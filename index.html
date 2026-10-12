@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- 必須保留：防止傳送 Referer，確保外部串流與資源安全 -->
   <meta name="referrer" content="no-referrer">
   <title>泰語學習週報｜全期索引與自學小站</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -10,30 +11,31 @@
   <style>
     :root {
       /* 背景層次：由深邃暗夜紫向宮廷夜色延伸 */
-      --bg-base: #0d0814;          /* 暹羅暗夜紫底（取代原石板黑） */
-      --bg-surface: #170f24;       /* 皇室深紫表層 */
-      --bg-card: #231738;          /* 帝王紫卡片背景 */
-      --bg-card-hover: #2f1f4a;    /* 卡片懸浮高光 */
-      --border: #443063;           /* 沉穩紫金邊框 */
-      --border-accent: #f59e0b;    /* 泰皇金箔高光邊框 */
+      --bg-base: #0d0814; /* 暹羅暗夜紫底 */
+      --bg-surface: #170f24; /* 皇室深紫表層 */
+      --bg-card: #231738; /* 帝王紫卡片背景 */
+      --bg-card-hover: #2f1f4a; /* 卡片懸浮高光 */
+      --border: #443063; /* 沉穩紫金邊框 */
+      --border-accent: #f59e0b; /* 泰皇金箔高光邊框 */
 
       /* 皇家金色系統（象徵大皇宮佛寺金箔與皇室尊爵） */
-      --accent-gold: #f59e0b;       /* 泰皇金箔金（主要按鈕、標題高光） */
-      --accent-gold-light: #fde68a; /* 亮香檳金（重點文字） */
-      --text-thai: #fde047;         /* 泰文字級專屬金色（黑底金字，尊貴且辨識度極高） */
+      --accent-gold: #f59e0b; /* 泰皇金箔金 */
+      --accent-gold-light: #fde68a; /* 亮香檳金 */
+      --text-thai: #fde047; /* 泰文字級專屬金色 */
       --gold-glow: rgba(245, 158, 11, 0.28); /* 金色發光光暈 */
 
       /* 皇室紫色系統（泰國詩琳通公主與皇室經典代表色） */
-      --primary: #a855f7;          /* 皇家紫羅蘭色（功能按鈕、標籤） */
-      --primary-hover: #c084fc;    /* 亮紫高光 */
+      --primary: #a855f7; /* 皇家紫羅蘭色 */
+      --primary-hover: #c084fc; /* 亮紫高光 */
       --primary-glow: rgba(168, 85, 247, 0.3);
 
       /* 文字與中性色 */
-      --text-main: #f8fafc;        /* 象牙白主文字 */
-      --text-muted: #a78bfa;       /* 柔紫灰輔助次要文字 */
+      --text-main: #f8fafc; /* 象牙白主文字 */
+      --text-muted: #a78bfa; /* 柔紫灰輔助次要文字 */
       --accent-red: #f43f5e;
       --accent-emerald: #10b981;
     }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -77,7 +79,6 @@
       font-size: 20px;
       color: #ffffff;
       text-decoration: none;
-      cursor: pointer;
     }
     .brand-icon {
       background: linear-gradient(135deg, #7e22ce, #a855f7);
@@ -90,299 +91,217 @@
       justify-content: center;
       font-size: 20px;
     }
-    .nav-links {
-      display: flex;
-      gap: 10px;
-    }
     .nav-btn {
-      background: transparent;
-      border: 1px solid transparent;
-      color: var(--text-muted);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-main);
       padding: 9px 20px;
       border-radius: 10px;
       font-size: 15.5px;
       font-weight: 600;
       text-decoration: none;
-      cursor: pointer;
-      transition: all 0.2s;
       display: inline-flex;
       align-items: center;
       gap: 8px;
+      transition: all 0.2s;
     }
     .nav-btn:hover {
+      background: var(--bg-card-hover);
       color: #ffffff;
-      background: rgba(168, 85, 247, 0.15);
-      border-color: rgba(168, 85, 247, 0.3);
-    }
-    .nav-btn.active {
-      background: var(--bg-card);
-      color: var(--accent-gold-light);
       border-color: var(--accent-gold);
-      box-shadow: 0 0 14px var(--gold-glow);
     }
 
-    /* Views */
-    .view-container { display: none; }
-    .view-container.active { display: block; animation: fadeIn 0.25s ease-in-out; }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ================= HOME VIEW STYLES ================= */
-    .hero {
+    /* 方案 1 核心：本週最新刊置頂大封面 (Spotlight Hero) */
+    .spotlight-hero {
       background: linear-gradient(135deg, #170f24 0%, #2e1065 60%, #451a03 100%);
       border: 1px solid var(--border);
-      border-top: 3px solid var(--accent-gold);
-      padding: 42px 38px;
       border-radius: 20px;
+      padding: 38px 36px;
       margin-bottom: 28px;
-      box-shadow: 0 16px 36px -10px rgba(0,0,0,0.6), 0 0 24px rgba(245, 158, 11, 0.15);
+      box-shadow: 0 16px 40px -8px rgba(0,0,0,0.7), 0 0 24px rgba(245, 158, 11, 0.18);
       position: relative;
       overflow: hidden;
-    }
-    .hero::after {
-      content: "";
-      position: absolute;
-      top: -50px;
-      right: -50px;
-      width: 240px;
-      height: 240px;
-      background: radial-gradient(circle, rgba(245, 158, 11, 0.18) 0%, transparent 70%);
-      border-radius: 50%;
-      pointer-events: none;
-    }
-    .hero-tag {
-      display: inline-block;
-      background: rgba(245, 158, 11, 0.15);
-      border: 1px solid rgba(245, 158, 11, 0.4);
-      color: #fde68a;
-      font-size: 14px;
-      font-weight: 600;
-      padding: 5px 14px;
-      border-radius: 20px;
-      margin-bottom: 14px;
-    }
-    .hero h1 {
-      font-size: 34px;
-      font-weight: 800;
-      color: #ffffff;
-      letter-spacing: 0.5px;
-      margin-bottom: 12px;
-    }
-    .hero p {
-      font-size: 17.5px;
-      color: var(--text-muted);
-      max-width: 100%;
-      line-height: 1.8;
-      text-wrap: pretty;
-    }
-
-    .archive-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
-      gap: 22px;
-      margin-bottom: 32px;
-    }
-
-    /* Real Anchor Card */
-    a.issue-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 28px;
-      text-decoration: none;
-      color: inherit;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-      cursor: pointer;
-      position: relative;
     }
-    a.issue-card:hover {
-      background: var(--bg-card-hover);
-      border-color: var(--accent-gold);
-      transform: translateY(-4px);
-      box-shadow: 0 14px 28px -5px rgba(0,0,0,0.6), 0 0 20px var(--gold-glow);
-    }
-    .issue-badge {
-      display: inline-block;
-      font-size: 13px;
-      font-weight: 700;
-      color: #fde68a;
-      background: rgba(245, 158, 11, 0.18);
-      border: 1px solid rgba(245, 158, 11, 0.4);
-      padding: 4px 12px;
-      border-radius: 6px;
-      margin-bottom: 14px;
-      width: fit-content;
-    }
-    .issue-card h2 {
-      font-size: 23px;
-      font-weight: 700;
-      color: #ffffff;
-      margin-bottom: 12px;
-      line-height: 1.4;
-    }
-    .issue-card p.desc {
-      font-size: 15.5px;
-      color: var(--text-muted);
-      margin-bottom: 22px;
-      flex-grow: 1;
-      line-height: 1.7;
-    }
-    .issue-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-top: 1px solid var(--border);
-      padding-top: 16px;
-      font-size: 14.5px;
-      color: var(--text-muted);
-    }
-    .action-btn-pill {
-      background: linear-gradient(135deg, #9333ea, #a855f7);
-      color: #ffffff;
-      font-weight: 700;
-      font-size: 14px;
-      padding: 8px 18px;
-      border-radius: 10px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.2s;
-    }
-    a.issue-card:hover .action-btn-pill {
-      background: linear-gradient(135deg, #a855f7, #c084fc);
-      box-shadow: 0 0 12px var(--primary-glow);
-    }
-
-    /* ================= MAGAZINE-STYLE ISSUE HEADER ================= */
-    .mag-header {
-      background: linear-gradient(135deg, #170f24 0%, #2e1065 60%, #451a03 100%);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 40px 38px;
-      margin-bottom: 26px;
-      box-shadow: 0 16px 40px -8px rgba(0,0,0,0.7), 0 0 24px rgba(245, 158, 11, 0.15);
-      position: relative;
-      overflow: hidden;
-    }
-    .mag-header::before {
+    .spotlight-hero::before {
       content: "";
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
+      top: 0; left: 0; right: 0; height: 4px;
       background: linear-gradient(90deg, #f59e0b, #fde68a, #d97706);
     }
-    .mag-meta-row {
+    .spotlight-badge-row {
       display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
       gap: 12px;
-      margin-bottom: 18px;
-      font-size: 14px;
-      letter-spacing: 1px;
-      font-weight: 700;
-      color: #fde68a;
-      text-transform: uppercase;
+      margin-bottom: 16px;
     }
-    .mag-tag-vol {
-      background: rgba(245, 158, 11, 0.18);
-      border: 1px solid rgba(245, 158, 11, 0.4);
+    .spotlight-tag-live {
+      background: rgba(245, 158, 11, 0.2);
+      border: 1px solid rgba(245, 158, 11, 0.45);
       color: #fde68a;
+      font-size: 13.5px;
+      font-weight: 800;
       padding: 5px 14px;
       border-radius: 6px;
-      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      letter-spacing: 0.5px;
     }
-    .mag-title {
-      font-size: 38px;
+    .spotlight-tag-live::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #f59e0b;
+      box-shadow: 0 0 8px #f59e0b;
+      animation: pulseDot 1.4s infinite;
+    }
+    @keyframes pulseDot {
+      0% { transform: scale(0.9); opacity: 0.7; }
+      50% { transform: scale(1.3); opacity: 1; }
+      100% { transform: scale(0.9); opacity: 0.7; }
+    }
+    .spotlight-date {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--accent-gold-light);
+      letter-spacing: 1px;
+    }
+    .spotlight-title {
+      font-size: 34px;
       font-weight: 900;
       color: #ffffff;
       line-height: 1.35;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       letter-spacing: 0.5px;
     }
-    .mag-subtitle {
-      font-size: 19px;
-      color: #e2e8f0;
+    .spotlight-desc {
+      font-size: 17.5px;
+      color: #cbd5e1;
       line-height: 1.75;
-      margin-bottom: 24px;
-      max-width: 950px;
+      margin-bottom: 22px;
+      max-width: 980px;
       text-wrap: pretty;
     }
-    .mag-footer-bar {
+    .spotlight-footer {
       display: flex;
       flex-wrap: wrap;
-      align-items: center;
       justify-content: space-between;
-      gap: 14px;
+      align-items: center;
+      gap: 16px;
       border-top: 1px solid rgba(255, 255, 255, 0.1);
       padding-top: 18px;
-      font-size: 15px;
-      color: var(--text-muted);
     }
-    .mag-meta-pills {
+    .spotlight-pills {
       display: flex;
       flex-wrap: wrap;
-      gap: 16px;
+      gap: 12px;
+      font-size: 14.5px;
+      color: var(--text-muted);
     }
-    .mag-pill {
+    .spotlight-pill {
+      background: rgba(13, 8, 20, 0.45);
+      border: 1px solid var(--border);
+      padding: 4px 12px;
+      border-radius: 8px;
       display: inline-flex;
       align-items: center;
-      gap: 7px;
+      gap: 6px;
+    }
+    .btn-enter-primary {
+      background: linear-gradient(135deg, #a855f7, #7e22ce);
+      color: #ffffff;
+      padding: 11px 24px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 0 16px var(--primary-glow);
+      transition: all 0.25s;
+    }
+    .btn-enter-primary:hover {
+      background: linear-gradient(135deg, #c084fc, #9333ea);
+      transform: translateY(-2px);
+      box-shadow: 0 0 22px var(--primary-glow);
     }
 
-    /* Learning Controls Toolbar */
-    .controls-toolbar {
+    /* 方案 4 核心：即時關鍵字搜尋工具列 (Instant Search Toolbar) */
+    .search-toolbar {
       background: var(--bg-surface);
       border: 1px solid var(--border);
       border-radius: 16px;
-      padding: 16px 24px;
+      padding: 16px 22px;
       margin-bottom: 28px;
       display: flex;
       flex-wrap: wrap;
+      align-items: center;
       justify-content: space-between;
-      align-items: center;
       gap: 14px;
+      box-shadow: 0 8px 20px -4px rgba(0,0,0,0.4);
     }
-    .ctrl-group {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 16px;
+    .search-box-wrapper {
+      position: relative;
+      flex: 1;
+      min-width: 280px;
     }
-    .btn-toggle {
+    .search-icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 18px;
+      color: #a78bfa;
+      pointer-events: none;
+    }
+    .search-input {
+      width: 100%;
       background: var(--bg-card);
       border: 1px solid var(--border);
-      color: var(--text-main);
-      padding: 9px 18px;
-      border-radius: 10px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
+      border-radius: 12px;
+      padding: 12px 42px 12px 46px;
+      color: #ffffff;
+      font-size: 16px;
+      outline: none;
       transition: all 0.2s;
     }
-    .btn-toggle:hover { background: var(--bg-card-hover); color: #ffffff; border-color: var(--primary); }
-    .btn-toggle.active {
-      background: var(--primary);
-      border-color: var(--primary);
-      color: #ffffff;
-      box-shadow: 0 0 14px var(--primary-glow);
+    .search-input:focus {
+      border-color: var(--accent-gold);
+      box-shadow: 0 0 14px var(--gold-glow);
+      background: #2a1b42;
+    }
+    .search-input::placeholder {
+      color: #8b7ca8;
+      font-size: 15px;
+    }
+    .btn-clear-search {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #a78bfa;
+      font-size: 16px;
+      cursor: pointer;
+      display: none;
+    }
+    .btn-clear-search:hover { color: #ffffff; }
+    .search-stats {
+      font-size: 14.5px;
+      color: var(--text-muted);
+      font-weight: 600;
+      white-space: nowrap;
     }
 
-    /* Content Sections */
-    section {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 34px 32px;
-      margin-bottom: 28px;
-    }
+    /* 區塊標題 */
     .sec-head {
       display: flex;
       align-items: center;
@@ -392,7 +311,7 @@
       margin-bottom: 24px;
     }
     .sec-title {
-      font-size: 25px;
+      font-size: 24px;
       font-weight: 800;
       color: #ffffff;
       display: flex;
@@ -410,790 +329,403 @@
       font-weight: 600;
     }
 
-    /* Vocabulary Cards Grid */
-    .vocab-grid {
+    /* 卡片網格 (近 4~6 週近期特輯) */
+    .archive-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 22px;
+      margin-bottom: 32px;
     }
-    .vocab-card {
+    a.issue-card, div.issue-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 24px;
+      border-radius: 18px;
+      padding: 26px;
+      text-decoration: none;
+      color: inherit;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      transition: all 0.2s;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
     }
-    .vocab-card:hover {
+    a.issue-card { cursor: pointer; }
+    a.issue-card:hover {
       background: var(--bg-card-hover);
       border-color: var(--accent-gold);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px -4px rgba(0,0,0,0.5), 0 0 16px var(--gold-glow);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 25px -5px rgba(0,0,0,0.6), 0 0 20px var(--gold-glow);
     }
-    .vocab-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 10px;
-    }
-    .thai-word {
-      font-size: 34px;
-      font-weight: 700;
-      color: var(--text-thai);
-      letter-spacing: 1px;
-      line-height: 1.35;
-      text-shadow: 0 0 12px rgba(253, 224, 71, 0.2);
-    }
-    .phonetic {
-      font-size: 16px;
-      color: var(--text-muted);
-      font-style: italic;
-      margin-bottom: 14px;
-    }
-    .meaning {
-      font-size: 17px;
-      color: #f8fafc;
-      background: rgba(13, 8, 20, 0.6);
-      padding: 10px 14px;
-      border-radius: 10px;
-      border-left: 4px solid var(--accent-gold);
-      transition: all 0.2s;
-      line-height: 1.5;
-    }
-    .meaning.masked {
-      background: #372352;
-      color: transparent;
-      user-select: none;
-      cursor: pointer;
-    }
-    .meaning.masked::after {
-      content: "👁️ 點擊翻開中文釋義";
-      color: #c084fc;
-      font-size: 14px;
-      display: block;
-    }
-
-    /* Audio Play Button */
-    .btn-audio {
-      background: rgba(245, 158, 11, 0.15);
-      border: 1px solid rgba(245, 158, 11, 0.35);
-      color: #fde047;
-      border-radius: 50%;
-      width: 50px;
-      height: 50px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 21px;
-      transition: all 0.2s;
-      flex-shrink: 0;
-    }
-    .btn-audio:hover {
-      background: var(--accent-gold);
-      color: #0d0814;
-      transform: scale(1.08);
-      box-shadow: 0 0 18px var(--gold-glow);
-    }
-    .btn-audio.playing {
-      animation: audioPulse 0.9s infinite alternate;
-      background: var(--accent-gold);
-      color: #0d0814;
-    }
-    @keyframes audioPulse {
-      0% { transform: scale(1); box-shadow: 0 0 6px var(--gold-glow); }
-      100% { transform: scale(1.15); box-shadow: 0 0 20px rgba(245, 158, 11, 0.85); }
-    }
-
-    /* Sentences */
-    .sentence-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 22px 24px;
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-      transition: all 0.2s;
-    }
-    .sentence-card:hover {
-      background: var(--bg-card-hover);
-      border-color: rgba(245, 158, 11, 0.4);
-    }
-    .sentence-thai {
-      font-size: 25px;
-      font-weight: 700;
-      color: var(--text-thai);
-      margin-bottom: 8px;
-      line-height: 1.45;
-      text-shadow: 0 0 10px rgba(253, 224, 71, 0.18);
-    }
-    .sentence-phonetic {
-      font-size: 16px;
-      color: var(--text-muted);
-      margin-bottom: 8px;
-    }
-    .sentence-meaning {
-      font-size: 17px;
-      color: #f8fafc;
-      line-height: 1.5;
-    }
-    .sentence-meaning.masked {
-      color: transparent;
-      background: #372352;
-      border-radius: 6px;
-      padding: 4px 10px;
+    .issue-badge {
       display: inline-block;
-      cursor: pointer;
-    }
-    .sentence-meaning.masked::after {
-      content: "👁️ 點擊查看中文翻譯";
-      color: #c084fc;
-      font-size: 14px;
-    }
-
-    /* Grammar Section */
-    .grammar-card {
-      background: rgba(23, 15, 36, 0.8);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 26px;
-      margin-bottom: 22px;
-    }
-    .grammar-card-title {
-      font-size: 20px;
+      font-size: 13px;
       font-weight: 700;
-      color: #fde047;
+      color: #fde68a;
+      background: rgba(245, 158, 11, 0.18);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      padding: 4px 12px;
+      border-radius: 6px;
       margin-bottom: 14px;
+      width: fit-content;
+    }
+    .issue-card h2 {
+      font-size: 22px;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+    .issue-card p.desc {
+      font-size: 15.5px;
+      color: #cbd5e1;
+      line-height: 1.7;
+      margin-bottom: 20px;
+      flex-grow: 1;
+    }
+    .issue-footer {
       display: flex;
       align-items: center;
-      gap: 10px;
+      justify-content: space-between;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding-top: 16px;
+      font-size: 14px;
+      color: var(--text-muted);
     }
-    .grammar-sub {
-      font-size: 17px;
+    .action-btn-pill {
+      background: var(--primary);
+      color: #ffffff;
+      padding: 6px 14px;
+      border-radius: 8px;
       font-weight: 600;
-      color: #f8fafc;
-      margin: 14px 0 8px;
-    }
-    .pill-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 8px;
-    }
-    .example-pill {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      padding: 10px 16px;
-      border-radius: 12px;
+      font-size: 13.5px;
       display: inline-flex;
       align-items: center;
-      gap: 12px;
-      font-size: 16px;
+      gap: 6px;
+      box-shadow: 0 0 10px var(--primary-glow);
+      transition: all 0.2s;
+    }
+    a.issue-card:hover .action-btn-pill {
+      background: var(--primary-hover);
+      box-shadow: 0 0 14px var(--primary-glow);
+    }
+
+    /* 方案 1 核心：歷史年份摺疊手風琴 (Yearly Accordion Drawer) */
+    .accordion-section {
+      margin-bottom: 32px;
+    }
+    .accordion-item {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      margin-bottom: 16px;
+      overflow: hidden;
       transition: border-color 0.2s;
     }
-    .example-pill:hover { border-color: var(--accent-gold); }
-    .example-pill .th {
-      font-weight: 700;
-      color: var(--text-thai);
-      font-size: 20px;
+    .accordion-item:hover {
+      border-color: rgba(245, 158, 11, 0.4);
     }
-    .example-pill .btn-audio-mini {
-      background: none;
+    .accordion-header {
+      width: 100%;
+      background: transparent;
       border: none;
-      cursor: pointer;
-      font-size: 18px;
-      color: #fde047;
-      transition: transform 0.15s;
-    }
-    .example-pill .btn-audio-mini:hover { transform: scale(1.2); }
-
-    /* Culture Section */
-    .culture-card {
-      line-height: 1.9;
-      font-size: 17.5px;
-      color: #cbd5e1;
-    }
-    .culture-card h3 {
-      font-size: 21px;
-      color: #fde68a;
-      margin: 22px 0 10px;
+      padding: 20px 24px;
       display: flex;
       align-items: center;
-      gap: 10px;
-    }
-    .culture-callout {
-      background: rgba(245, 158, 11, 0.12);
-      border-left: 4px solid var(--accent-gold);
-      padding: 16px 22px;
-      border-radius: 0 12px 12px 0;
-      margin: 20px 0;
-      font-size: 17px;
-      color: #fde68a;
-    }
-
-    /* Toast Notification */
-    #toast {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background: #231738;
-      border: 1px solid var(--border);
+      justify-content: space-between;
       color: #ffffff;
-      padding: 14px 22px;
-      border-radius: 12px;
-      font-size: 15px;
-      display: none;
+      font-size: 18px;
+      font-weight: 800;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.2s;
+    }
+    .accordion-header:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .accordion-title-group {
+      display: flex;
       align-items: center;
-      gap: 10px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.6);
-      z-index: 1000;
+      gap: 12px;
+    }
+    .accordion-count-tag {
+      font-size: 13px;
+      color: #fde68a;
+      background: rgba(245, 158, 11, 0.16);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-weight: 600;
+    }
+    .accordion-arrow {
+      font-size: 16px;
+      color: #a78bfa;
+      transition: transform 0.25s ease;
+    }
+    .accordion-item.open .accordion-arrow {
+      transform: rotate(180deg);
+      color: var(--accent-gold);
+    }
+    .accordion-content {
+      display: none;
+      padding: 0 24px 24px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .accordion-item.open .accordion-content {
+      display: block;
+      animation: fadeIn 0.25s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Mobile Responsive preservation */
+    /* 空搜尋結果提示卡 */
+    .empty-search-card {
+      display: none;
+      background: var(--bg-surface);
+      border: 1px dashed var(--border);
+      border-radius: 16px;
+      padding: 48px 24px;
+      text-align: center;
+      color: var(--text-muted);
+      margin: 20px 0;
+    }
+    .empty-search-card h3 {
+      font-size: 20px;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+
     @media (max-width: 768px) {
       body { padding: 14px; font-size: 16px; }
-      .container { width: 100%; }
-      nav { padding: 12px 16px; }
-      .brand { font-size: 18px; }
-      .brand-icon { width: 32px; height: 32px; font-size: 16px; }
-      .nav-btn { padding: 7px 14px; font-size: 14px; }
-      .hero { padding: 24px 18px; }
-      .hero h1 { font-size: 24px; }
-      .hero p { font-size: 15.5px; }
-      .mag-header { padding: 24px 18px; }
-      .mag-title { font-size: 25px; }
-      .mag-subtitle { font-size: 15.5px; }
-      .thai-word { font-size: 26px; }
-      .sentence-thai { font-size: 19px; }
-      section { padding: 20px 16px; }
-      .sec-title { font-size: 21px; }
-      .btn-audio { width: 44px; height: 44px; font-size: 18px; }
-      .archive-grid, .vocab-grid { grid-template-columns: 1fr; }
+      .spotlight-hero { padding: 24px 20px; }
+      .spotlight-title { font-size: 25px; }
+      .spotlight-desc { font-size: 15.5px; }
+      .search-toolbar { padding: 14px 16px; }
+      .archive-grid { grid-template-columns: 1fr; gap: 16px; }
+      .accordion-header { padding: 16px 18px; font-size: 16px; }
+      .accordion-content { padding: 0 16px 18px; }
     }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <!-- Top Navigation -->
+  <!-- 1. Top Navigation Bar -->
   <nav>
-    <a href="#home" class="brand" onclick="navigateTo('home'); return false;">
+    <a href="index.html" class="brand">
       <div class="brand-icon">🇹🇭</div>
       <span>泰語學習週報</span>
     </a>
-    <div class="nav-links">
-      <a href="#home" class="nav-btn active" id="nav-home" onclick="navigateTo('home'); return false;">📚 週報總覽目錄</a>
-      <a href="#issue1" class="nav-btn" id="nav-issue1" onclick="navigateTo('issue1'); return false;">📖 第 1 期課程</a>
+    <div style="display:flex; gap:10px;">
+      <a href="26w41.html" class="nav-btn">📖 最新刊 26w41</a>
     </div>
   </nav>
 
-  <!-- ================= VIEW 1: HOME PORTAL ================= -->
-  <div id="view-home" class="view-container active">
-    <div class="hero">
-      <div class="hero-tag">每週六晨間自動化出刊</div>
-      <h1>泰語自主學習・全期課程索引站</h1>
-      <p><span style="display: inline-block;">專為職場與生活實務打造。</span><span style="display: inline-block;">精選單字、深度語法拆解、道地文化風俗，</span><span style="display: inline-block;">支援點擊原地播放標準語音與單字卡測驗。</span></p>
+  <!-- 2. 方案 1 核心：本週最新刊置頂大封面 (Spotlight Hero) -->
+  <div class="spotlight-hero">
+    <div>
+      <div class="spotlight-badge-row">
+        <span class="spotlight-tag-live">本週最新刊 ｜ VOL. 26w41</span>
+        <span class="spotlight-date">2026-10-10 SATURDAY</span>
+      </div>
+      <h1 class="spotlight-title">飲食預訂實務・語法名詞化與九皇齋節文化誌</h1>
+      <p class="spotlight-desc">
+        專為職場接待與生活實務打造。掌握九皇齋節 (เทศกาลกินเจ) 飲食禁忌與關鍵「กินเจ / มังสวิรัติ」語意差異；深入解析 การ (行為過程) 與 ความ (抽象心境) 名詞化公式，建立線控經理專業文化底蘊。
+      </p>
     </div>
-
-    <div class="sec-head">
-      <div class="sec-title">📖 週報歷史期數存檔</div>
-      <span class="sec-tag">持續累積中</span>
-    </div>
-
-    <div class="archive-grid">
-      <!-- Issue 1 Real Link Card -->
-      <a href="#issue1" class="issue-card" onclick="navigateTo('issue1'); return false;">
-        <div>
-          <span class="issue-badge">第 1 期・最新刊</span>
-          <h2>飲食預訂實務・語法名詞化與九皇齋節</h2>
-          <p class="desc">涵蓋素食接待、海鮮過敏、行程預訂單字與句型；解析 การ 與 ความ 名詞化前綴；對比 ได้、เป็น、ไหว 能力助詞；詳介泰國九皇齋節文化。</p>
-        </div>
-        <div class="issue-footer">
-          <span>📅 2026/10/10 出刊</span>
-          <span class="action-btn-pill">進入學習 →</span>
-        </div>
-      </a>
-
-      <!-- Upcoming Issue 2 Placeholder -->
-      <a href="javascript:void(0)" class="issue-card" style="opacity: 0.6; cursor: default;" onclick="showToast('第 2 期將於下週六（10/17）上午自動出刊！'); return false;">
-        <div>
-          <span class="issue-badge" style="background: rgba(156, 163, 175, 0.15); color: #9ca3af; border-color: transparent;">第 2 期・即將出刊</span>
-          <h2>交通指引・機場退稅與水燈節前哨</h2>
-          <p class="desc">預計介紹泰國國內交通搭乘、問路、航廈退稅常見詞句；深入解析動詞連綴結構與生活對話。</p>
-        </div>
-        <div class="issue-footer">
-          <span>📅 2026/10/17 排程中</span>
-          <span style="color:#9ca3af; font-size:13px;">即將推出 ⏳</span>
-        </div>
-      </a>
+    
+    <div class="spotlight-footer">
+      <div class="spotlight-pills">
+        <span class="spotlight-pill">🎯 9 個餐飲核心單字</span>
+        <span class="spotlight-pill">💬 5 組點餐預訂句型</span>
+        <span class="spotlight-pill">🔊 原地標準雙引擎發音</span>
+        <span class="spotlight-pill">👁️ 遮蔽記憶自測</span>
+      </div>
+      <a href="26w41.html" class="btn-enter-primary">進入 26w41 課程 →</a>
     </div>
   </div>
 
-  <!-- ================= VIEW 2: ISSUE 1 DETAIL ================= -->
-  <div id="view-issue1" class="view-container">
-    
-    <!-- Top Action Bar -->
-    <div style="margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between;">
-      <a href="#home" class="nav-btn" onclick="navigateTo('home'); return false;" style="border: 1px solid var(--border); background: var(--bg-surface); color:#f3f4f6; font-size:14px;">
-        ← 返回週報總覽目錄
-      </a>
-      <span style="font-size: 13.5px; color: var(--text-muted);">泰語學習週報專欄</span>
+  <!-- 3. 方案 4 核心：即時關鍵字搜尋工具列 (Instant Search Toolbar) -->
+  <div class="search-toolbar">
+    <div class="search-box-wrapper">
+      <span class="search-icon">🔍</span>
+      <input 
+        type="text" 
+        id="search-input" 
+        class="search-input" 
+        placeholder="搜尋週報期數、單元主題、核心單字或語法關鍵字（例如：素食、26w41、名詞化）..."
+        oninput="handleSearch()"
+      >
+      <button id="btn-clear" class="btn-clear-search" onclick="clearSearch()" title="清除搜尋">✕</button>
+    </div>
+    <div class="search-stats" id="search-stats">
+      收錄歷史期數中
+    </div>
+  </div>
+
+  <!-- 空搜尋結果卡片 -->
+  <div class="empty-search-card" id="empty-search">
+    <h3>🔍 找不到符合的週報專題</h3>
+    <p>請嘗試使用其他關鍵字（例如：飲食、預訂、海鮮、名詞化、26w41）</p>
+  </div>
+
+  <!-- 4. 近期特輯專區 (Recent Issues) -->
+  <div class="sec-head">
+    <div class="sec-title"><span>🌟</span> 近期特輯課程</div>
+    <span class="sec-tag">最新發布</span>
+  </div>
+
+  <div class="archive-grid" id="recent-grid">
+    <!-- Issue 26w41 Card -->
+    <a 
+      href="26w41.html" 
+      class="issue-card" 
+      data-code="26w41" 
+      data-title="飲食預訂實務・語法名詞化與九皇齋節文化誌" 
+      data-desc="涵蓋素食接待、海鮮過敏、行程預訂核心單字與情境句型；解析 การ 與 ความ 名詞化前綴；對比 ขอ 與 ช่วย 商務請求句型；詳介泰國九皇齋節文化誌與線控實務備忘。"
+      data-tags="飲食 素食 吃齋 海鮮 過敏 預訂 確認 取消 九皇齋節 名詞化 การ ความ"
+    >
+      <div>
+        <span class="issue-badge">26w41 ｜ 2026 第 41 週</span>
+        <h2>飲食預訂實務・語法名詞化與九皇齋節</h2>
+        <p class="desc">涵蓋素食接待、海鮮過敏、行程預訂核心單字與情境句型；解析 การ 與 ความ 名詞化前綴；對比 ขอ 與 ช่วย 商務請求句型；詳介泰國九皇齋節文化誌與線控實務備忘。</p>
+      </div>
+      <div class="issue-footer">
+        <span>📅 2026/10/10 出刊</span>
+        <span class="action-btn-pill">進入 26w41 課程 →</span>
+      </div>
+    </a>
+
+    <!-- Upcoming Issue 26w42 Card -->
+    <div 
+      class="issue-card" 
+      style="opacity: 0.65; cursor: default;" 
+      data-code="26w42" 
+      data-title="交通指引・機場退稅與水燈節前哨" 
+      data-desc="預計介紹泰國國內交通搭乘、問路、航廈退稅常見詞句；深入解析動詞連綴結構與生活對話。"
+      data-tags="交通 機場 退稅 水燈節 26w42"
+    >
+      <div>
+        <span class="issue-badge" style="background: rgba(168, 85, 247, 0.15); color: #a78bfa; border-color: rgba(168, 85, 247, 0.3);">26w42 ｜ 2026 第 42 週</span>
+        <h2>交通指引・機場退稅與水燈節前哨</h2>
+        <p class="desc">預計介紹泰國國內交通搭乘、問路、航廈退稅常見詞句；深入解析動詞連綴結構與生活對話。</p>
+      </div>
+      <div class="issue-footer">
+        <span>📅 2026/10/17 出刊</span>
+        <span style="color:#a78bfa; font-size:13.5px;">即將推出 ⏳</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. 方案 1 核心：歷史年份收納手風琴抽屜 (Yearly Accordion Drawer) -->
+  <div class="accordion-section">
+    <div class="sec-head">
+      <div class="sec-title"><span>📂</span> 歷史年度歸檔抽屜</div>
+      <span class="sec-tag">折疊收納</span>
     </div>
 
-    <!-- Editorial Magazine-Style Hero Banner -->
-    <div class="mag-header">
-      <div class="mag-meta-row">
-        <span class="mag-tag-vol">VOL. 01 ｜ 週刊第 1 期</span>
-        <span>2026.10.10 SATURDAY</span>
-        <span style="color:var(--text-thai);">SPECIAL EDITORIAL</span>
-      </div>
-      <h1 class="mag-title">飲食預訂實務・語法名詞化與九皇齋節文化誌</h1>
-      <p class="mag-subtitle">從餐飲接待的純素全齋、海鮮過敏，到行程查單業務溝通；深度拆解「การ」與「ความ」動名詞分工邏輯，辨析能力後綴三大神詞；探訪盛大熱鬧的年度九皇齋節文化盛宴。</p>
-      
-      <div class="mag-footer-bar">
-        <div class="mag-meta-pills">
-          <span class="mag-pill">✍️ <b>編審</b>：Gemini Spark</span>
-          <span class="mag-pill">⏱️ <b>閱讀時間</b>：約 8 分鐘</span>
-          <span class="mag-pill">🎯 <b>學習重點</b>：9 單字・5 句型・2 核心語法・1 文化時事</span>
+    <!-- 2026 年度抽屜 -->
+    <div class="accordion-item open" id="accordion-2026">
+      <button class="accordion-header" onclick="toggleAccordion('accordion-2026')">
+        <div class="accordion-title-group">
+          <span>📅 2026 年度課程歸檔（第 41 週 ～ 52 週）</span>
+          <span class="accordion-count-tag" id="count-2026">共 2 期</span>
+        </div>
+        <span class="accordion-arrow">▼</span>
+      </button>
+      <div class="accordion-content">
+        <p style="font-size:14.5px; color:var(--text-muted); margin: 16px 0 14px;">
+          此處自動收納 2026 年度所有發布之歷史週報，超過近期的舊期數會自動在此歸檔，保持首頁清爽舒適：
+        </p>
+        <div class="archive-grid" style="margin-bottom:0;" id="grid-2026">
+          <!-- 歸檔期數卡片範本（後續期數隨時間增加將自動集中於此） -->
+          <a 
+            href="26w41.html" 
+            class="issue-card" 
+            data-code="26w41" 
+            data-title="飲食預訂實務・語法名詞化與九皇齋節文化誌" 
+            data-desc="涵蓋素食接待、海鮮過敏、行程預訂核心單字與情境句型；解析 การ 與 ความ 名詞化前綴；對比 ขอ 與 ช่วย 商務請求句型；詳介泰國九皇齋節文化誌與線控實務備忘。"
+            data-tags="飲食 素食 吃齋 海鮮 過敏 預訂 確認 取消 九皇齋節 名詞化"
+          >
+            <div>
+              <span class="issue-badge">26w41 ｜ 2026 第 41 週</span>
+              <h2>飲食預訂實務・語法名詞化與九皇齋節</h2>
+              <p class="desc">涵蓋素食接待、海鮮過敏、行程預訂核心單字與情境句型；解析 การ 與 ความ 名詞化前綴。</p>
+            </div>
+            <div class="issue-footer">
+              <span>📅 2026/10/10 出刊</span>
+              <span class="action-btn-pill">閱讀歸檔 →</span>
+            </div>
+          </a>
         </div>
       </div>
     </div>
-
-    <!-- Learning Controls Toolbar -->
-    <div class="controls-toolbar">
-      <div class="ctrl-group">
-        <span style="font-weight:600; color:#ffffff;">🔊 語音語速：</span>
-        <button class="btn-toggle active" id="btn-speed-normal" onclick="setSpeed(1.0)">正常 (1.0x)</button>
-        <button class="btn-toggle" id="btn-speed-slow" onclick="setSpeed(0.75)">慢速 (0.75x 聽聲調)</button>
-      </div>
-      <div class="ctrl-group">
-        <button class="btn-toggle" id="btn-mask-toggle" onclick="toggleMask()">👁️ 遮蔽中文（單字測驗）</button>
-      </div>
-    </div>
-
-    <!-- Section 1: Vocabulary -->
-    <section>
-      <div class="sec-head">
-        <div class="sec-title">
-          一、核心單字
-        </div>
-        <span class="sec-tag">共 9 個關鍵詞</span>
-      </div>
-
-      <div class="vocab-grid">
-        <!-- 1. กินเจ -->
-        <div class="vocab-card">
-          <div>
-            <div class="vocab-top">
-              <span class="thai-word">กินเจ</span>
-              <button class="btn-audio" onclick="playTTS('กินเจ', this)" title="播放發音">🔊</button>
-            </div>
-            <div class="phonetic">gin jee</div>
-          </div>
-          <div class="meaning">[動詞] 吃齋 / 全素（避五辛與蛋奶）</div>
-        </div>
-
-        <!-- 2. มังสวิรัติ -->
-        <div class="vocab-card">
-          <div>
-            <div class="vocab-top">
-              <span class="thai-word">มังสวิรัติ</span>
-              <button class="btn-audio" onclick="playTTS('มังสวิรัติ', this)" title="播放發音">🔊</button>
-            </div>
-            <div class="phonetic">mang-sa-wí-rát</div>
-          </div>
-          <div class="meaning">[名詞/形容詞] 蛋奶素 / 一般素食</div>
-        </div>
-
-        <!-- 3. แพ้ -->
-        <div class="vocab-card">
-          <div>
-            <div class="vocab-top">
-              <span class="thai-word">แพ้</span>
-              <button class="btn-audio" onclick="playTTS('แพ้', this)" title="播放發音">🔊</button>
-            </div>
-            <div class="phonetic">phɛ́ɛ</div>
-          </div>
-          <div class="meaning">[動詞] 過敏；輸</div>
-        </div>
-
-        <!-- 4. อาหารทะเล -->
-        <div class="vocab-card">
-          <div>
-            <div class="vocab-top">
-              <span class="thai-word">อาหารทะเล</span>
-              <button class="btn-audio" onclick="playTTS('อาหารทะเล', this)" title="播放發音">🔊</button>
-            </div>
-            <div class="phonetic">aa-hǎan thá-lee</div>
-          </div>
-          <div class="meaning">[名詞] 海鮮料理</div>
-        </div>
-
-        <!-- 5. จอง -->
-        <div class="vocab-card">
-          <div>
-            <div class="vocab-top">
-              <span class="thai-word">จอง</span>
-              <button class="btn-audio" onclick="playTTS('จอง', this)" title="播放發音">🔊</button>
-            </div>
-            <div class="phonetic">jɔɔng</div>
-          </div>
-          <div class="meaning">[動詞] 預訂 / 預購 (Book)</div>
-        </div>
-
-        <!-- 6. ยืนยัน -->
-        <div class="vocab-card">
-          <div>
-            <div class="vocab-top">
-              <span class="thai-word">ยืนยัน</span>
-              <button class="btn-audio" onclick="playTTS('ยืนยัน', this)" title="播放發音">🔊</button>
-            </div>
-            <div class="phonetic">yeen-yan</div>
-          </div>
-          <div class="meaning">[動詞] 確認 (Confirm)</div>
-        </div>
-
-        <!-- 7. ยกเลิก -->
-        <div class="vocab-card">
-          <div>
-            <div class="vocab-top">
-              <span class="thai-word">ยกเลิก</span>
-              <button class="btn-audio" onclick="playTTS('ยกเลิก', this)" title="播放發音">🔊</button>
-            </div>
-            <div class="phonetic">yók-lə̂ək</div>
-          </div>
-          <div class="meaning">[動詞] 取消 (Cancel)</div>
-        </div>
-
-        <!-- 8. ลูกค้า -->
-        <div class="vocab-card">
-          <div>
-            <div class="vocab-top">
-              <span class="thai-word">ลูกค้า</span>
-              <button class="btn-audio" onclick="playTTS('ลูกค้า', this)" title="播放發音">🔊</button>
-            </div>
-            <div class="phonetic">lûuk-kháa</div>
-          </div>
-          <div class="meaning">[名詞] 客戶 / 旅客</div>
-        </div>
-
-        <!-- 9. ตรวจสอบ -->
-        <div class="vocab-card">
-          <div>
-            <div class="vocab-top">
-              <span class="thai-word">ตรวจสอบ</span>
-              <button class="btn-audio" onclick="playTTS('ตรวจสอบ', this)" title="播放發音">🔊</button>
-            </div>
-            <div class="phonetic">trùat-sɔ̀ɔp</div>
-          </div>
-          <div class="meaning">[動詞] 檢查 / 核對 (Check)</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Section 2: Sentences -->
-    <section>
-      <div class="sec-head">
-        <div class="sec-title">
-          二、情境句型
-        </div>
-        <span class="sec-tag">點擊喇叭即時發音</span>
-      </div>
-
-      <div class="sentence-card">
-        <div>
-          <div class="sentence-thai">1. ลูกค้าทานเจ / ทานมังสวิรัติครับ</div>
-          <div class="sentence-phonetic">Lûuk-kháa thaan jee / thaan mang-sa-wí-rát khráp.</div>
-          <div class="sentence-meaning">客人是吃純素齋戒／吃一般素食。</div>
-        </div>
-        <button class="btn-audio" onclick="playTTS('ลูกค้าทานเจ หรือ ทานมังสวิรัติครับ', this)">🔊</button>
-      </div>
-
-      <div class="sentence-card">
-        <div>
-          <div class="sentence-thai">2. เมนูนี้มีเนื้อสัตว์ไหมครับ</div>
-          <div class="sentence-phonetic">Mee-nuu níi mii nʉ́a-sàt mǎi khráp?</div>
-          <div class="sentence-meaning">這道菜有包含肉類成分嗎？</div>
-        </div>
-        <button class="btn-audio" onclick="playTTS('เมนูนี้มีเนื้อสัตว์ไหมครับ', this)">🔊</button>
-      </div>
-
-      <div class="sentence-card">
-        <div>
-          <div class="sentence-thai">3. ผมแพ้อาหารทะเลครับ</div>
-          <div class="sentence-phonetic">Phǒm phɛ́ɛ aa-hǎan thá-lee khráp.</div>
-          <div class="sentence-meaning">我對海鮮過敏。</div>
-        </div>
-        <button class="btn-audio" onclick="playTTS('ผมแพ้อาหารทะเลครับ', this)">🔊</button>
-      </div>
-
-      <div class="sentence-card">
-        <div>
-          <div class="sentence-thai">4. ขอตรวจสอบการจองห้องพักครับ</div>
-          <div class="sentence-phonetic">Khɔ̌ɔ trùat-sɔ̀ɔp gaan-jɔɔng hɔ̂ng-phák khráp.</div>
-          <div class="sentence-meaning">我想查詢／核對飯店房間的預訂紀錄。</div>
-        </div>
-        <button class="btn-audio" onclick="playTTS('ขอตรวจสอบการจองห้องพักครับ', this)">🔊</button>
-      </div>
-
-      <div class="sentence-card">
-        <div>
-          <div class="sentence-thai">5. ช่วยยืนยันจำนวนคนอีกครั้งได้ไหมครับ</div>
-          <div class="sentence-phonetic">Chûai yeen-yan jam-nuan khon ìik khráng dâai mǎi khráp?</div>
-          <div class="sentence-meaning">能麻煩您再確認一次出團／用餐的人數嗎？</div>
-        </div>
-        <button class="btn-audio" onclick="playTTS('ช่วยยืนยันจำนวนคนอีกครั้งได้ไหมครับ', this)">🔊</button>
-      </div>
-    </section>
-
-    <!-- Section 3: Grammar -->
-    <section>
-      <div class="sec-head">
-        <div class="sec-title">
-          三、重點語法結構深度解析
-        </div>
-        <span class="sec-tag">文法邏輯</span>
-      </div>
-
-      <!-- Grammar 1 -->
-      <div class="grammar-card">
-        <div class="grammar-card-title">📌 語法點 1：名詞化前綴「การ (gaan)」與「ความ (kwaam)」的精確分工</div>
-        <p style="color:var(--text-muted); font-size:15px; margin-bottom:12px;">泰語名詞化需根據動詞性質嚴格搭配前綴：</p>
-
-        <div class="grammar-sub">👉 การ (gaan) + 動作動詞 ➔ 具體行為／動作過程（動名詞 -ing）</div>
-        <div class="pill-group">
-          <div class="example-pill"><span class="th">การจอง</span> <span>(預約手續)</span> <button class="btn-audio-mini" onclick="playTTS('การจอง', this)">🔊</button></div>
-          <div class="example-pill"><span class="th">การเดินทาง</span> <span>(旅途行程)</span> <button class="btn-audio-mini" onclick="playTTS('การเดินทาง', this)">🔊</button></div>
-          <div class="example-pill"><span class="th">การจัดการ</span> <span>(管理機制)</span> <button class="btn-audio-mini" onclick="playTTS('การจัดการ', this)">🔊</button></div>
-        </div>
-
-        <div class="grammar-sub" style="margin-top:16px;">👉 ความ (kwaam) + 形容詞／心理狀態 ➔ 抽象概念／感受狀態</div>
-        <div class="pill-group">
-          <div class="example-pill"><span class="th">ความสะดวก</span> <span>(便利性)</span> <button class="btn-audio-mini" onclick="playTTS('ความสะดวก', this)">🔊</button></div>
-          <div class="example-pill"><span class="th">ความปลอดภัย</span> <span>(安全性)</span> <button class="btn-audio-mini" onclick="playTTS('ความปลอดภัย', this)">🔊</button></div>
-          <div class="example-pill"><span class="th">ความสุข</span> <span>(幸福快樂)</span> <button class="btn-audio-mini" onclick="playTTS('ความสุข', this)">🔊</button></div>
-        </div>
-      </div>
-
-      <!-- Grammar 2 -->
-      <div class="grammar-card">
-        <div class="grammar-card-title">📌 語法點 2：表達「能力／許可」三大後綴辨析</div>
-        <p style="color:var(--text-muted); font-size:15px; margin-bottom:12px;">中文常統稱「可以／會／行」，泰語需依情境嚴格分立：</p>
-
-        <div class="grammar-sub">1. ได้ (dâai) ➔ 客觀條件或外在環境允許 (Can / May)</div>
-        <div class="pill-group">
-          <div class="example-pill"><span class="th">วันนี้ว่าง ไปได้</span> <span>(今天有空，可以去)</span> <button class="btn-audio-mini" onclick="playTTS('วันนี้ว่าง ไปได้', this)">🔊</button></div>
-        </div>
-
-        <div class="grammar-sub" style="margin-top:14px;">2. เป็น (bpen) ➔ 經後天學習掌握之技能技術 (Know how to)</div>
-        <div class="pill-group">
-          <div class="example-pill"><span class="th">พูดภาษาไทยเป็น</span> <span>(會說泰語技能)</span> <button class="btn-audio-mini" onclick="playTTS('พูดภาษาไทยเป็น', this)">🔊</button></div>
-          <div class="example-pill"><span class="th">ขับรถเป็น</span> <span>(會開車技能)</span> <button class="btn-audio-mini" onclick="playTTS('ขับรถเป็น', this)">🔊</button></div>
-        </div>
-
-        <div class="grammar-sub" style="margin-top:14px;">3. ไหว (wǎi) ➔ 個人體能生理或心理可承受 (Physically endure)</div>
-        <div class="pill-group">
-          <div class="example-pill"><span class="th">เดินขึ้นเขาไหว</span> <span>(爬山體力負荷得了)</span> <button class="btn-audio-mini" onclick="playTTS('เดินขึ้นเขาไหว', this)">🔊</button></div>
-          <div class="example-pill"><span class="th">ไหวไหมครับ</span> <span>(還撐得住嗎？)</span> <button class="btn-audio-mini" onclick="playTTS('ไหวไหมครับ', this)">🔊</button></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Section 4: Culture -->
-    <section>
-      <div class="sec-head">
-        <div class="sec-title">
-          四、泰國文化與生活話題
-        </div>
-        <span class="sec-tag" style="background: rgba(239, 68, 68, 0.15); color: #f87171;">文化時事</span>
-      </div>
-      <div class="culture-card">
-        <h3>🏮 2026 泰國九皇齋節（เทศกาลกินเจ）盛大登場</h3>
-        <p><b>舉行期間：</b>2026 年 10 月 10 日至 10 月 18 日（農曆九月初一至初九）</p>
-        <p><b>文化淵源：</b>起源於 19 世紀初南洋閩粵移民對道教「九皇大帝」的崇拜信仰，扎根泰國融入佛教文化後，演變為為期九天的身心淨化與素食嘉年華。</p>
-
-        <div class="culture-callout">
-          <b>🚩 街頭黃旗與嚴格戒律：</b><br>
-          • 大街小巷與超市插滿<b>黃底紅字「เจ (Jee)」</b>旗幟。<br>
-          • 「กินเจ」屬於極嚴格全素：除戒除一切動物肉品、蛋奶與蜂蜜外，更全面禁用<b>蔥、蒜、韭菜、洋蔥、香菜等五辛植物</b>，追求「身、口、意」純淨。
-        </div>
-
-        <h3>📍 焦點活動</h3>
-        <p>• <b>普吉島（Phuket）：</b>全泰最具儀式震撼力的舞台。各大宮廟舉行降神科儀，乩童（ม้าทรง, Mah Song）進行穿刺巡遊替信眾擋煞消災，場面極為壯觀。</p>
-        <p>• <b>曼谷耀華力路（唐人街 Yaowarat）：</b>整條大道封街化身為素食長廊，供應潮汕傳統素點、手工炸豆腐、素魚翅等特色佳餚。</p>
-
-        <h3>✈️ 線控經理實務備忘</h3>
-        <p>若安排此期間出團，重視蔬食養生的旅客可獲得極為豐富的用餐選擇；若有團體行經曼谷唐人街或普吉老城區，請提早因應廟會巡遊進行封街與車流調配。</p>
-      </div>
-    </section>
   </div>
 </div>
 
-<div id="toast">🔊 正在播放發音...</div>
-
+<!-- 即時搜尋與收納互動邏輯 Script -->
 <script>
-  let currentAudio = null;
-  let playbackRate = 1.0;
-  let isMasked = false;
-
-  function navigateTo(targetView) {
-    if (history.pushState) {
-      history.pushState(null, null, '#' + targetView);
-    } else {
-      location.hash = '#' + targetView;
+  function toggleAccordion(itemId) {
+    const item = document.getElementById(itemId);
+    if (item) {
+      item.classList.toggle('open');
     }
-    renderView(targetView);
   }
 
-  function renderView(viewName) {
-    const isIssue1 = (viewName === 'issue1');
+  function handleSearch() {
+    const input = document.getElementById('search-input');
+    const query = input.value.trim().toLowerCase();
+    const clearBtn = document.getElementById('btn-clear');
+    const statsEl = document.getElementById('search-stats');
+    const emptyCard = document.getElementById('empty-search');
     
-    const homeView = document.getElementById('view-home');
-    const issueView = document.getElementById('view-issue1');
-    const navHome = document.getElementById('nav-home');
-    const navIssue1 = document.getElementById('nav-issue1');
+    clearBtn.style.display = query.length > 0 ? 'block' : 'none';
 
-    if (isIssue1) {
-      homeView.classList.remove('active');
-      issueView.classList.add('active');
-      navHome.classList.remove('active');
-      navIssue1.classList.add('active');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    const cards = document.querySelectorAll('.issue-card');
+    let matchedCount = 0;
+
+    cards.forEach(card => {
+      const code = (card.getAttribute('data-code') || '').toLowerCase();
+      const title = (card.getAttribute('data-title') || '').toLowerCase();
+      const desc = (card.getAttribute('data-desc') || '').toLowerCase();
+      const tags = (card.getAttribute('data-tags') || '').toLowerCase();
+
+      const isMatch = query === '' || 
+                      code.includes(query) || 
+                      title.includes(query) || 
+                      desc.includes(query) || 
+                      tags.includes(query);
+
+      card.style.display = isMatch ? 'flex' : 'none';
+      if (isMatch && card.getAttribute('data-code')) {
+        matchedCount++;
+      }
+    });
+
+    // 搜尋時若有輸入關鍵字，自動展開所有手風琴抽屜以供查看
+    const accordions = document.querySelectorAll('.accordion-item');
+    if (query.length > 0) {
+      accordions.forEach(acc => acc.classList.add('open'));
+    }
+
+    // 更新搜尋統計與空狀態
+    if (query.length > 0) {
+      statsEl.innerText = `找到 ${matchedCount} 筆相關課程`;
+      emptyCard.style.display = matchedCount === 0 ? 'block' : 'none';
     } else {
-      issueView.classList.remove('active');
-      homeView.classList.add('active');
-      navIssue1.classList.remove('active');
-      navHome.classList.add('active');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      statsEl.innerText = '全期收納中';
+      emptyCard.style.display = 'none';
     }
   }
 
-  window.addEventListener('hashchange', () => {
-    const hash = window.location.hash.replace('#', '') || 'home';
-    renderView(hash);
-  });
-
-  window.addEventListener('DOMContentLoaded', () => {
-    const hash = window.location.hash.replace('#', '') || 'home';
-    renderView(hash);
-  });
-
-  function setSpeed(speed) {
-    playbackRate = speed;
-    document.getElementById('btn-speed-normal').classList.toggle('active', speed === 1.0);
-    document.getElementById('btn-speed-slow').classList.toggle('active', speed === 0.75);
-    showToast(`語速已設定為 ${speed}x`);
-  }
-
-  function toggleMask() {
-    isMasked = !isMasked;
-    const btn = document.getElementById('btn-mask-toggle');
-    btn.classList.toggle('active', isMasked);
-    btn.innerText = isMasked ? '👁️ 顯示中文釋義' : '👁️ 遮蔽中文（單字測驗）';
-
-    document.querySelectorAll('.meaning').forEach(el => {
-      el.classList.toggle('masked', isMasked);
-      if (!isMasked) el.onclick = null;
-      else el.onclick = () => el.classList.remove('masked');
-    });
-
-    document.querySelectorAll('.sentence-meaning').forEach(el => {
-      el.classList.toggle('masked', isMasked);
-      if (!isMasked) el.onclick = null;
-      else el.onclick = () => el.classList.remove('masked');
-    });
-
-    showToast(isMasked ? '已開啟遮蔽測驗（點擊即可翻開）' : '已恢復顯示中文');
-  }
-
-  function playTTS(text, btnElement) {
-    if (currentAudio) {
-      currentAudio.pause();
-      currentAudio = null;
-    }
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-    }
-    document.querySelectorAll('.btn-audio, .btn-audio-mini').forEach(b => b.classList.remove('playing'));
-
-    if (btnElement) {
-      btnElement.classList.add('playing');
-    }
-
-    showToast(`🔊 正在播放：${text}`);
-
-    const encoded = encodeURIComponent(text);
-    const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=th&q=${encoded}`;
-    
-    const audio = new Audio();
-    currentAudio = audio;
-    audio.playbackRate = playbackRate;
-
-    const cleanup = () => {
-      if (btnElement) btnElement.classList.remove('playing');
-      if (currentAudio === audio) currentAudio = null;
-    };
-
-    audio.onended = cleanup;
-
-    // 若 Google 語音因任何網路因素異常，自動無縫切換為 Web Speech API 原生泰語發音
-    audio.onerror = () => {
-      console.warn('Google TTS 載入受阻，自動切換至 Web Speech API 原生語音播放');
-      playWebSpeech(text, btnElement);
-    };
-
-    audio.src = audioUrl;
-    audio.play().catch(e => {
-      console.warn('Google TTS 播放異常，切換至 Web Speech API:', e);
-      playWebSpeech(text, btnElement);
-    });
-  }
-
-  function playWebSpeech(text, btnElement) {
-    if (!('speechSynthesis' in window)) {
-      showToast('⚠️ 瀏覽器不支援語音播放');
-      if (btnElement) btnElement.classList.remove('playing');
-      return;
-    }
-
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'th-TH';
-    utterance.rate = playbackRate;
-
-    const voices = window.speechSynthesis.getVoices();
-    const thaiVoice = voices.find(v => v.lang === 'th-TH' || v.lang.toLowerCase().includes('th'));
-    if (thaiVoice) {
-      utterance.voice = thaiVoice;
-    }
-
-    utterance.onend = () => {
-      if (btnElement) btnElement.classList.remove('playing');
-    };
-
-    utterance.onerror = (e) => {
-      console.error('Web Speech 播放錯誤:', e);
-      if (btnElement) btnElement.classList.remove('playing');
-      showToast('⚠️ 語音播放受阻，請檢查音效設定');
-    };
-
-    window.speechSynthesis.speak(utterance);
-  }
-
-  function showToast(msg) {
-    const toast = document.getElementById('toast');
-    toast.innerText = msg;
-    toast.style.display = 'flex';
-    clearTimeout(toast.timer);
-    toast.timer = setTimeout(() => {
-      toast.style.display = 'none';
-    }, 2000);
+  function clearSearch() {
+    const input = document.getElementById('search-input');
+    input.value = '';
+    handleSearch();
+    input.focus();
   }
 </script>
+
 </body>
 </html>
