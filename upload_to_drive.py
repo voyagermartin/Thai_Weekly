@@ -26,7 +26,6 @@ FOLDER_ID = "1xTWvfaAEIqzHFpDKtG7ipdMBZf8PYbBA"
 SCOPES = ["https://www.googleapis.com/auth/drive"]
 ROOT_DIR = Path(__file__).resolve().parent
 
-# 欲上傳回 Google Drive 的本地檔案列表
 TARGET_FILES = [
     ROOT_DIR / "templates" / "lesson_template.html",
     ROOT_DIR / "HANDBOOK.MD",
@@ -68,12 +67,14 @@ def find_drive_file(service, folder_id: str, filename: str):
         spaces="drive",
         fields="files(id, name, mimeType, modifiedTime)",
         pageSize=10,
+        supportsAllDrives=True,
+        includeItemsFromAllDrives=True,
     ).execute()
     files = response.get("files", [])
     return files[0] if files else None
 
 
-def upload_or_update_file(service, folder_id: str, file_path: Path):
+def upload_or_update_file(service, folder_id: str, file_path: Path, sa_email: str):
     """上傳或更新單一檔案至 Google Drive"""
     if not file_path.exists():
         print(f"[WARN] 檔案不存在，略過: {file_path}")
@@ -87,46 +88,77 @@ def upload_or_update_file(service, folder_id: str, file_path: Path):
         else:
             mime_type = "text/plain"
 
+    print(f"\n[START] 處理檔案: {filename} ({mime_type})")
     media = MediaFileUpload(str(file_path), mimetype=mime_type, resumable=True)
 
-    existing_file = find_drive_file(service, folder_id, filename)
+    try:
+        existing_file = find_drive_file(service, folder_id, filename)
 
-    if existing_file:
-        file_id = existing_file["id"]
-        print(f"[INFO] 更新雲端既有檔案: {filename} (ID: {file_id})...")
-        updated_file = service.files().update(
-            fileId=file_id,
-            media_body=media,
-            fields="id, name, modifiedTime"
-        ).execute()
-        print(f"[SUCCESS] 已更新: {filename} -> {updated_file.get('modifiedTime')}")
-    else:
-        print(f"[INFO] 雲端無同名檔案，建立新檔案: {filename}...")
-        file_metadata = {
-            "name": filename,
-            "parents": [folder_id],
-        }
-        new_file = service.files().create(
-            body=file_metadata,
-            media_body=media,
-            fields="id, name"
-        ).execute()
-        print(f"[SUCCESS] 已建立: {filename} (ID: {new_file.get('id')})")
+        if existing_file:
+            file_id = existing_file["id"]
+            print(f"[INFO] 雲端已存在同名檔案，執行更新: {filename} (ID: {file_id})...")
+            updated_file = service.files().update(
+                fileId=file_id,
+                media_body=media,
+                fields="id, name, modifiedTime",
+                supportsAllDrives=True,
+            ).execute()
+            print(f"[SUCCESS] 已成功更新檔案: {filename} (時間: {updated_file.get('modifiedTime')})")
+        else:
+            print(f"[INFO] 雲端尚無同名檔案，建立新檔案: {filename}...")
+            file_metadata = {
+                "name": filename,
+                "parents": [folder_id],
+            }
+            new_file = service.files().create(
+                body=file_metadata,
+                media_body=media,
+                fields="id, name",
+                supportsAllDrives=True,
+            ).execute()
+            print(f"[SUCCESS] 已成功建立檔案: {filename} (ID: {new_file.get('id')})")
+
+    except HttpError as e:
+        status_code = e.resp.status if hasattr(e, "resp") else "未知"
+        error_details = e.content.decode("utf-8", errors="ignore") if hasattr(e, "content") else str(e)
+        print("\n" + "=" * 65)
+        print(f"[ERROR] 上傳檔案「{filename}」時發生 Google Drive API 錯誤 (HTTP {status_code})")
+        print(f"詳細錯誤訊息: {error_details}")
+        print("-" * 65)
+        if status_code in (403, 404):
+            print("【權限排除指引】")
+            print(f"1. 請開啟 Google Drive 目標資料夾「泰文小短篇」(ID: {folder_id})")
+            print(f"2. 點選「共用」設定，確認是否已將此服務帳號加入：")
+            print(f"   👉 {sa_email}")
+            print(f"3. 請務必將該帳號權限設為「編輯者 (Editor)」（不可為檢視者）！")
+        print("=" * 65 + "\n")
+        raise e
 
 
 def main():
-    print("=" * 60)
+    print("=" * 65)
     print("Thai_Weekly 本地檔案寫回 Google Drive 工具")
     print(f"目標雲端資料夾 ID: {FOLDER_ID}")
-    print("=" * 60)
+    print("=" * 65)
 
     creds = get_credentials()
+    sa_email = getattr(creds, "service_account_email", "未知帳號")
+    print(f"[INFO] 驗證成功！目前使用的 GCP 服務帳號: {sa_email}")
+
     service = build("drive", "v3", credentials=creds)
 
+    has_error = False
     for target in TARGET_FILES:
-        upload_or_update_file(service, FOLDER_ID, target)
+        try:
+            upload_or_update_file(service, FOLDER_ID, target, sa_email)
+        except Exception:
+            has_error = True
 
-    print("\n[FINISH] 所有指定檔案已同步至 Google Drive！")
+    if has_error:
+        print("\n[FAILED] 部分或全部檔案上傳失敗，請依上方指引檢查 Google Drive 編輯權限。")
+        sys.exit(1)
+
+    print("\n[FINISH] ✨ 所有指定檔案均已成功寫入 Google Drive 目標資料夾！")
 
 
 if __name__ == "__main__":
