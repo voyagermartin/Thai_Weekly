@@ -1,6 +1,6 @@
 # Thai_Weekly (泰語學習週報自動化發布系統) 專案協作手冊
 
-> **專案版本**：v1.0  
+> **專案版本**：v1.2 (紫金門戶與雙引擎語音升級版)  
 > **最後更新日期**：2026-10-12  
 > **維護者**：Martin × Gemini Spark × Antigravity (Anti)
 
@@ -9,7 +9,7 @@
 ## 1. 專案願景與協作架構
 
 ### 1.1 願景 (Vision)
-打造一個**全自動、零手動維護、支援原地標準語音播放與卡片互動自測**的現代化泰語自主學習網站。讀者能每週定期獲取結合時事/日常話題的精選短篇教學，享有沉浸式的深色雜誌閱讀體驗與高效率自學工具。
+打造一個**全自動、零手動維護、支援原地標準語音播放與卡片互動自測**的現代化泰語自主學習網站。讀者能每週定期獲取結合時事/日常話題的精選短篇教學，享有沈浸式泰國皇室紫金雜誌閱讀體驗與高效率自學工具。
 
 ### 1.2 三方協作流水線 (Collaborative Pipeline)
 
@@ -17,40 +17,43 @@
 
 ```mermaid
 flowchart LR
-    A["Martin (架構與監護)"] -->|需求制定 & 源頭短篇提供| B["Google Drive (泰文小短篇)"]
-    B -->|自動讀取| C["GitHub Actions CI/CD"]
-    C -->|Prompt / 教材拆解| D["Gemini Spark (教材生成)"]
-    D -->|結構化文章/生詞/測驗| E["Anti 構建腳本 (HTML 生成)"]
-    E -->|產出每週課程 YYwWW.html| F["GitHub Pages / 線上站點"]
+    A["Martin (架構與業務主理)"] -->|需求制定 & 源頭短篇維護| B["Google Drive (泰文小短篇)"]
+    B -->|定時觸發 / 內容讀取| C["GitHub Actions CI/CD"]
+    C -->|教材拆解 / 模板渲染| D["Gemini Spark (內容引擎)"]
+    D -->|產出結構化 YYwWW.html| E["Anti 構建腳本 (自動化同步)"]
+    E -->|Git Commit & Push| F["GitHub Pages / 線上門戶"]
     style A fill:#1e293b,stroke:#38bdf8,color:#fff
     style B fill:#0f172a,stroke:#38bdf8,color:#fff
     style C fill:#1e293b,stroke:#a855f7,color:#fff
     style D fill:#1e293b,stroke:#ec4899,color:#fff
     style E fill:#0f172a,stroke:#22c55e,color:#fff
-    style F fill:#0284c7,stroke:#38bdf8,color:#fff
+    style F fill:#0284c7,stroke:#f59e0b,color:#fff
 ```
 
 * **Martin (專案推動 / 業務主理)**：
   * 定義業務需求、核心規範與風格偏好。
-  * 於指定 Google Drive 目錄存放或維護原生泰語短篇材料。
+  * 於指定 Google Drive 目錄存放或維護原生泰語短篇材料與參考手冊。
   * 審閱線上站點學習反饋與整體發展方向。
 * **Gemini Spark (內容引擎 / 教學拆解)**：
   * 負責將 Google Drive 上的短文進行智能剖析：斷詞音標（IPA / 羅馬拼音）、中文翻譯、核心文法點、難詞單字釋義。
-  * 生成每週「互動遮蔽測驗（Cloze / Flashcards）」的題型數據與上下文例句。
+  * 嚴格套用 `templates/lesson_template.html` 骨架生成當週獨立課程（`YYwWW.html`）。
+  * 產出每週「互動遮蔽測驗（Cloze / Flashcards）」的題型數據與上下文例句。
 * **Anti / Antigravity (系統工程 / 程式碼實作與自動化維運)**：
-  * 負責靜態頁面模板（Template Engine）與建構邏輯（Builder Script）。
-  * 串接 Google Drive API 與自動化同步機制。
-  * 整合 Google TTS 語音發音元件、音訊快取與深色雜誌 UI 互動邏輯。
-  * 配置 GitHub Actions 雲端定期排程發布與部署維護。
+  * 負責維護全站靜態頁面模板、首頁門戶架構與 UI 互動邏輯。
+  * 串接 Google Drive API 雙向同步機制（下載雲端教材、上傳最新模板）。
+  * 整合 Google TTS 搭配 Web Speech API 雙引擎語音播放器。
+  * 配置 GitHub Actions 雲端定期排程發布與 GitHub Pages 自動部署維護。
 
 ---
 
-## 2. 目錄與命名規範 (File Structure & Naming Conventions)
+## 2. 目錄與檔案結構規範 (File Structure & Naming Conventions)
 
-### 2.1 外部資料來源
+### 2.1 外部雲端資料來源
 * **目標 Google Drive 資料夾**：`泰文小短篇`
 * **Folder ID**：`1xTWvfaAEIqzHFpDKtG7ipdMBZf8PYbBA`
-* **同步邏輯**：系統會自動抓取此資料夾內新增或更新的短篇文件，轉譯為每週刊發的獨立教材。
+* **重要備忘 (GCP Service Account 限制)**：
+  * GCP 服務帳號本身具備 0 MB 儲存配額限制。
+  * 在個人 Google Drive 中，模板（`lesson_template.html`）與手冊（`HANDBOOK.MD`）由主理人帳號建立後，自動化腳本可正常執行 `update` 覆蓋更新。
 
 ### 2.2 網站檔案結構與命名
 發布端採用乾淨且易於歸檔的週期編號命名法則：
@@ -59,29 +62,20 @@ flowchart LR
 Thai_Weekly/
 ├── .github/
 │   └── workflows/
-│       └── sync-and-deploy.yml  # GitHub Actions 定時排程與部署腳本
-├── scripts/
-│   ├── fetch_drive.py          # Google Drive 內容抓取
-│   ├── generate_content.py     # Gemini Spark 教材處理腳本
-│   └── build_site.py           # 靜態 HTML 生成器
+│       ├── sync.yml            # 每週六 09:30 自動從 Google Drive 同步更新至 GitHub
+│       └── upload_to_drive.yml # 一鍵手動推送本地最新模板與手冊至 Google Drive
 ├── templates/
-│   ├── base.html               # 共通版型
-│   └── lesson.html             # 單期課程範本
-├── public/                     # 最終發布靜態檔案目錄 (或根目錄)
-│   ├── index.html              # 站點首頁 (課程期數列表、進度追蹤、精選推薦)
-│   ├── 26w41.html              # 每週獨立課程 (格式: YYwWW.html，例: 2026年第41週)
-│   ├── 26w42.html
-│   ├── assets/
-│   │   ├── css/
-│   │   │   └── magazine.css    # 深色雜誌風 UI 樣式表
-│   │   └── js/
-│   │       ├── player.js       # 原地 Google TTS 語音串流控制
-│   │       └── quiz.js         # 互動遮蔽測驗與翻轉卡片邏輯
-├── HANDBOOK.MD                 # 本專案協作手冊
+│   └── lesson_template.html    # Spark 生成每週課程專用的標準紫金版 HTML 骨架
+├── favicon.svg                 # 專屬深邃曜石黑 × 科技藍漸層泰語學習 App 圖標
+├── index.html                  # 站點首頁（方案 1 置頂封面 + 方案 4 搜尋手風琴抽屜）
+├── 26w41.html                  # 第 1 期課程實體頁（格式: YYwWW.html，例: 2026年第41週）
+├── sync_drive_to_github.py     # Google Drive 雲端檔案自動拉取與 Git Push 腳本
+├── upload_to_drive.py          # 本地模板寫回 Google Drive 工具腳本
+├── HANDBOOK.MD                 # 本專案協作手冊（規格與最高指引）
 └── README.md                   # 專案概覽與說明
 ```
 
-* **入口頁面**：`index.html`（自動彙整所有歷史週報索引、提供學習進度追蹤與快捷搜尋）。
+* **入口頁面**：`index.html`（彙整所有歷史週報索引、即時關鍵字過濾與年度歸檔收納）。
 * **每週獨立課程命名規則**：`YYwWW.html`
   * `YY`：公元年份後兩碼（例如 `2026` 年為 `26`）
   * `w`：固定小寫字母 `w`（表示 week）
@@ -91,58 +85,115 @@ Thai_Weekly/
 
 ## 3. 技術與 UI / UX 規範 (Design & Interaction System)
 
-### 3.1 視覺風格：深色雜誌風 (Dark Editorial Magazine UI - 暹羅暗夜紫與大皇宮金箔)
-* **色彩基調 (Color Palette)**：
-  * 主背景 (Background)：`#0d0814`（暹羅暗夜紫底）至 `#170f24`（皇室深紫表層）。
-  * 卡片/區塊 (Surface)：`#231738`（帝王紫卡片背景），沉穩紫金邊框 `#443063`，懸浮高光 `#2f1f4a`。
-  * 皇家金箔系統 (Accent Gold)：泰皇金箔金 (`#f59e0b`)、亮香檳金 (`#fde68a`)、泰文字級專屬金色 (`#fde047` 黑底金字極致辨識度)。
-  * 皇室紫系統 (Primary)：詩琳通公主皇室紫羅蘭色 (`#a855f7`)、亮紫高光 (`#c084fc`)。
-  * 封面橫幅：皇室紫漸層 `linear-gradient(135deg, #170f24 0%, #2e1065 60%, #451a03 100%)` 搭配金色細頂邊。
-  * 文字階層 (Typography)：
-    * 主標題與泰文字體：採用清晰優美的現代字型（如 `Noto Sans Thai`、`Sarabun`）。
-    * 正文字體：高品質現代無襯線字體（如 `Inter`、`system-ui`）。
-* **字體大小階層 (Font Scale)**：
-  * **核心泰語單字/片語**：**28px**（加粗，間距舒展，確保聲調符號清晰易讀）。
-  * 拼音/音標 (Phonetic / Transliteration)：15px（柔和輔助灰 `#94a3b8`）。
-  * 中文釋義與說明：16px - 18px。
-  * 課文本文 (Body Text)：泰文 22px / 中文對照 16px。
+### 3.1 視覺風格：泰國皇室紫金風 (Dark Editorial Magazine UI - 暹羅暗夜紫與大皇宮金箔)
+全站統一採用高對比、護眼且極具大皇宮金箔質感的配色系統：
 
-### 3.2 原地 Google TTS 串流播放 (In-place TTS Audio Player)
-* **標準語音串流**：
-  * 點擊任何單字、例句或段落旁的播放按鈕，即時發起 Google TTS（泰語 `th-TH`）音訊串流。
-  * **原地播放**：不另開分頁、不跳轉視窗，播放時該卡片/字詞呈現動態發光波紋（Pulse Animation）。
-* **播放控制**：支援 1.0x 標準速與 0.75x 慢速跟讀重播功能。
+* **核心 CSS 配色變數 (`:root`)**：
+  ```css
+  :root {
+    /* 背景層次 */
+    --bg-base: #0d0814;          /* 暹羅暗夜紫底（取代原石板黑） */
+    --bg-surface: #170f24;       /* 皇室深紫表層 */
+    --bg-card: #231738;          /* 帝王紫卡片背景 */
+    --bg-card-hover: #2f1f4a;    /* 卡片懸浮高光 */
+    --border: #443063;           /* 沉穩紫金邊框 */
+    --border-accent: #f59e0b;    /* 泰皇金箔高光邊框 */
 
-### 3.3 互動遮蔽測驗 (Interactive Masking & Self-test)
-* **自測卡片 (Cloze / Masked Cards)**：
-  * 重點單字預設呈現霧面毛玻璃遮蔽（Blur / Mask）。
-  * 點擊/懸停即揭曉拼音與中文釋義，方便讀者先聽聲音或看泰文字母自測記憶。
-* **隨堂複習小卡**：
-  * 雙面翻轉卡（Flip Card）機制，支援標記「已掌握 / 需加強」。
+    /* 皇家金色系統（象徵大皇宮佛寺金箔與皇室尊爵） */
+    --accent-gold: #f59e0b;       /* 泰皇金箔金（主要按鈕、標題裝飾） */
+    --accent-gold-light: #fde68a; /* 亮香檳金（重點文字與標籤） */
+    --text-thai: #fde047;         /* 泰文字級專屬金色（黑底金字極致辨識度） */
+    --gold-glow: rgba(245, 158, 11, 0.28); /* 金色發光光暈 */
+
+    /* 皇室紫色系統（泰國詩琳通公主與皇室經典代表色） */
+    --primary: #a855f7;          /* 皇家紫羅蘭色（功能按鈕、標籤） */
+    --primary-hover: #c084fc;    /* 亮紫高光 */
+    --primary-glow: rgba(168, 85, 247, 0.3);
+
+    /* 文字與中性色 */
+    --text-main: #f8fafc;        /* 象牙白主文字 */
+    --text-muted: #a78bfa;       /* 柔紫灰輔助次要文字 */
+  }
+  ```
+
+* **雜誌封面橫幅**：
+  ```css
+  background: linear-gradient(135deg, #170f24 0%, #2e1065 60%, #451a03 100%);
+  border-top: 2px solid var(--accent-gold);
+  ```
+
+### 3.2 容器與字體規格 (Typography & Layout)
+* **大版面容器**：桌機主要容器寬度設定為 **1160px**（當視窗 `>= 1400px` 時自動擴展至 **1240px**），徹底解決大螢幕留白過多問題。
+* **字級規格**：
+  * **34px 核心泰語單字**：採用 `--text-thai: #fde047` 黑底金字，搭配金色柔光微陰影（`0 0 16px rgba(245, 158, 11, 0.35)`），音標符號清晰分明。
+  * **25px 情境泰語句型**：加強實務跟讀辨識度。
+  * **17.5px 正文閱讀**：行高設定為 1.7 ~ 1.8，搭配柔和象牙白（`#f8fafc`）。
+* **語意斷句保護**：
+  長句中的核心語意區塊以 `<span style="display:inline-block">` 包裹，防止中文/泰文在特定螢幕斷句突兀（例如：「專為職場接待與生活實務打造」）。
+
+### 3.3 原地語音播放系統 (In-place TTS Dual Engine & Security)
+為保證語音播放 100% 穩定零中斷，全站統一配置雙重防護機制：
+
+1. **安全性與跨域防護（必備）**：
+   ```html
+   <meta name="referrer" content="no-referrer">
+   ```
+   * **關鍵作用**：移除請求中的 `Referer` 標頭，防止 Google TTS 伺服器因跨域或來源阻擋而返回 HTTP 404 / 播放失敗。
+2. **雙引擎備援架構 (Dual-Engine Audio)**：
+   * **第一引擎 (Primary)**：Google 繁中/泰語標準 TTS 原地串流 (`audio/mpeg`)。
+   * **第二引擎 (Fallback)**：若遇到網路連線異常或跨域受阻，JavaScript 自動無縫切換至瀏覽器原生 **Web Speech API** (`SpeechSynthesisUtterance`，指定 `lang: 'th-TH'`)。
+3. **播放控制**：
+   * 支援原地動態波紋光暈（Pulse Glow）。
+   * 具備 1.0x 標準速與 0.75x 慢速跟讀切換。
+
+### 3.4 門戶首頁收納與檢索機制（方案 1 ＋ 方案 4）
+為避免未來課程持續增加導致首頁卡片過多、滑動過長，`index.html` 整合了兩大收納機制：
+
+1. **方案 1：視覺分層＋歷史年度收納抽屜**
+   * **本週最新刊置頂大封面 (Spotlight Hero)**：永遠突顯當週最新一期，包含呼吸燈標籤、摘要、核心特點與一鍵直達按鈕。
+   * **近期特輯展示區 (Recent Issues Grid)**：僅保留最近 4～6 期的紫金卡片展開，維持雜誌探索感。
+   * **歷史年度手風琴抽屜 (Yearly Accordion Drawer)**：超過近期的舊期數依年份（如 📅 2026 年度課程歸檔）收納，**預設為折疊狀態**，保持首頁清爽簡潔。
+2. **方案 4：毫秒級即時關鍵字搜尋與智慧聯動**
+   * **檢索欄位**：支援刊號代碼（`26w41`）、主題關鍵字（`素食`、`預訂`）、單字與文法標籤。
+   * **智慧展開聯動**：讀者輸入任意搜尋字詞時，前端自動**強制展開**所有歷史年度手風琴抽屜以進行全域檢索；清空關鍵字或按 `✕` 時，**自動恢復預設折疊**。
+   * **即時統計回饋**：即時顯示「找到 X 筆相關課程」，無結果時跳出友善提示卡片。
 
 ---
 
-## 4. 部署架構：方案 B (雲端定時排程自動同步與發布)
+## 4. 部署與自動化排程架構
 
-採用 **方案 B**：利用 Google Drive API + GitHub Actions 達成 100% 雲端全自動化運作，本機無需開啟常駐程序。
+### 4.1 GitHub Actions 工作流程
+專案內建兩套自動化 Actions：
 
-### 4.1 運作流程
-1. **定時觸發 (Schedule Trigger)**：
-   * GitHub Actions 依 Cron 排程（例如每週一上午 06:00 UTC+8）或 Repository Dispatch 自動喚醒。
-2. **Drive 檔案偵測與拉取 (Drive Sync)**：
-   * 透過 Google Drive Service Account API，掃描目標資料夾（ID: `1xTWvfaAEIqzHFpDKtG7ipdMBZf8PYbBA`）。
-   * 比對現存期數，若發現未處理短篇或最新修訂，自動下載文字內容。
-3. **AI 處理與頁面構建 (Content Build)**：
-   * 呼叫腳本進行語意拆解、斷詞、注音、例句生成與課後測驗數據封裝。
-   * 產出該週課程 `YYwWW.html` 並自動刷新 `index.html` 彙整首頁。
-4. **自動發布 (Git Commit & Pages Deploy)**：
-   * GitHub Actions 將產出的 HTML/靜態資產自動 Commit 回倉庫，並觸發 GitHub Pages 部署上線。
+1. **`.github/workflows/sync.yml`（每週自動同步）**：
+   * 排程時間：台灣時間每週六上午 09:30（UTC 01:30，`cron: '30 1 * * 6'`）。
+   * 功能：自動連線 Google Drive 下載最新 `.html`，比對後自動執行 Git Commit 並推送到 `main` 分支，觸發 GitHub Pages 部署。
+2. **`.github/workflows/upload_to_drive.yml`（一鍵推播模板）**：
+   * 支援手動觸發（`workflow_dispatch`）。
+   * 功能：將倉庫中最新修訂之 `lesson_template.html` 與 `HANDBOOK.MD` 自動更新回 Google Drive 目標資料夾。
 
-### 4.2 必要的憑證與環境變數 (Secrets)
-* `GDRIVE_SERVICE_ACCOUNT_KEY`：Google Cloud 服務帳號 JSON 金鑰（需具備對目標雲端硬碟資料夾的讀取權限）。
-* `GEMINI_API_KEY`：教材自動剖析與生詞拆解所需之 API Key。
+### 4.2 必要的憑證設定 (GitHub Secrets)
+* `GCP_SA_KEY_JSON`：Google Cloud 服務帳號金鑰（JSON 字串），具備存取「泰文小短篇」資料夾之 Google Drive API 權限。
 
 ---
 
-## 5. 結語與準則 (Commitment)
-本手冊為全專案的最高指引原則，後續所有頁面模板撰寫、自動化腳本實作與樣式調整均需嚴格遵守上述命名、視覺規範與自動化架構。
+## 5. Spark 生成每週週報之作業準則
+
+Gemini Spark 於每週生成新期數（例如 `26w42.html`）時，必須遵守以下標準：
+1. **骨架來源**：以 `templates/lesson_template.html` 為唯一基礎。
+2. **視覺配色**：嚴格使用泰國皇室紫金配色變數（禁止改用舊版藍黑或石板灰）。
+3. **安全標頭**：`<head>` 內必須包含 `<meta name="referrer" content="no-referrer">`。
+4. **字級規範**：34px 核心單字、25px 情境句型、1160px 大版面容器。
+5. **雙引擎語音**：完整保留 Google TTS + Web Speech API 語音函式。
+6. **期數歸檔**：產生該期獨立網頁（如 `26w42.html`），並同步更新首頁 `index.html` 將最新一期置於 Spotlight Hero。
+
+---
+
+## 6. 結語與里程碑記錄
+
+本手冊為全專案的最高指引原則。截至 2026-10-12，已達成：
+- [x] 全站深色雜誌風升級為「大皇宮金箔 × 暹羅暗夜紫」主題。
+- [x] 完成 34px 大字級與 1160px 桌機沉浸式排版升級。
+- [x] 解決 Google TTS 播放失敗問題，完成 `<meta name="referrer">` 防護與 Web Speech API 雙引擎備援。
+- [x] 完成首頁「方案 1 ＋ 方案 4」置頂封面、即時關鍵字搜尋與預設折疊年度手風琴抽屜。
+- [x] 建立雙向 Google Drive ⇄ GitHub Actions 同步與模板寫回管線。
