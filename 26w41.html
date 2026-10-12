@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="no-referrer">
   <title>泰語學習週報｜26w41 飲食預訂實務・語法名詞化與九皇齋節</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="apple-touch-icon" href="favicon.svg">
@@ -845,14 +846,11 @@
     if (currentAudio) {
       currentAudio.pause();
       currentAudio = null;
-      document.querySelectorAll('.btn-audio, .btn-audio-mini').forEach(b => b.classList.remove('playing'));
     }
-
-    const encoded = encodeURIComponent(text);
-    const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=th&q=${encoded}`;
-    
-    currentAudio = new Audio(audioUrl);
-    currentAudio.playbackRate = playbackRate;
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    document.querySelectorAll('.btn-audio, .btn-audio-mini').forEach(b => b.classList.remove('playing'));
 
     if (btnElement) {
       btnElement.classList.add('playing');
@@ -860,15 +858,62 @@
 
     showToast(`🔊 正在播放：${text}`);
 
-    currentAudio.play().catch(e => {
-      console.warn('Audio play error:', e);
-      showToast('播放失敗，請檢查網路連線');
-    });
+    const encoded = encodeURIComponent(text);
+    const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=th&q=${encoded}`;
+    
+    const audio = new Audio();
+    currentAudio = audio;
+    audio.playbackRate = playbackRate;
 
-    currentAudio.onended = () => {
+    const cleanup = () => {
       if (btnElement) btnElement.classList.remove('playing');
-      currentAudio = null;
+      if (currentAudio === audio) currentAudio = null;
     };
+
+    audio.onended = cleanup;
+
+    // 若 Google 語音因任何網路因素異常，自動無縫切換為 Web Speech API 原生泰語發音
+    audio.onerror = () => {
+      console.warn('Google TTS 載入受阻，自動切換至 Web Speech API 原生語音播放');
+      playWebSpeech(text, btnElement);
+    };
+
+    audio.src = audioUrl;
+    audio.play().catch(e => {
+      console.warn('Google TTS 播放異常，切換至 Web Speech API:', e);
+      playWebSpeech(text, btnElement);
+    });
+  }
+
+  function playWebSpeech(text, btnElement) {
+    if (!('speechSynthesis' in window)) {
+      showToast('⚠️ 瀏覽器不支援語音播放');
+      if (btnElement) btnElement.classList.remove('playing');
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'th-TH';
+    utterance.rate = playbackRate;
+
+    const voices = window.speechSynthesis.getVoices();
+    const thaiVoice = voices.find(v => v.lang === 'th-TH' || v.lang.toLowerCase().includes('th'));
+    if (thaiVoice) {
+      utterance.voice = thaiVoice;
+    }
+
+    utterance.onend = () => {
+      if (btnElement) btnElement.classList.remove('playing');
+    };
+
+    utterance.onerror = (e) => {
+      console.error('Web Speech 播放錯誤:', e);
+      if (btnElement) btnElement.classList.remove('playing');
+      showToast('⚠️ 語音播放受阻，請檢查音效設定');
+    };
+
+    window.speechSynthesis.speak(utterance);
   }
 
   function showToast(msg) {
