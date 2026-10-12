@@ -10,20 +10,29 @@
   <link rel="apple-touch-icon" href="favicon.svg">
   <style>
     :root {
-      --bg-base: #0b0f19;
-      --bg-surface: #111827;
-      --bg-card: #1f2937;
-      --bg-card-hover: #283548;
-      --border: #374151;
-      --border-accent: #3b82f6;
-      --primary: #3b82f6;
-      --primary-hover: #60a5fa;
-      --primary-glow: rgba(59, 130, 246, 0.25);
-      --text-main: #f3f4f6;
-      --text-muted: #9ca3af;
-      --text-thai: #93c5fd;
-      --accent-gold: #f59e0b;
-      --accent-red: #ef4444;
+      /* 背景層次：由深邃暗夜紫向宮廷夜色延伸 */
+      --bg-base: #0d0814;          /* 暹羅暗夜紫底（取代原石板黑） */
+      --bg-surface: #170f24;       /* 皇室深紫表層 */
+      --bg-card: #231738;          /* 帝王紫卡片背景 */
+      --bg-card-hover: #2f1f4a;    /* 卡片懸浮高光 */
+      --border: #443063;           /* 沉穩紫金邊框 */
+      --border-accent: #f59e0b;    /* 泰皇金箔高光邊框 */
+
+      /* 皇家金色系統（象徵大皇宮佛寺金箔與皇室尊爵） */
+      --accent-gold: #f59e0b;       /* 泰皇金箔金（主要按鈕、標題高光） */
+      --accent-gold-light: #fde68a; /* 亮香檳金（重點文字） */
+      --text-thai: #fde047;         /* 泰文字級專屬金色（黑底金字，尊貴且辨識度極高） */
+      --gold-glow: rgba(245, 158, 11, 0.28); /* 金色發光光暈 */
+
+      /* 皇室紫色系統（泰國詩琳通公主與皇室經典代表色） */
+      --primary: #a855f7;          /* 皇家紫羅蘭色（功能按鈕、標籤） */
+      --primary-hover: #c084fc;    /* 亮紫高光 */
+      --primary-glow: rgba(168, 85, 247, 0.3);
+
+      /* 文字與中性色 */
+      --text-main: #f8fafc;        /* 象牙白主文字 */
+      --text-muted: #a78bfa;       /* 柔紫灰輔助次要文字 */
+      --accent-red: #f43f5e;
       --accent-emerald: #10b981;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -59,7 +68,7 @@
       position: sticky;
       top: 14px;
       z-index: 100;
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(12px);
     }
     .brand {
       display: flex;
@@ -71,7 +80,8 @@
       text-decoration: none;
     }
     .brand-icon {
-      background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+      background: linear-gradient(135deg, #7e22ce, #a855f7);
+      box-shadow: 0 0 10px var(--primary-glow);
       width: 38px;
       height: 38px;
       border-radius: 10px;
@@ -97,17 +107,17 @@
     .nav-btn:hover {
       background: var(--bg-card-hover);
       color: #ffffff;
-      border-color: var(--primary);
+      border-color: var(--accent-gold);
     }
 
     /* Editorial Magazine Header */
     .mag-header {
-      background: linear-gradient(135deg, #111827 0%, #1e293b 60%, #172554 100%);
-      border: 1px solid #3b82f6;
+      background: linear-gradient(135deg, #170f24 0%, #2e1065 60%, #451a03 100%);
+      border: 1px solid var(--border);
       border-radius: 20px;
       padding: 40px 38px;
       margin-bottom: 26px;
-      box-shadow: 0 16px 40px -8px rgba(0,0,0,0.6), 0 0 24px rgba(59, 130, 246, 0.25);
+      box-shadow: 0 16px 40px -8px rgba(0,0,0,0.7), 0 0 24px rgba(245, 158, 11, 0.15);
       position: relative;
       overflow: hidden;
     }
@@ -115,7 +125,7 @@
       content: "";
       position: absolute;
       top: 0; left: 0; right: 0; height: 4px;
-      background: linear-gradient(90deg, #3b82f6, #60a5fa, #93c5fd);
+      background: linear-gradient(90deg, #f59e0b, #fde68a, #d97706);
     }
     .mag-meta-row {
       display: flex;
@@ -127,13 +137,13 @@
       font-size: 14px;
       letter-spacing: 1px;
       font-weight: 700;
-      color: #60a5fa;
+      color: #fde68a;
       text-transform: uppercase;
     }
     .mag-tag-vol {
-      background: rgba(59, 130, 246, 0.2);
-      border: 1px solid rgba(59, 130, 246, 0.4);
-      color: #93c5fd;
+      background: rgba(245, 158, 11, 0.18);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #fde68a;
       padding: 5px 14px;
       border-radius: 6px;
       font-size: 14px;
@@ -148,7 +158,7 @@
     }
     .mag-subtitle {
       font-size: 19px;
-      color: #cbd5e1;
+      color: #e2e8f0;
       line-height: 1.75;
       margin-bottom: 24px;
       max-width: 950px;
@@ -206,12 +216,12 @@
       cursor: pointer;
       transition: all 0.2s;
     }
-    .btn-toggle:hover { background: var(--bg-card-hover); color: #ffffff; }
+    .btn-toggle:hover { background: var(--bg-card-hover); color: #ffffff; border-color: var(--primary); }
     .btn-toggle.active {
       background: var(--primary);
       border-color: var(--primary);
       color: #ffffff;
-      box-shadow: 0 0 12px var(--primary-glow);
+      box-shadow: 0 0 14px var(--primary-glow);
     }
 
     /* Content Sections */
@@ -241,8 +251,9 @@
     }
     .sec-tag {
       font-size: 14px;
-      background: rgba(59, 130, 246, 0.15);
-      color: #60a5fa;
+      background: rgba(168, 85, 247, 0.18);
+      color: #fde68a;
+      border: 1px solid rgba(168, 85, 247, 0.35);
       padding: 4px 12px;
       border-radius: 6px;
       font-weight: 600;
@@ -266,8 +277,9 @@
     }
     .vocab-card:hover {
       background: var(--bg-card-hover);
-      border-color: rgba(59, 130, 246, 0.5);
+      border-color: var(--accent-gold);
       transform: translateY(-2px);
+      box-shadow: 0 8px 20px -4px rgba(0,0,0,0.5), 0 0 16px var(--gold-glow);
     }
     .vocab-top {
       display: flex;
@@ -281,6 +293,7 @@
       color: var(--text-thai);
       letter-spacing: 1px;
       line-height: 1.35;
+      text-shadow: 0 0 12px rgba(253, 224, 71, 0.2);
     }
     .phonetic {
       font-size: 16px;
@@ -290,32 +303,32 @@
     }
     .meaning {
       font-size: 17px;
-      color: #e5e7eb;
-      background: rgba(0, 0, 0, 0.25);
+      color: #f8fafc;
+      background: rgba(13, 8, 20, 0.6);
       padding: 10px 14px;
       border-radius: 10px;
-      border-left: 4px solid var(--primary);
+      border-left: 4px solid var(--accent-gold);
       transition: all 0.2s;
       line-height: 1.5;
     }
     .meaning.masked {
-      background: #374151;
+      background: #372352;
       color: transparent;
       user-select: none;
       cursor: pointer;
     }
     .meaning.masked::after {
       content: "👁️ 點擊翻開中文釋義";
-      color: #9ca3af;
+      color: #c084fc;
       font-size: 14px;
       display: block;
     }
 
     /* In-place Audio Play Button */
     .btn-audio {
-      background: rgba(59, 130, 246, 0.15);
-      border: 1px solid rgba(59, 130, 246, 0.3);
-      color: #93c5fd;
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      color: #fde047;
       border-radius: 50%;
       width: 50px;
       height: 50px;
@@ -328,19 +341,19 @@
       flex-shrink: 0;
     }
     .btn-audio:hover {
-      background: var(--primary);
-      color: #ffffff;
+      background: var(--accent-gold);
+      color: #0d0814;
       transform: scale(1.08);
-      box-shadow: 0 0 14px var(--primary-glow);
+      box-shadow: 0 0 18px var(--gold-glow);
     }
     .btn-audio.playing {
       animation: audioPulse 0.9s infinite alternate;
-      background: var(--primary);
-      color: white;
+      background: var(--accent-gold);
+      color: #0d0814;
     }
     @keyframes audioPulse {
-      0% { transform: scale(1); box-shadow: 0 0 4px var(--primary-glow); }
-      100% { transform: scale(1.15); box-shadow: 0 0 16px rgba(59, 130, 246, 0.8); }
+      0% { transform: scale(1); box-shadow: 0 0 6px var(--gold-glow); }
+      100% { transform: scale(1.15); box-shadow: 0 0 20px rgba(245, 158, 11, 0.85); }
     }
 
     /* Sentences */
@@ -358,7 +371,7 @@
     }
     .sentence-card:hover {
       background: var(--bg-card-hover);
-      border-color: rgba(59, 130, 246, 0.4);
+      border-color: rgba(245, 158, 11, 0.4);
     }
     .sentence-thai {
       font-size: 25px;
@@ -366,6 +379,7 @@
       color: var(--text-thai);
       margin-bottom: 8px;
       line-height: 1.45;
+      text-shadow: 0 0 10px rgba(253, 224, 71, 0.18);
     }
     .sentence-phonetic {
       font-size: 16px;
@@ -374,12 +388,12 @@
     }
     .sentence-meaning {
       font-size: 17px;
-      color: #e5e7eb;
+      color: #f8fafc;
       line-height: 1.5;
     }
     .sentence-meaning.masked {
       color: transparent;
-      background: #374151;
+      background: #372352;
       border-radius: 6px;
       padding: 4px 10px;
       display: inline-block;
@@ -387,14 +401,14 @@
     }
     .sentence-meaning.masked::after {
       content: "👁️ 點擊查看中文翻譯";
-      color: #9ca3af;
+      color: #c084fc;
       font-size: 14px;
     }
 
     /* Grammar Section */
     .grammar-card {
-      background: rgba(17, 24, 39, 0.7);
-      border: 1px solid #4b5563;
+      background: rgba(23, 15, 36, 0.8);
+      border: 1px solid var(--border);
       border-radius: 16px;
       padding: 26px;
       margin-bottom: 22px;
@@ -402,7 +416,7 @@
     .grammar-card-title {
       font-size: 20px;
       font-weight: 700;
-      color: #fbbf24;
+      color: #fde047;
       margin-bottom: 14px;
       display: flex;
       align-items: center;
@@ -411,7 +425,7 @@
     .grammar-sub {
       font-size: 17px;
       font-weight: 600;
-      color: #f3f4f6;
+      color: #f8fafc;
       margin: 14px 0 8px;
     }
     .pill-group {
@@ -431,7 +445,7 @@
       font-size: 16px;
       transition: border-color 0.2s;
     }
-    .example-pill:hover { border-color: var(--primary); }
+    .example-pill:hover { border-color: var(--accent-gold); }
     .example-pill .th {
       font-weight: 700;
       color: var(--text-thai);
@@ -442,7 +456,7 @@
       border: none;
       cursor: pointer;
       font-size: 18px;
-      color: #60a5fa;
+      color: #fde047;
       transition: transform 0.15s;
     }
     .example-pill .btn-audio-mini:hover { transform: scale(1.2); }
@@ -451,24 +465,24 @@
     .culture-card {
       line-height: 1.9;
       font-size: 17.5px;
-      color: #d1d5db;
+      color: #cbd5e1;
     }
     .culture-card h3 {
       font-size: 21px;
-      color: #60a5fa;
+      color: #fde68a;
       margin: 22px 0 10px;
       display: flex;
       align-items: center;
       gap: 10px;
     }
     .culture-callout {
-      background: rgba(239, 68, 68, 0.1);
-      border-left: 4px solid var(--accent-red);
+      background: rgba(245, 158, 11, 0.12);
+      border-left: 4px solid var(--accent-gold);
       padding: 16px 22px;
       border-radius: 0 12px 12px 0;
       margin: 20px 0;
       font-size: 17px;
-      color: #fca5a5;
+      color: #fde68a;
     }
 
     /* Toast Notification */
@@ -476,7 +490,7 @@
       position: fixed;
       bottom: 24px;
       right: 24px;
-      background: #1f2937;
+      background: #231738;
       border: 1px solid var(--border);
       color: #ffffff;
       padding: 14px 22px;
@@ -485,7 +499,7 @@
       display: none;
       align-items: center;
       gap: 10px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.6);
       z-index: 1000;
     }
 
@@ -528,7 +542,7 @@
     <div class="mag-meta-row">
       <span class="mag-tag-vol">VOL. {{ISSUE_CODE}} ｜ {{ISSUE_YEAR}} 第 {{ISSUE_WEEK}} 週</span>
       <span>{{ISSUE_DATE}} SATURDAY</span>
-      <span style="color:#93c5fd;">SPECIAL EDITORIAL</span>
+      <span style="color:var(--text-thai);">SPECIAL EDITORIAL</span>
     </div>
     <h1 class="mag-title">{{ISSUE_TITLE}}</h1>
     <p class="mag-subtitle">

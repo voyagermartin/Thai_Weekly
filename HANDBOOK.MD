@@ -91,11 +91,13 @@ Thai_Weekly/
 
 ## 3. 技術與 UI / UX 規範 (Design & Interaction System)
 
-### 3.1 視覺風格：深色雜誌風 (Dark Editorial Magazine UI)
+### 3.1 視覺風格：深色雜誌風 (Dark Editorial Magazine UI - 暹羅暗夜紫與大皇宮金箔)
 * **色彩基調 (Color Palette)**：
-  * 主背景 (Background)：`#0c0f17` 至 `#151b28` 的優雅深邃藍黑底色。
-  * 卡片/區塊 (Surface)：半透明玻璃擬態質感（Glassmorphism，帶微邊框 `#263045` 與柔和內光暈）。
-  * 點綴強調色 (Accent)：暖金橘 (`#f59e0b`)、翡翠綠 (`#10b981`) 與泰風典雅亮金。
+  * 主背景 (Background)：`#0d0814`（暹羅暗夜紫底）至 `#170f24`（皇室深紫表層）。
+  * 卡片/區塊 (Surface)：`#231738`（帝王紫卡片背景），沉穩紫金邊框 `#443063`，懸浮高光 `#2f1f4a`。
+  * 皇家金箔系統 (Accent Gold)：泰皇金箔金 (`#f59e0b`)、亮香檳金 (`#fde68a`)、泰文字級專屬金色 (`#fde047` 黑底金字極致辨識度)。
+  * 皇室紫系統 (Primary)：詩琳通公主皇室紫羅蘭色 (`#a855f7`)、亮紫高光 (`#c084fc`)。
+  * 封面橫幅：皇室紫漸層 `linear-gradient(135deg, #170f24 0%, #2e1065 60%, #451a03 100%)` 搭配金色細頂邊。
   * 文字階層 (Typography)：
     * 主標題與泰文字體：採用清晰優美的現代字型（如 `Noto Sans Thai`、`Sarabun`）。
     * 正文字體：高品質現代無襯線字體（如 `Inter`、`system-ui`）。
