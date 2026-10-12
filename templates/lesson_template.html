@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- 關鍵：防止向外部資源傳遞 Referer，避免 Google TTS 串流回傳 404 -->
+  <meta name="referrer" content="no-referrer">
+  <title>泰語學習週報｜{{ISSUE_CODE}} {{ISSUE_TITLE}}</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="apple-touch-icon" href="favicon.svg">
+  <style>
+    :root {
+      --bg-base: #0b0f19;
+      --bg-surface: #111827;
+      --bg-card: #1f2937;
+      --bg-card-hover: #283548;
+      --border: #374151;
+      --border-accent: #3b82f6;
+      --primary: #3b82f6;
+      --primary-hover: #60a5fa;
+      --primary-glow: rgba(59, 130, 246, 0.25);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --text-thai: #93c5fd;
+      --accent-gold: #f59e0b;
+      --accent-red: #ef4444;
+      --accent-emerald: #10b981;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      line-height: 1.7;
+      font-size: 17.5px;
+      padding: 24px;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1160px;
+      margin: 0 auto;
+    }
+    @media (min-width: 1400px) {
+      .container {
+        max-width: 1240px;
+      }
+    }
+
+    /* Top Navigation */
+    nav {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px 24px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 14px;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      font-size: 20px;
+      color: #ffffff;
+      text-decoration: none;
+    }
+    .brand-icon {
+      background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+    .nav-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 9px 20px;
+      border-radius: 10px;
+      font-size: 15.5px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .nav-btn:hover {
+      background: var(--bg-card-hover);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+
+    /* Editorial Magazine Header */
+    .mag-header {
+      background: linear-gradient(135deg, #111827 0%, #1e293b 60%, #172554 100%);
+      border: 1px solid #3b82f6;
+      border-radius: 20px;
+      padding: 40px 38px;
+      margin-bottom: 26px;
+      box-shadow: 0 16px 40px -8px rgba(0,0,0,0.6), 0 0 24px rgba(59, 130, 246, 0.25);
+      position: relative;
+      overflow: hidden;
+    }
+    .mag-header::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 4px;
+      background: linear-gradient(90deg, #3b82f6, #60a5fa, #93c5fd);
+    }
+    .mag-meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+      font-size: 14px;
+      letter-spacing: 1px;
+      font-weight: 700;
+      color: #60a5fa;
+      text-transform: uppercase;
+    }
+    .mag-tag-vol {
+      background: rgba(59, 130, 246, 0.2);
+      border: 1px solid rgba(59, 130, 246, 0.4);
+      color: #93c5fd;
+      padding: 5px 14px;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    .mag-title {
+      font-size: 38px;
+      font-weight: 900;
+      color: #ffffff;
+      line-height: 1.35;
+      margin-bottom: 16px;
+      letter-spacing: 0.5px;
+    }
+    .mag-subtitle {
+      font-size: 19px;
+      color: #cbd5e1;
+      line-height: 1.75;
+      margin-bottom: 24px;
+      max-width: 950px;
+      text-wrap: pretty;
+    }
+    .mag-footer-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 18px;
+      font-size: 15px;
+      color: var(--text-muted);
+    }
+    .mag-meta-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .mag-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    /* Learning Controls Toolbar */
+    .controls-toolbar {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px 24px;
+      margin-bottom: 28px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+    }
+    .ctrl-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 16px;
+    }
+    .btn-toggle {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 9px 18px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-toggle:hover { background: var(--bg-card-hover); color: #ffffff; }
+    .btn-toggle.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 0 12px var(--primary-glow);
+    }
+
+    /* Content Sections */
+    section {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 34px 32px;
+      margin-bottom: 28px;
+    }
+    .sec-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+    }
+    .sec-title {
+      font-size: 25px;
+      font-weight: 800;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      letter-spacing: 0.5px;
+    }
+    .sec-tag {
+      font-size: 14px;
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    /* Vocabulary Cards Grid */
+    .vocab-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+    }
+    .vocab-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.2s;
+    }
+    .vocab-card:hover {
+      background: var(--bg-card-hover);
+      border-color: rgba(59, 130, 246, 0.5);
+      transform: translateY(-2px);
+    }
+    .vocab-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+    .thai-word {
+      font-size: 34px;
+      font-weight: 700;
+      color: var(--text-thai);
+      letter-spacing: 1px;
+      line-height: 1.35;
+    }
+    .phonetic {
+      font-size: 16px;
+      color: var(--text-muted);
+      font-style: italic;
+      margin-bottom: 14px;
+    }
+    .meaning {
+      font-size: 17px;
+      color: #e5e7eb;
+      background: rgba(0, 0, 0, 0.25);
+      padding: 10px 14px;
+      border-radius: 10px;
+      border-left: 4px solid var(--primary);
+      transition: all 0.2s;
+      line-height: 1.5;
+    }
+    .meaning.masked {
+      background: #374151;
+      color: transparent;
+      user-select: none;
+      cursor: pointer;
+    }
+    .meaning.masked::after {
+      content: "👁️ 點擊翻開中文釋義";
+      color: #9ca3af;
+      font-size: 14px;
+      display: block;
+    }
+
+    /* In-place Audio Play Button */
+    .btn-audio {
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      color: #93c5fd;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 21px;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .btn-audio:hover {
+      background: var(--primary);
+      color: #ffffff;
+      transform: scale(1.08);
+      box-shadow: 0 0 14px var(--primary-glow);
+    }
+    .btn-audio.playing {
+      animation: audioPulse 0.9s infinite alternate;
+      background: var(--primary);
+      color: white;
+    }
+    @keyframes audioPulse {
+      0% { transform: scale(1); box-shadow: 0 0 4px var(--primary-glow); }
+      100% { transform: scale(1.15); box-shadow: 0 0 16px rgba(59, 130, 246, 0.8); }
+    }
+
+    /* Sentences */
+    .sentence-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 22px 24px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      transition: all 0.2s;
+    }
+    .sentence-card:hover {
+      background: var(--bg-card-hover);
+      border-color: rgba(59, 130, 246, 0.4);
+    }
+    .sentence-thai {
+      font-size: 25px;
+      font-weight: 700;
+      color: var(--text-thai);
+      margin-bottom: 8px;
+      line-height: 1.45;
+    }
+    .sentence-phonetic {
+      font-size: 16px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .sentence-meaning {
+      font-size: 17px;
+      color: #e5e7eb;
+      line-height: 1.5;
+    }
+    .sentence-meaning.masked {
+      color: transparent;
+      background: #374151;
+      border-radius: 6px;
+      padding: 4px 10px;
+      display: inline-block;
+      cursor: pointer;
+    }
+    .sentence-meaning.masked::after {
+      content: "👁️ 點擊查看中文翻譯";
+      color: #9ca3af;
+      font-size: 14px;
+    }
+
+    /* Grammar Section */
+    .grammar-card {
+      background: rgba(17, 24, 39, 0.7);
+      border: 1px solid #4b5563;
+      border-radius: 16px;
+      padding: 26px;
+      margin-bottom: 22px;
+    }
+    .grammar-card-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #fbbf24;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .grammar-sub {
+      font-size: 17px;
+      font-weight: 600;
+      color: #f3f4f6;
+      margin: 14px 0 8px;
+    }
+    .pill-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .example-pill {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 10px 16px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 16px;
+      transition: border-color 0.2s;
+    }
+    .example-pill:hover { border-color: var(--primary); }
+    .example-pill .th {
+      font-weight: 700;
+      color: var(--text-thai);
+      font-size: 20px;
+    }
+    .example-pill .btn-audio-mini {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      color: #60a5fa;
+      transition: transform 0.15s;
+    }
+    .example-pill .btn-audio-mini:hover { transform: scale(1.2); }
+
+    /* Culture Section */
+    .culture-card {
+      line-height: 1.9;
+      font-size: 17.5px;
+      color: #d1d5db;
+    }
+    .culture-card h3 {
+      font-size: 21px;
+      color: #60a5fa;
+      margin: 22px 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .culture-callout {
+      background: rgba(239, 68, 68, 0.1);
+      border-left: 4px solid var(--accent-red);
+      padding: 16px 22px;
+      border-radius: 0 12px 12px 0;
+      margin: 20px 0;
+      font-size: 17px;
+      color: #fca5a5;
+    }
+
+    /* Toast Notification */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #1f2937;
+      border: 1px solid var(--border);
+      color: #ffffff;
+      padding: 14px 22px;
+      border-radius: 12px;
+      font-size: 15px;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      z-index: 1000;
+    }
+
+    /* Mobile Responsive preservation */
+    @media (max-width: 768px) {
+      body { padding: 14px; font-size: 16px; }
+      .container { width: 100%; }
+      nav { padding: 12px 16px; }
+      .brand { font-size: 18px; }
+      .brand-icon { width: 32px; height: 32px; font-size: 16px; }
+      .nav-btn { padding: 7px 14px; font-size: 14px; }
+      .mag-header { padding: 24px 18px; }
+      .mag-title { font-size: 25px; }
+      .mag-subtitle { font-size: 15.5px; }
+      .thai-word { font-size: 26px; }
+      .sentence-thai { font-size: 19px; }
+      section { padding: 20px 16px; }
+      .sec-title { font-size: 21px; }
+      .btn-audio { width: 44px; height: 44px; font-size: 18px; }
+      .vocab-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- 1. Top Navigation Bar -->
+  <nav>
+    <a href="index.html" class="brand">
+      <div class="brand-icon">🇹🇭</div>
+      <span>泰語學習週報</span>
+    </a>
+    <div style="display:flex; gap:10px;">
+      <a href="index.html" class="nav-btn">← 返回週報總覽</a>
+    </div>
+  </nav>
+
+  <!-- 2. Editorial Magazine Header -->
+  <div class="mag-header">
+    <div class="mag-meta-row">
+      <span class="mag-tag-vol">VOL. {{ISSUE_CODE}} ｜ {{ISSUE_YEAR}} 第 {{ISSUE_WEEK}} 週</span>
+      <span>{{ISSUE_DATE}} SATURDAY</span>
+      <span style="color:#93c5fd;">SPECIAL EDITORIAL</span>
+    </div>
+    <h1 class="mag-title">{{ISSUE_TITLE}}</h1>
+    <p class="mag-subtitle">
+      <span style="display: inline-block;">{{SUBTITLE_PART_1}}</span>
+      <span style="display: inline-block;">{{SUBTITLE_PART_2}}</span>
+    </p>
+    
+    <div class="mag-footer-bar">
+      <div class="mag-meta-pills">
+        <span class="mag-pill">✍️ <b>編審</b>：Gemini Spark</span>
+        <span class="mag-pill">⏱️ <b>閱讀時間</b>：約 {{READ_TIME}} 分鐘</span>
+        <span class="mag-pill">🎯 <b>本期重點</b>：{{HIGHLIGHTS}}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Learning Controls Toolbar (語音速率 + 遮蔽測驗自測開關) -->
+  <div class="controls-toolbar">
+    <div class="ctrl-group">
+      <span style="font-weight:600; color:#9ca3af;">語音速率：</span>
+      <button class="btn-toggle active" id="btn-rate-1" onclick="toggleRate(1.0)">1.0x 標準速</button>
+      <button class="btn-toggle" id="btn-rate-075" onclick="toggleRate(0.75)">0.75x 慢速跟讀</button>
+    </div>
+    <div class="ctrl-group">
+      <span style="font-weight:600; color:#9ca3af;">記憶自測：</span>
+      <button class="btn-toggle" id="btn-mask-toggle" onclick="toggleMask()">👁️ 遮蔽中文自測</button>
+    </div>
+  </div>
+
+  <!-- 4. Section 1: 核心單字庫 (大字體 34px + 原地語音) -->
+  <section>
+    <div class="sec-head">
+      <div class="sec-title"><span>📌</span> 實務核心單字庫</div>
+      <span class="sec-tag">精選高頻字</span>
+    </div>
+    <div class="vocab-grid">
+      <!-- 單字卡範例 (可循環生成) -->
+      <div class="vocab-card">
+        <div class="vocab-top">
+          <div>
+            <div class="thai-word">{{WORD_THAI}}</div>
+            <div class="phonetic">{{WORD_PHONETIC}}</div>
+          </div>
+          <button class="btn-audio" onclick="playTTS('{{WORD_THAI}}', this)" title="播放泰語標準發音">🔊</button>
+        </div>
+        <div class="meaning">{{WORD_MEANING}}</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. Section 2: 情境實用短篇與句型 -->
+  <section>
+    <div class="sec-head">
+      <div class="sec-title"><span>💬</span> 職場與日常情境句型</div>
+      <span class="sec-tag">對話實戰</span>
+    </div>
+    
+    <!-- 句子卡範例 -->
+    <div class="sentence-card">
+      <div>
+        <div class="sentence-thai">{{SENTENCE_THAI}}</div>
+        <div class="sentence-phonetic">{{SENTENCE_PHONETIC}}</div>
+        <div class="sentence-meaning">{{SENTENCE_MEANING}}</div>
+      </div>
+      <button class="btn-audio" onclick="playTTS('{{SENTENCE_THAI}}', this)" title="播放例句發音">🔊</button>
+    </div>
+  </section>
+
+  <!-- 6. Section 3: 深度語法拆解 -->
+  <section>
+    <div class="sec-head">
+      <div class="sec-title"><span>🔍</span> 核心語法與句型解析</div>
+      <span class="sec-tag">文法剖析</span>
+    </div>
+
+    <!-- 文法卡範例 -->
+    <div class="grammar-card">
+      <div class="grammar-card-title">💡 語法點：{{GRAMMAR_TITLE}}</div>
+      <p style="color:#d1d5db; line-height:1.75;">{{GRAMMAR_EXPLANATION}}</p>
+      
+      <div class="grammar-sub">常用搭配例句：</div>
+      <div class="pill-group">
+        <div class="example-pill">
+          <span class="th">{{EXAMPLE_THAI}}</span>
+          <span style="color:#cbd5e1;">{{EXAMPLE_MEANING}}</span>
+          <button class="btn-audio-mini" onclick="playTTS('{{EXAMPLE_THAI}}', this)" title="播放發音">🔊</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. Section 4: 文化時事與風俗隨筆 -->
+  <section>
+    <div class="sec-head">
+      <div class="sec-title"><span>🏮</span> 文化時事漫談</div>
+      <span class="sec-tag">人文背景</span>
+    </div>
+    <div class="culture-card">
+      <h3>🏛️ {{CULTURE_SECTION_TITLE}}</h3>
+      <p>{{CULTURE_CONTENT}}</p>
+      
+      <div class="culture-callout">
+        <b>💡 文化豆知識：</b>{{CULTURE_CALLOUT}}
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- 浮動提示 Toast -->
+<div id="toast"></div>
+
+<!-- 全功能雙引擎播放器與互動邏輯 Script -->
+<script>
+  let currentAudio = null;
+  let playbackRate = 1.0;
+  let isMasked = false;
+
+  function toggleRate(rate) {
+    playbackRate = rate;
+    document.getElementById('btn-rate-1').classList.toggle('active', rate === 1.0);
+    document.getElementById('btn-rate-075').classList.toggle('active', rate === 0.75);
+    if (currentAudio) currentAudio.playbackRate = rate;
+    showToast(`語音速度切換為 ${rate}x`);
+  }
+
+  function toggleMask() {
+    isMasked = !isMasked;
+    const btn = document.getElementById('btn-mask-toggle');
+    btn.classList.toggle('active', isMasked);
+    btn.innerText = isMasked ? '👁️‍🗨️ 恢復中文顯示' : '👁️ 遮蔽中文自測';
+
+    document.querySelectorAll('.meaning').forEach(el => {
+      el.classList.toggle('masked', isMasked);
+      if (!isMasked) el.onclick = null;
+      else el.onclick = () => el.classList.remove('masked');
+    });
+
+    document.querySelectorAll('.sentence-meaning').forEach(el => {
+      el.classList.toggle('masked', isMasked);
+      if (!isMasked) el.onclick = null;
+      else el.onclick = () => el.classList.remove('masked');
+    });
+
+    showToast(isMasked ? '已開啟遮蔽測驗（點擊即可翻開）' : '已恢復顯示中文');
+  }
+
+  function playTTS(text, btnElement) {
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio = null;
+    }
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    document.querySelectorAll('.btn-audio, .btn-audio-mini').forEach(b => b.classList.remove('playing'));
+
+    if (btnElement) {
+      btnElement.classList.add('playing');
+    }
+
+    showToast(`🔊 正在播放：${text}`);
+
+    const encoded = encodeURIComponent(text);
+    const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=th&q=${encoded}`;
+    
+    const audio = new Audio();
+    currentAudio = audio;
+    audio.playbackRate = playbackRate;
+
+    const cleanup = () => {
+      if (btnElement) btnElement.classList.remove('playing');
+      if (currentAudio === audio) currentAudio = null;
+    };
+
+    audio.onended = cleanup;
+
+    // 若 Google 語音因任何網路因素異常，自動無縫切換為 Web Speech API 原生泰語發音
+    audio.onerror = () => {
+      console.warn('Google TTS 載入受阻，自動切換至 Web Speech API 原生語音播放');
+      playWebSpeech(text, btnElement);
+    };
+
+    audio.src = audioUrl;
+    audio.play().catch(e => {
+      console.warn('Google TTS 播放異常，切換至 Web Speech API:', e);
+      playWebSpeech(text, btnElement);
+    });
+  }
+
+  function playWebSpeech(text, btnElement) {
+    if (!('speechSynthesis' in window)) {
+      showToast('⚠️ 瀏覽器不支援語音播放');
+      if (btnElement) btnElement.classList.remove('playing');
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'th-TH';
+    utterance.rate = playbackRate;
+
+    // 優先匹配泰語專用發音引擎
+    const voices = window.speechSynthesis.getVoices();
+    const thaiVoice = voices.find(v => v.lang === 'th-TH' || v.lang.toLowerCase().includes('th'));
+    if (thaiVoice) {
+      utterance.voice = thaiVoice;
+    }
+
+    utterance.onend = () => {
+      if (btnElement) btnElement.classList.remove('playing');
+    };
+
+    utterance.onerror = (e) => {
+      console.error('Web Speech 播放錯誤:', e);
+      if (btnElement) btnElement.classList.remove('playing');
+      showToast('⚠️ 語音播放受阻，請檢查音效設定');
+    };
+
+    window.speechSynthesis.speak(utterance);
+  }
+
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.innerText = msg;
+    toast.style.display = 'flex';
+    clearTimeout(toast.timer);
+    toast.timer = setTimeout(() => {
+      toast.style.display = 'none';
+    }, 2000);
+  }
+</script>
+</body>
+</html>
