@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>泰語學習週報｜26w41 飲食預訂實務・語法名詞化與九皇齋節</title>
+  <style>
+    :root {
+      --bg-base: #0b0f19;
+      --bg-surface: #111827;
+      --bg-card: #1f2937;
+      --bg-card-hover: #283548;
+      --border: #374151;
+      --primary: #3b82f6;
+      --primary-hover: #60a5fa;
+      --primary-glow: rgba(59, 130, 246, 0.25);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --text-thai: #93c5fd;
+      --accent-gold: #f59e0b;
+      --accent-red: #ef4444;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      line-height: 1.65;
+      font-size: 16px;
+      padding: 16px;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 920px;
+      margin: 0 auto;
+    }
+
+    /* Navigation */
+    nav {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 12px;
+      z-index: 100;
+      backdrop-filter: blur(8px);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 18px;
+      color: #ffffff;
+      text-decoration: none;
+    }
+    .brand-icon {
+      background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+    .nav-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 7px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .nav-btn:hover {
+      background: var(--bg-card-hover);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+
+    /* Magazine Header */
+    .mag-header {
+      background: linear-gradient(135deg, #111827 0%, #1e293b 60%, #172554 100%);
+      border: 1px solid #3b82f6;
+      border-radius: 18px;
+      padding: 32px 30px;
+      margin-bottom: 22px;
+      box-shadow: 0 14px 35px -8px rgba(0,0,0,0.6), 0 0 20px rgba(59, 130, 246, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+    .mag-header::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 4px;
+      background: linear-gradient(90deg, #3b82f6, #60a5fa, #93c5fd);
+    }
+    .mag-meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      letter-spacing: 1px;
+      font-weight: 700;
+      color: #60a5fa;
+      text-transform: uppercase;
+    }
+    .mag-tag-vol {
+      background: rgba(59, 130, 246, 0.2);
+      border: 1px solid rgba(59, 130, 246, 0.4);
+      color: #93c5fd;
+      padding: 4px 12px;
+      border-radius: 6px;
+    }
+    .mag-title {
+      font-size: 32px;
+      font-weight: 900;
+      color: #ffffff;
+      line-height: 1.3;
+      margin-bottom: 12px;
+      letter-spacing: 0.5px;
+    }
+    .mag-subtitle {
+      font-size: 17px;
+      color: #cbd5e1;
+      line-height: 1.7;
+      margin-bottom: 20px;
+      max-width: 800px;
+    }
+    .mag-footer-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 16px;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+    .mag-meta-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+    .mag-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Learning Controls Toolbar */
+    .controls-toolbar {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 20px;
+      margin-bottom: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .ctrl-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 15px;
+    }
+    .btn-toggle {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 7px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-toggle:hover { background: var(--bg-card-hover); color: #ffffff; }
+    .btn-toggle.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 0 12px var(--primary-glow);
+    }
+
+    /* Content Sections */
+    section {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 26px;
+      margin-bottom: 24px;
+    }
+    .sec-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 14px;
+      margin-bottom: 20px;
+    }
+    .sec-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      letter-spacing: 0.5px;
+    }
+    .sec-tag {
+      font-size: 13px;
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    /* Vocabulary Cards Grid */
+    .vocab-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 16px;
+    }
+    .vocab-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.2s;
+    }
+    .vocab-card:hover {
+      background: var(--bg-card-hover);
+      border-color: rgba(59, 130, 246, 0.5);
+      transform: translateY(-2px);
+    }
+    .vocab-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+    .thai-word {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-thai);
+      letter-spacing: 0.8px;
+      line-height: 1.3;
+    }
+    .phonetic {
+      font-size: 14.5px;
+      color: var(--text-muted);
+      font-style: italic;
+      margin-bottom: 12px;
+    }
+    .meaning {
+      font-size: 15.5px;
+      color: #e5e7eb;
+      background: rgba(0, 0, 0, 0.25);
+      padding: 8px 12px;
+      border-radius: 8px;
+      border-left: 3px solid var(--primary);
+      transition: all 0.2s;
+    }
+    .meaning.masked {
+      background: #374151;
+      color: transparent;
+      user-select: none;
+      cursor: pointer;
+    }
+    .meaning.masked::after {
+      content: "👁️ 點擊翻開中文釋義";
+      color: #9ca3af;
+      font-size: 13px;
+      display: block;
+    }
+
+    /* Audio Play Button */
+    .btn-audio {
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      color: #93c5fd;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 18px;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .btn-audio:hover {
+      background: var(--primary);
+      color: #ffffff;
+      transform: scale(1.08);
+      box-shadow: 0 0 14px var(--primary-glow);
+    }
+    .btn-audio.playing {
+      animation: audioPulse 0.9s infinite alternate;
+      background: var(--primary);
+      color: white;
+    }
+    @keyframes audioPulse {
+      0% { transform: scale(1); box-shadow: 0 0 4px var(--primary-glow); }
+      100% { transform: scale(1.15); box-shadow: 0 0 16px rgba(59, 130, 246, 0.8); }
+    }
+
+    /* Sentences */
+    .sentence-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px 20px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      transition: all 0.2s;
+    }
+    .sentence-card:hover {
+      background: var(--bg-card-hover);
+      border-color: rgba(59, 130, 246, 0.4);
+    }
+    .sentence-thai {
+      font-size: 21px;
+      font-weight: 700;
+      color: var(--text-thai);
+      margin-bottom: 6px;
+      line-height: 1.4;
+    }
+    .sentence-phonetic {
+      font-size: 14.5px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .sentence-meaning {
+      font-size: 15.5px;
+      color: #e5e7eb;
+    }
+    .sentence-meaning.masked {
+      color: transparent;
+      background: #374151;
+      border-radius: 6px;
+      padding: 3px 8px;
+      display: inline-block;
+      cursor: pointer;
+    }
+    .sentence-meaning.masked::after {
+      content: "👁️ 點擊查看中文翻譯";
+      color: #9ca3af;
+      font-size: 13px;
+    }
+
+    /* Grammar Section */
+    .grammar-card {
+      background: rgba(17, 24, 39, 0.7);
+      border: 1px solid #4b5563;
+      border-radius: 14px;
+      padding: 22px;
+      margin-bottom: 18px;
+    }
+    .grammar-card-title {
+      font-size: 17.5px;
+      font-weight: 700;
+      color: #fbbf24;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .grammar-sub {
+      font-size: 15.5px;
+      font-weight: 600;
+      color: #f3f4f6;
+      margin: 12px 0 6px;
+    }
+    .pill-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 6px;
+    }
+    .example-pill {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 8px 14px;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 15px;
+      transition: border-color 0.2s;
+    }
+    .example-pill:hover { border-color: var(--primary); }
+    .example-pill .th {
+      font-weight: 700;
+      color: var(--text-thai);
+      font-size: 17px;
+    }
+    .example-pill .btn-audio-mini {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      color: #60a5fa;
+      transition: transform 0.15s;
+    }
+    .example-pill .btn-audio-mini:hover { transform: scale(1.2); }
+
+    /* Culture Section */
+    .culture-card {
+      line-height: 1.85;
+      font-size: 16px;
+      color: #d1d5db;
+    }
+    .culture-card h3 {
+      font-size: 18px;
+      color: #60a5fa;
+      margin: 18px 0 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .culture-callout {
+      background: rgba(239, 68, 68, 0.1);
+      border-left: 4px solid var(--accent-red);
+      padding: 14px 18px;
+      border-radius: 0 10px 10px 0;
+      margin: 16px 0;
+      font-size: 15.5px;
+      color: #fca5a5;
+    }
+
+    /* Toast Notification */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #1f2937;
+      border: 1px solid var(--border);
+      color: #ffffff;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      z-index: 1000;
+    }
+
+    @media (max-width: 640px) {
+      body { padding: 12px; }
+      .mag-header { padding: 24px 18px; }
+      .mag-title { font-size: 24px; }
+      .mag-subtitle { font-size: 15px; }
+      .thai-word { font-size: 24px; }
+      .sentence-thai { font-size: 18.5px; }
+      section { padding: 18px 14px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Navigation Bar -->
+  <nav>
+    <a href="index.html" class="brand">
+      <div class="brand-icon">🇹🇭</div>
+      <span>泰語學習週報</span>
+    </a>
+    <div style="display:flex; gap:10px;">
+      <a href="index.html" class="nav-btn">← 返回週報總覽</a>
+    </div>
+  </nav>
+
+  <!-- Editorial Magazine Header -->
+  <div class="mag-header">
+    <div class="mag-meta-row">
+      <span class="mag-tag-vol">VOL. 26w41 ｜ 2026 第 41 週</span>
+      <span>2026.10.10 SATURDAY</span>
+      <span style="color:#93c5fd;">SPECIAL EDITORIAL</span>
+    </div>
+    <h1 class="mag-title">飲食預訂實務・語法名詞化與九皇齋節文化誌</h1>
+    <p class="mag-subtitle">從餐飲接待的純素全齋、海鮮過敏，到行程查單業務溝通；深度拆解「การ」與「ความ」動名詞分工邏輯，辨析能力後綴三大神詞；探訪盛大熱鬧的年度九皇齋節文化盛宴。</p>
+    
+    <div class="mag-footer-bar">
+      <div class="mag-meta-pills">
+        <span class="mag-pill">✍️ <b>編審</b>：Gemini Spark</span>
+        <span class="mag-pill">⏱️ <b>閱讀時間</b>：約 8 分鐘</span>
+        <span class="mag-pill">🎯 <b>本期重點</b>：9 核心單字・5 情境句型・2 深度語法・1 文化時事</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Learning Controls Toolbar -->
+  <div class="controls-toolbar">
+    <div class="ctrl-group">
+      <span style="font-weight:600; color:#ffffff;">🔊 語音語速：</span>
+      <button class="btn-toggle active" id="btn-speed-normal" onclick="setSpeed(1.0)">正常 (1.0x)</button>
+      <button class="btn-toggle" id="btn-speed-slow" onclick="setSpeed(0.75)">慢速 (0.75x 聽聲調)</button>
+    </div>
+    <div class="ctrl-group">
+      <button class="btn-toggle" id="btn-mask-toggle" onclick="toggleMask()">👁️ 遮蔽中文（單字測驗）</button>
+    </div>
+  </div>
+
+  <!-- Section 1: 核心單字 -->
+  <section>
+    <div class="sec-head">
+      <div class="sec-title">
+        一、核心單字
+      </div>
+      <span class="sec-tag">共 9 個關鍵詞</span>
+    </div>
+
+    <div class="vocab-grid">
+      <!-- 1. กินเจ -->
+      <div class="vocab-card">
+        <div>
+          <div class="vocab-top">
+            <span class="thai-word">กินเจ</span>
+            <button class="btn-audio" onclick="playTTS('กินเจ', this)" title="播放發音">🔊</button>
+          </div>
+          <div class="phonetic">gin jee</div>
+        </div>
+        <div class="meaning">[動詞] 吃齋 / 全素（避五辛與蛋奶）</div>
+      </div>
+
+      <!-- 2. มังสวิรัติ -->
+      <div class="vocab-card">
+        <div>
+          <div class="vocab-top">
+            <span class="thai-word">มังสวิรัติ</span>
+            <button class="btn-audio" onclick="playTTS('มังสวิรัติ', this)" title="播放發音">🔊</button>
+          </div>
+          <div class="phonetic">mang-sa-wí-rát</div>
+        </div>
+        <div class="meaning">[名詞/形容詞] 蛋奶素 / 一般素食</div>
+      </div>
+
+      <!-- 3. แพ้ -->
+      <div class="vocab-card">
+        <div>
+          <div class="vocab-top">
+            <span class="thai-word">แพ้</span>
+            <button class="btn-audio" onclick="playTTS('แพ้', this)" title="播放發音">🔊</button>
+          </div>
+          <div class="phonetic">phɛ́ɛ</div>
+        </div>
+        <div class="meaning">[動詞] 過敏；輸</div>
+      </div>
+
+      <!-- 4. อาหารทะเล -->
+      <div class="vocab-card">
+        <div>
+          <div class="vocab-top">
+            <span class="thai-word">อาหารทะเล</span>
+            <button class="btn-audio" onclick="playTTS('อาหารทะเล', this)" title="播放發音">🔊</button>
+          </div>
+          <div class="phonetic">aa-hǎan thá-lee</div>
+        </div>
+        <div class="meaning">[名詞] 海鮮料理</div>
+      </div>
+
+      <!-- 5. จอง -->
+      <div class="vocab-card">
+        <div>
+          <div class="vocab-top">
+            <span class="thai-word">จอง</span>
+            <button class="btn-audio" onclick="playTTS('จอง', this)" title="播放發音">🔊</button>
+          </div>
+          <div class="phonetic">jɔɔng</div>
+        </div>
+        <div class="meaning">[動詞] 預訂 / 預約 (Book)</div>
+      </div>
+
+      <!-- 6. ยืนยัน -->
+      <div class="vocab-card">
+        <div>
+          <div class="vocab-top">
+            <span class="thai-word">ยืนยัน</span>
+            <button class="btn-audio" onclick="playTTS('ยืนยัน', this)" title="播放發音">🔊</button>
+          </div>
+          <div class="phonetic">yeen-yan</div>
+        </div>
+        <div class="meaning">[動詞] 確認 (Confirm)</div>
+      </div>
+
+      <!-- 7. ยกเลิก -->
+      <div class="vocab-card">
+        <div>
+          <div class="vocab-top">
+            <span class="thai-word">ยกเลิก</span>
+            <button class="btn-audio" onclick="playTTS('ยกเลิก', this)" title="播放發音">🔊</button>
+          </div>
+          <div class="phonetic">yók-lə̂ək</div>
+        </div>
+        <div class="meaning">[動詞] 取消 (Cancel)</div>
+      </div>
+
+      <!-- 8. ลูกค้า -->
+      <div class="vocab-card">
+        <div>
+          <div class="vocab-top">
+            <span class="thai-word">ลูกค้า</span>
+            <button class="btn-audio" onclick="playTTS('ลูกค้า', this)" title="播放發音">🔊</button>
+          </div>
+          <div class="phonetic">lûuk-kháa</div>
+        </div>
+        <div class="meaning">[名詞] 客戶 / 旅客</div>
+      </div>
+
+      <!-- 9. ตรวจสอบ -->
+      <div class="vocab-card">
+        <div>
+          <div class="vocab-top">
+            <span class="thai-word">ตรวจสอบ</span>
+            <button class="btn-audio" onclick="playTTS('ตรวจสอบ', this)" title="播放發音">🔊</button>
+          </div>
+          <div class="phonetic">trùat-sɔ̀ɔp</div>
+        </div>
+        <div class="meaning">[動詞] 檢查 / 核對 (Check)</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 2: 情境句型 -->
+  <section>
+    <div class="sec-head">
+      <div class="sec-title">
+        二、情境句型
+      </div>
+      <span class="sec-tag">點擊喇叭即時發音</span>
+    </div>
+
+    <div class="sentence-card">
+      <div>
+        <div class="sentence-thai">1. ลูกค้าทานเจ / ทานมังสวิรัติครับ</div>
+        <div class="sentence-phonetic">Lûuk-kháa thaan jee / thaan mang-sa-wí-rát khráp.</div>
+        <div class="sentence-meaning">客人是吃純素齋戒／吃一般素食。</div>
+      </div>
+      <button class="btn-audio" onclick="playTTS('ลูกค้าทานเจ หรือ ทานมังสวิรัติครับ', this)">🔊</button>
+    </div>
+
+    <div class="sentence-card">
+      <div>
+        <div class="sentence-thai">2. เมนูนี้มีเนื้อสัตว์ไหมครับ</div>
+        <div class="sentence-phonetic">Mee-nuu níi mii nʉ́a-sàt mǎi khráp?</div>
+        <div class="sentence-meaning">這道菜有包含肉類成分嗎？</div>
+      </div>
+      <button class="btn-audio" onclick="playTTS('เมนูนี้มีเนื้อสัตว์ไหมครับ', this)">🔊</button>
+    </div>
+
+    <div class="sentence-card">
+      <div>
+        <div class="sentence-thai">3. ผมแพ้อาหารทะเลครับ</div>
+        <div class="sentence-phonetic">Phǒm phɛ́ɛ aa-hǎan thá-lee khráp.</div>
+        <div class="sentence-meaning">我對海鮮過敏。</div>
+      </div>
+      <button class="btn-audio" onclick="playTTS('ผมแพ้อาหารทะเลครับ', this)">🔊</button>
+    </div>
+
+    <div class="sentence-card">
+      <div>
+        <div class="sentence-thai">4. ขอตรวจสอบการจองห้องพักครับ</div>
+        <div class="sentence-phonetic">Khɔ̌ɔ trùat-sɔ̀ɔp gaan-jɔɔng hɔ̂ng-phák khráp.</div>
+        <div class="sentence-meaning">我想查詢／核對飯店房間的預訂紀錄。</div>
+      </div>
+      <button class="btn-audio" onclick="playTTS('ขอตรวจสอบการจองห้องพักครับ', this)">🔊</button>
+    </div>
+
+    <div class="sentence-card">
+      <div>
+        <div class="sentence-thai">5. ช่วยยืนยันจำนวนคนอีกครั้งได้ไหมครับ</div>
+        <div class="sentence-phonetic">Chûai yeen-yan jam-nuan khon ìik khráng dâai mǎi khráp?</div>
+        <div class="sentence-meaning">能麻煩您再確認一次出團／用餐的人數嗎？</div>
+      </div>
+      <button class="btn-audio" onclick="playTTS('ช่วยยืนยันจำนวนคนอีกครั้งได้ไหมครับ', this)">🔊</button>
+    </div>
+  </section>
+
+  <!-- Section 3: Grammar -->
+  <section>
+    <div class="sec-head">
+      <div class="sec-title">
+        三、重點語法結構深度解析
+      </div>
+      <span class="sec-tag">文法邏輯</span>
+    </div>
+
+    <!-- Grammar 1 -->
+    <div class="grammar-card">
+      <div class="grammar-card-title">📌 語法點 1：名詞化前綴「การ (gaan)」與「ความ (kwaam)」的精確分工</div>
+      <p style="color:var(--text-muted); font-size:15px; margin-bottom:12px;">泰語名詞化需根據動詞性質嚴格搭配前綴：</p>
+
+      <div class="grammar-sub">👉 การ (gaan) + 動作動詞 ➔ 具體行為／動作過程（動名詞 -ing）</div>
+      <div class="pill-group">
+        <div class="example-pill"><span class="th">การจอง</span> <span>(預約手續)</span> <button class="btn-audio-mini" onclick="playTTS('การจอง', this)">🔊</button></div>
+        <div class="example-pill"><span class="th">การเดินทาง</span> <span>(旅途行程)</span> <button class="btn-audio-mini" onclick="playTTS('การเดินทาง', this)">🔊</button></div>
+        <div class="example-pill"><span class="th">การจัดการ</span> <span>(管理機制)</span> <button class="btn-audio-mini" onclick="playTTS('การจัดการ', this)">🔊</button></div>
+      </div>
+
+      <div class="grammar-sub" style="margin-top:16px;">👉 ความ (kwaam) + 形容詞／心理狀態 ➔ 抽象概念／感受狀態</div>
+      <div class="pill-group">
+        <div class="example-pill"><span class="th">ความสะดวก</span> <span>(便利性)</span> <button class="btn-audio-mini" onclick="playTTS('ความสะดวก', this)">🔊</button></div>
+        <div class="example-pill"><span class="th">ความปลอดภัย</span> <span>(安全性)</span> <button class="btn-audio-mini" onclick="playTTS('ความปลอดภัย', this)">🔊</button></div>
+        <div class="example-pill"><span class="th">ความสุข</span> <span>(幸福快樂)</span> <button class="btn-audio-mini" onclick="playTTS('ความสุข', this)">🔊</button></div>
+      </div>
+    </div>
+
+    <!-- Grammar 2 -->
+    <div class="grammar-card">
+      <div class="grammar-card-title">📌 語法點 2：表達「能力／許可」三大後綴辨析</div>
+      <p style="color:var(--text-muted); font-size:15px; margin-bottom:12px;">中文常統稱「可以／會／行」，泰語需依情境嚴格分立：</p>
+
+      <div class="grammar-sub">1. ได้ (dâai) ➔ 客觀條件或外在環境允許 (Can / May)</div>
+      <div class="pill-group">
+        <div class="example-pill"><span class="th">วันนี้ว่าง ไปได้</span> <span>(今天有空，可以去)</span> <button class="btn-audio-mini" onclick="playTTS('วันนี้ว่าง ไปได้', this)">🔊</button></div>
+      </div>
+
+      <div class="grammar-sub" style="margin-top:14px;">2. เป็น (bpen) ➔ 經後天學習掌握之技能技術 (Know how to)</div>
+      <div class="pill-group">
+        <div class="example-pill"><span class="th">พูดภาษาไทยเป็น</span> <span>(會說泰語技能)</span> <button class="btn-audio-mini" onclick="playTTS('พูดภาษาไทยเป็น', this)">🔊</button></div>
+        <div class="example-pill"><span class="th">ขับรถเป็น</span> <span>(會開車技能)</span> <button class="btn-audio-mini" onclick="playTTS('ขับรถเป็น', this)">🔊</button></div>
+      </div>
+
+      <div class="grammar-sub" style="margin-top:14px;">3. ไหว (wǎi) ➔ 個人體能生理或心理可承受 (Physically endure)</div>
+      <div class="pill-group">
+        <div class="example-pill"><span class="th">เดินขึ้นเขาไหว</span> <span>(爬山體力負荷得了)</span> <button class="btn-audio-mini" onclick="playTTS('เดินขึ้นเขาไหว', this)">🔊</button></div>
+        <div class="example-pill"><span class="th">ไหวไหมครับ</span> <span>(還撐得住嗎？)</span> <button class="btn-audio-mini" onclick="playTTS('ไหวไหมครับ', this)">🔊</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 4: Culture -->
+  <section>
+    <div class="sec-head">
+      <div class="sec-title">
+        四、泰國文化與生活話題
+      </div>
+      <span class="sec-tag" style="background: rgba(239, 68, 68, 0.15); color: #f87171;">文化時事</span>
+    </div>
+    <div class="culture-card">
+      <h3>🏮 2026 泰國九皇齋節（เทศกาลกินเจ）盛大登場</h3>
+      <p><b>舉行期間：</b>2026 年 10 月 10 日至 10 月 18 日（農曆九月初一至初九）</p>
+      <p><b>文化淵源：</b>起源於 19 世紀初南洋閩粵移民對道教「九皇大帝」的崇拜信仰，扎根泰國融入佛教文化後，演變為為期九天的身心淨化與素食嘉年華。</p>
+
+      <div class="culture-callout">
+        <b>🚩 街頭黃旗與嚴格戒律：</b><br>
+        • 大街小巷與超市插滿<b>黃底紅字「เจ (Jee)」</b>旗幟。<br>
+        • 「กินเจ」屬於極嚴格全素：除戒除一切動物肉品、蛋奶與蜂蜜外，更全面禁用<b>蔥、蒜、韭菜、洋蔥、香菜等五辛植物</b>，追求「身、口、意」純淨。
+      </div>
+
+      <h3>📍 焦點活動</h3>
+      <p>• <b>普吉島（Phuket）：</b>全泰最具儀式震撼力的舞台。各大宮廟舉行降神科儀，乩童（ม้าทรง, Mah Song）進行穿刺巡遊替信眾擋煞消災，場面極為壯觀。</p>
+      <p>• <b>曼谷耀華力路（唐人街 Yaowarat）：</b>整條大道封街化身為素食長廊，供應潮汕傳統素點、手工炸豆腐、素魚翅等特色佳餚。</p>
+
+      <h3>✈️ 線控經理實務備忘</h3>
+      <p>若安排此期間出團，重視蔬食養生的旅客可獲得極為豐富的用餐選擇；若有團體行經曼谷唐人街或普吉老城區，請提早因應廟會巡遊進行封街與車流調配。</p>
+    </div>
+  </section>
+</div>
+
+<div id="toast">🔊 正在播放發音...</div>
+
+<script>
+  let currentAudio = null;
+  let playbackRate = 1.0;
+  let isMasked = false;
+
+  function setSpeed(speed) {
+    playbackRate = speed;
+    document.getElementById('btn-speed-normal').classList.toggle('active', speed === 1.0);
+    document.getElementById('btn-speed-slow').classList.toggle('active', speed === 0.75);
+    showToast(`語速已設定為 ${speed}x`);
+  }
+
+  function toggleMask() {
+    isMasked = !isMasked;
+    const btn = document.getElementById('btn-mask-toggle');
+    btn.classList.toggle('active', isMasked);
+    btn.innerText = isMasked ? '👁️ 顯示中文釋義' : '👁️ 遮蔽中文（單字測驗）';
+
+    document.querySelectorAll('.meaning').forEach(el => {
+      el.classList.toggle('masked', isMasked);
+      if (!isMasked) el.onclick = null;
+      else el.onclick = () => el.classList.remove('masked');
+    });
+
+    document.querySelectorAll('.sentence-meaning').forEach(el => {
+      el.classList.toggle('masked', isMasked);
+      if (!isMasked) el.onclick = null;
+      else el.onclick = () => el.classList.remove('masked');
+    });
+
+    showToast(isMasked ? '已開啟遮蔽測驗（點擊即可翻開）' : '已恢復顯示中文');
+  }
+
+  function playTTS(text, btnElement) {
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio = null;
+      document.querySelectorAll('.btn-audio, .btn-audio-mini').forEach(b => b.classList.remove('playing'));
+    }
+
+    const encoded = encodeURIComponent(text);
+    const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=th&q=${encoded}`;
+    
+    currentAudio = new Audio(audioUrl);
+    currentAudio.playbackRate = playbackRate;
+
+    if (btnElement) {
+      btnElement.classList.add('playing');
+    }
+
+    showToast(`🔊 正在播放：${text}`);
+
+    currentAudio.play().catch(e => {
+      console.warn('Audio play error:', e);
+      showToast('播放失敗，請檢查網路連線');
+    });
+
+    currentAudio.onended = () => {
+      if (btnElement) btnElement.classList.remove('playing');
+      currentAudio = null;
+    };
+  }
+
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.innerText = msg;
+    toast.style.display = 'flex';
+    clearTimeout(toast.timer);
+    toast.timer = setTimeout(() => {
+      toast.style.display = 'none';
+    }, 2000);
+  }
+</script>
+</body>
+</html>
