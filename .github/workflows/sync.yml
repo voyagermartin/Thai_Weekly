@@ -1,4 +1,4 @@
-name: Sync Thai Weekly from Google Drive
+name: Sync Thai Weekly from Drive
 
 on:
   schedule:
