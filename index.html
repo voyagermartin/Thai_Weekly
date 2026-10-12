@@ -626,7 +626,7 @@
     </div>
 
     <!-- 2026 年度抽屜 -->
-    <div class="accordion-item open" id="accordion-2026">
+    <div class="accordion-item" id="accordion-2026">
       <button class="accordion-header" onclick="toggleAccordion('accordion-2026')">
         <div class="accordion-title-group">
           <span>📅 2026 年度課程歸檔（第 41 週 ～ 52 週）</span>
@@ -703,10 +703,12 @@
       }
     });
 
-    // 搜尋時若有輸入關鍵字，自動展開所有手風琴抽屜以供查看
+    // 搜尋時若有輸入關鍵字，自動展開所有手風琴抽屜以供查看；清空時恢復折疊
     const accordions = document.querySelectorAll('.accordion-item');
     if (query.length > 0) {
       accordions.forEach(acc => acc.classList.add('open'));
+    } else {
+      accordions.forEach(acc => acc.classList.remove('open'));
     }
 
     // 更新搜尋統計與空狀態
