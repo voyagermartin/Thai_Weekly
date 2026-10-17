@@ -1,7 +1,7 @@
 # Thai_Weekly (泰語學習週報自動化發布系統) 專案協作手冊
 
-> **專案版本**：v1.2 (紫金門戶與雙引擎語音升級版)  
-> **最後更新日期**：2026-10-12  
+> **專案版本**：v1.3 (雲端零接觸全自動部署版)  
+> **最後更新日期**：2026-10-17  
 > **維護者**：Martin × Gemini Spark × Antigravity (Anti)
 
 ---
@@ -62,13 +62,15 @@ flowchart LR
 Thai_Weekly/
 ├── .github/
 │   └── workflows/
-│       ├── sync.yml            # 每週六 09:30 自動從 Google Drive 同步更新至 GitHub
+│       ├── sync_drive.yml      # 每週六 09:15~10:00 雲端定時零接觸向 Google Drive 自動同步
+│       ├── sync.yml            # 原每週六 09:30 自動從 Google Drive 同步更新至 GitHub
 │       └── upload_to_drive.yml # 一鍵手動推送本地最新模板與手冊至 Google Drive
 ├── templates/
 │   └── lesson_template.html    # Spark 生成每週課程專用的標準紫金版 HTML 骨架
 ├── favicon.svg                 # 專屬深邃曜石黑 × 科技藍漸層泰語學習 App 圖標
 ├── index.html                  # 站點首頁（方案 1 置頂封面 + 方案 4 搜尋手風琴抽屜）
-├── 26w41.html                  # 第 1 期課程實體頁（格式: YYwWW.html，例: 2026年第41週）
+├── 26w41.html                  # 第 1 期課程實體頁（飲食預訂實務・語法名詞化與九皇齋節）
+├── 26w42.html                  # 第 2 期課程實體頁（交通指引・機場退稅與水燈節前哨）
 ├── sync_drive_to_github.py     # Google Drive 雲端檔案自動拉取與 Git Push 腳本
 ├── upload_to_drive.py          # 本地模板寫回 Google Drive 工具腳本
 ├── HANDBOOK.MD                 # 本專案協作手冊（規格與最高指引）
@@ -163,17 +165,20 @@ Thai_Weekly/
 ## 4. 部署與自動化排程架構
 
 ### 4.1 GitHub Actions 工作流程
-專案內建兩套自動化 Actions：
+專案內建自動化 Actions：
 
-1. **`.github/workflows/sync.yml`（每週自動同步）**：
+1. **`.github/workflows/sync_drive.yml`（雲端零接觸全自動排程同步，主要）**：
+   * 排程時間：台灣時間每週六上午 09:15、09:30、09:45、10:00 各觸發一次檢查（UTC 每週六 01:15、01:30、01:45、02:00）。
+   * 功能：純雲端執行環境，透過 Google API 自動比對雲端「泰文小短篇」最新 `.html`，免開機、零接觸自動推送至 `main` 分支並觸發 GitHub Pages 部署。
+2. **`.github/workflows/sync.yml`（備援同步管線）**：
    * 排程時間：台灣時間每週六上午 09:30（UTC 01:30，`cron: '30 1 * * 6'`）。
-   * 功能：自動連線 Google Drive 下載最新 `.html`，比對後自動執行 Git Commit 並推送到 `main` 分支，觸發 GitHub Pages 部署。
-2. **`.github/workflows/upload_to_drive.yml`（一鍵推播模板）**：
+   * 功能：調用 Python 腳本下載雲端 HTML。
+3. **`.github/workflows/upload_to_drive.yml`（一鍵推播模板）**：
    * 支援手動觸發（`workflow_dispatch`）。
    * 功能：將倉庫中最新修訂之 `lesson_template.html` 與 `HANDBOOK.MD` 自動更新回 Google Drive 目標資料夾。
 
 ### 4.2 必要的憑證設定 (GitHub Secrets)
-* `GCP_SA_KEY_JSON`：Google Cloud 服務帳號金鑰（JSON 字串），具備存取「泰文小短篇」資料夾之 Google Drive API 權限。
+* `GDRIVE_SA_KEY` / `GCP_SA_KEY_JSON`：Google Cloud 服務帳號金鑰（JSON 字串），服務帳號為 `thai-sync-bot@thai-weekly-sync.iam.gserviceaccount.com`，具備存取「泰文小短篇」資料夾（ID: `1xTWvfaAEIqzHFpDKtG7ipdMBZf8PYbBA`）之 Drive 權限。
 
 ---
 
@@ -196,4 +201,5 @@ Gemini Spark 於每週生成新期數（例如 `26w42.html`）時，必須遵守
 - [x] 完成 34px 大字級與 1160px 桌機沉浸式排版升級。
 - [x] 解決 Google TTS 播放失敗問題，完成 `<meta name="referrer">` 防護與 Web Speech API 雙引擎備援。
 - [x] 完成首頁「方案 1 ＋ 方案 4」置頂封面、即時關鍵字搜尋與預設折疊年度手風琴抽屜。
-- [x] 建立雙向 Google Drive ⇄ GitHub Actions 同步與模板寫回管線。
+- [x] 發布 26w42《交通指引・機場退稅與水燈節前哨》，並更新首頁 Spotlight Hero。
+- [x] 升級為 100% 雲端零接觸全自動部署架構（`.github/workflows/sync_drive.yml`），解除本機設備與開機依賴。
