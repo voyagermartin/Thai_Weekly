@@ -13,36 +13,35 @@
 
 ### 1.2 三方協作流水線 (Collaborative Pipeline)
 
-本專案由三方緊密分工形成自動化生產流水線：
+本專案由三方緊密分工形成 100% 雲端零接觸自動化生產流水線：
 
 ```mermaid
 flowchart LR
-    A["Martin (架構與業務主理)"] -->|需求制定 & 源頭短篇維護| B["Google Drive (泰文小短篇)"]
-    B -->|定時觸發 / 內容讀取| C["GitHub Actions CI/CD"]
-    C -->|教材拆解 / 模板渲染| D["Gemini Spark (內容引擎)"]
-    D -->|產出結構化 YYwWW.html| E["Anti 構建腳本 (自動化同步)"]
-    E -->|Git Commit & Push| F["GitHub Pages / 線上門戶"]
+    A["Martin (架構與業務主理)"] -->|教材源頭短篇維護| B["Google Drive (泰文小短篇)"]
+    B -->|每週六 09:00 排程解析| C["Gemini Spark (內容引擎)"]
+    C -->|產出結構化 YYwWW.html & index.html| B
+    B -->|每週六 09:15~10:00 零接觸自動抓取| D["GitHub Actions (sync_drive.yml)"]
+    D -->|Git Commit & Push (main)| E["GitHub Pages / 線上門戶"]
     style A fill:#1e293b,stroke:#38bdf8,color:#fff
     style B fill:#0f172a,stroke:#38bdf8,color:#fff
-    style C fill:#1e293b,stroke:#a855f7,color:#fff
-    style D fill:#1e293b,stroke:#ec4899,color:#fff
-    style E fill:#0f172a,stroke:#22c55e,color:#fff
-    style F fill:#0284c7,stroke:#f59e0b,color:#fff
+    style C fill:#1e293b,stroke:#ec4899,color:#fff
+    style D fill:#1e293b,stroke:#a855f7,color:#fff
+    style E fill:#0284c7,stroke:#f59e0b,color:#fff
 ```
 
 * **Martin (專案推動 / 業務主理)**：
   * 定義業務需求、核心規範與風格偏好。
-  * 於指定 Google Drive 目錄存放或維護原生泰語短篇材料與參考手冊。
-  * 審閱線上站點學習反饋與整體發展方向。
+  * 於 Google Drive 目錄（`泰文小短篇`）存放與維護原生泰語素材、字彙手稿與參考材料。
+  * 審閱線上站點學習成效、發音體驗與整體演進方向。
 * **Gemini Spark (內容引擎 / 教學拆解)**：
-  * 負責將 Google Drive 上的短文進行智能剖析：斷詞音標（IPA / 羅馬拼音）、中文翻譯、核心文法點、難詞單字釋義。
-  * 嚴格套用 `templates/lesson_template.html` 骨架生成當週獨立課程（`YYwWW.html`）。
-  * 產出每週「互動遮蔽測驗（Cloze / Flashcards）」的題型數據與上下文例句。
+  * 固化每週六 09:00 自動執行指令，將雲端短文智能剖析：斷詞音標（IPA / 羅馬拼音）、中文翻譯、核心文法點、難詞單字釋義。
+  * 嚴格套用 `templates/lesson_template.html` 骨架生成當週獨立課程（`YYwWW.html`）與新版入口門戶（`index.html`）。
+  * 產出每週「互動遮蔽測驗（Cloze / Flashcards）」題型數據與上下文例句，直接以原始 HTML 實體寫回 Google Drive。
 * **Anti / Antigravity (系統工程 / 程式碼實作與自動化維運)**：
-  * 負責維護全站靜態頁面模板、首頁門戶架構與 UI 互動邏輯。
-  * 串接 Google Drive API 雙向同步機制（下載雲端教材、上傳最新模板）。
-  * 整合 Google TTS 搭配 Web Speech API 雙引擎語音播放器。
-  * 配置 GitHub Actions 雲端定期排程發布與 GitHub Pages 自動部署維護。
+  * 負責維護全站靜態頁面模板、首頁紫金門戶架構與 UI 互動邏輯（大字級容器、方案 1 + 方案 4 搜尋收納）。
+  * 建置 GitHub Actions 純雲端零接觸全自動排程管線（`sync_drive.yml`），解除本地 Cron 與個人電腦開機依賴。
+  * 整合 Google TTS 搭配 Web Speech API 雙引擎語音播放器，並配置 `<meta name="referrer">` 防護。
+  * 維護雙向同步與模板寫回工具，確保整套自動化系統穩定健壯。
 
 ---
 
@@ -196,10 +195,28 @@ Gemini Spark 於每週生成新期數（例如 `26w42.html`）時，必須遵守
 
 ## 6. 結語與里程碑記錄
 
-本手冊為全專案的最高指引原則。截至 2026-10-12，已達成：
+本手冊為全專案的最高指引原則。截至 2026-10-17，已達成：
 - [x] 全站深色雜誌風升級為「大皇宮金箔 × 暹羅暗夜紫」主題。
-- [x] 完成 34px 大字級與 1160px 桌機沉浸式排版升級。
+- [x] 完成 34px 大字級與 1160px/1240px 桌機沉浸式排版升級。
 - [x] 解決 Google TTS 播放失敗問題，完成 `<meta name="referrer">` 防護與 Web Speech API 雙引擎備援。
 - [x] 完成首頁「方案 1 ＋ 方案 4」置頂封面、即時關鍵字搜尋與預設折疊年度手風琴抽屜。
 - [x] 發布 26w42《交通指引・機場退稅與水燈節前哨》，並更新首頁 Spotlight Hero。
 - [x] 升級為 100% 雲端零接觸全自動部署架構（`.github/workflows/sync_drive.yml`），解除本機設備與開機依賴。
+- [x] 通過 GitHub Actions 實機排程驗證與 Service Account (`thai-sync-bot`) 雲端連線測試。
+
+---
+
+## 7. 下階段開發演進展望 (Next Phase Roadmap)
+
+作為後續功能迭代與體驗擴充的起點記錄：
+
+1. **學習歷程本地持久化 (Local Progress Tracking)**：
+   * 透過瀏覽器 LocalStorage 記錄使用者「已讀期數」、「單字收藏」與「互動遮蔽測驗完成度」。
+   * 於首頁卡片上呈現輕量化閱讀打勾進度徽章（例如：`✓ 已完成 80%`）。
+2. **單元自測模式增強 (Flashcard & Cloze Enhancements)**：
+   * 提供「一鍵全遮蔽 / 一鍵全顯示」快速切換功能（針對泰文字、音標、中文釋義分別開關）。
+   * 支援隨機抽題與錯題集中複習功能。
+3. **多媒體延伸整合 (Rich Media Integrations)**：
+   * 探索情境對話短片、文化典故圖卡等多元富媒體嵌入。
+   * 持續每週自動化排程生產發布（26w43...）。
+
