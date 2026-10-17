@@ -3,515 +3,246 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- 必須保留：防止傳送 Referer，確保外部串流與資源安全 -->
-  <meta name="referrer" content="no-referrer">
   <title>泰語學習週報｜全期索引與自學小站</title>
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="apple-touch-icon" href="favicon.svg">
   <style>
     :root {
-      /* 背景層次：由深邃暗夜紫向宮廷夜色延伸 */
-      --bg-base: #0d0814; /* 暹羅暗夜紫底 */
-      --bg-surface: #170f24; /* 皇室深紫表層 */
-      --bg-card: #231738; /* 帝王紫卡片背景 */
-      --bg-card-hover: #2f1f4a; /* 卡片懸浮高光 */
-      --border: #443063; /* 沉穩紫金邊框 */
-      --border-accent: #f59e0b; /* 泰皇金箔高光邊框 */
-
-      /* 皇家金色系統（象徵大皇宮佛寺金箔與皇室尊爵） */
-      --accent-gold: #f59e0b; /* 泰皇金箔金 */
-      --accent-gold-light: #fde68a; /* 亮香檳金 */
-      --text-thai: #fde047; /* 泰文字級專屬金色 */
-      --gold-glow: rgba(245, 158, 11, 0.28); /* 金色發光光暈 */
-
-      /* 皇室紫色系統（泰國詩琳通公主與皇室經典代表色） */
-      --primary: #a855f7; /* 皇家紫羅蘭色 */
-      --primary-hover: #c084fc; /* 亮紫高光 */
-      --primary-glow: rgba(168, 85, 247, 0.3);
-
-      /* 文字與中性色 */
-      --text-main: #f8fafc; /* 象牙白主文字 */
-      --text-muted: #a78bfa; /* 柔紫灰輔助次要文字 */
-      --accent-red: #f43f5e;
-      --accent-emerald: #10b981;
+      --bg-base: #0b0f19;
+      --bg-surface: #111827;
+      --bg-card: #1f2937;
+      --bg-card-hover: #283548;
+      --border: #374151;
+      --primary: #3b82f6;
+      --primary-hover: #60a5fa;
+      --primary-glow: rgba(59, 130, 246, 0.25);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --text-thai: #93c5fd;
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       background-color: var(--bg-base);
       color: var(--text-main);
-      line-height: 1.7;
-      font-size: 17.5px;
-      padding: 24px;
+      line-height: 1.65;
+      font-size: 16px;
+      padding: 16px;
       min-height: 100vh;
     }
     .container {
-      max-width: 1160px;
+      max-width: 920px;
       margin: 0 auto;
     }
-    @media (min-width: 1400px) {
-      .container {
-        max-width: 1240px;
-      }
-    }
 
-    /* Top Navigation Bar */
+    /* Navigation */
     nav {
       background: var(--bg-surface);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 14px 24px;
-      margin-bottom: 24px;
+      border-radius: 14px;
+      padding: 12px 20px;
+      margin-bottom: 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       position: sticky;
-      top: 14px;
+      top: 12px;
       z-index: 100;
-      backdrop-filter: blur(12px);
+      backdrop-filter: blur(8px);
     }
     .brand {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       font-weight: 700;
-      font-size: 20px;
+      font-size: 18px;
       color: #ffffff;
       text-decoration: none;
     }
     .brand-icon {
-      background: linear-gradient(135deg, #7e22ce, #a855f7);
-      box-shadow: 0 0 10px var(--primary-glow);
-      width: 38px;
-      height: 38px;
-      border-radius: 10px;
+      background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
+      font-size: 16px;
     }
     .nav-btn {
       background: var(--bg-card);
       border: 1px solid var(--border);
       color: var(--text-main);
-      padding: 9px 20px;
-      border-radius: 10px;
-      font-size: 15.5px;
+      padding: 7px 16px;
+      border-radius: 8px;
+      font-size: 14px;
       font-weight: 600;
       text-decoration: none;
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       transition: all 0.2s;
     }
     .nav-btn:hover {
       background: var(--bg-card-hover);
       color: #ffffff;
-      border-color: var(--accent-gold);
+      border-color: var(--primary);
     }
 
-    /* 方案 1 核心：本週最新刊置頂大封面 (Spotlight Hero) */
-    .spotlight-hero {
-      background: linear-gradient(135deg, #170f24 0%, #2e1065 60%, #451a03 100%);
+    /* Hero */
+    .hero {
+      background: linear-gradient(145deg, #111827 0%, #1e293b 100%);
       border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 38px 36px;
-      margin-bottom: 28px;
-      box-shadow: 0 16px 40px -8px rgba(0,0,0,0.7), 0 0 24px rgba(245, 158, 11, 0.18);
+      padding: 32px 28px;
+      border-radius: 18px;
+      margin-bottom: 24px;
+      box-shadow: 0 12px 30px -10px rgba(0,0,0,0.5);
       position: relative;
       overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
     }
-    .spotlight-hero::before {
+    .hero::after {
       content: "";
       position: absolute;
-      top: 0; left: 0; right: 0; height: 4px;
-      background: linear-gradient(90deg, #f59e0b, #fde68a, #d97706);
-    }
-    .spotlight-badge-row {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-    .spotlight-tag-live {
-      background: rgba(245, 158, 11, 0.2);
-      border: 1px solid rgba(245, 158, 11, 0.45);
-      color: #fde68a;
-      font-size: 13.5px;
-      font-weight: 800;
-      padding: 5px 14px;
-      border-radius: 6px;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      letter-spacing: 0.5px;
-    }
-    .spotlight-tag-live::before {
-      content: "";
-      width: 8px;
-      height: 8px;
+      top: -50px;
+      right: -50px;
+      width: 180px;
+      height: 180px;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
       border-radius: 50%;
-      background: #f59e0b;
-      box-shadow: 0 0 8px #f59e0b;
-      animation: pulseDot 1.4s infinite;
-    }
-    @keyframes pulseDot {
-      0% { transform: scale(0.9); opacity: 0.7; }
-      50% { transform: scale(1.3); opacity: 1; }
-      100% { transform: scale(0.9); opacity: 0.7; }
-    }
-    .spotlight-date {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--accent-gold-light);
-      letter-spacing: 1px;
-    }
-    .spotlight-title {
-      font-size: 34px;
-      font-weight: 900;
-      color: #ffffff;
-      line-height: 1.35;
-      margin-bottom: 14px;
-      letter-spacing: 0.5px;
-    }
-    .spotlight-desc {
-      font-size: 17.5px;
-      color: #cbd5e1;
-      line-height: 1.75;
-      margin-bottom: 22px;
-      max-width: 980px;
-      text-wrap: pretty;
-    }
-    .spotlight-footer {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      padding-top: 18px;
-    }
-    .spotlight-pills {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      font-size: 14.5px;
-      color: var(--text-muted);
-    }
-    .spotlight-pill {
-      background: rgba(13, 8, 20, 0.45);
-      border: 1px solid var(--border);
-      padding: 4px 12px;
-      border-radius: 8px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .btn-enter-primary {
-      background: linear-gradient(135deg, #a855f7, #7e22ce);
-      color: #ffffff;
-      padding: 11px 24px;
-      border-radius: 12px;
-      font-size: 16px;
-      font-weight: 700;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      box-shadow: 0 0 16px var(--primary-glow);
-      transition: all 0.25s;
-    }
-    .btn-enter-primary:hover {
-      background: linear-gradient(135deg, #c084fc, #9333ea);
-      transform: translateY(-2px);
-      box-shadow: 0 0 22px var(--primary-glow);
-    }
-
-    /* 方案 4 核心：即時關鍵字搜尋工具列 (Instant Search Toolbar) */
-    .search-toolbar {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 16px 22px;
-      margin-bottom: 28px;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 14px;
-      box-shadow: 0 8px 20px -4px rgba(0,0,0,0.4);
-    }
-    .search-box-wrapper {
-      position: relative;
-      flex: 1;
-      min-width: 280px;
-    }
-    .search-icon {
-      position: absolute;
-      left: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 18px;
-      color: #a78bfa;
       pointer-events: none;
     }
-    .search-input {
-      width: 100%;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 12px 42px 12px 46px;
-      color: #ffffff;
-      font-size: 16px;
-      outline: none;
-      transition: all 0.2s;
-    }
-    .search-input:focus {
-      border-color: var(--accent-gold);
-      box-shadow: 0 0 14px var(--gold-glow);
-      background: #2a1b42;
-    }
-    .search-input::placeholder {
-      color: #8b7ca8;
-      font-size: 15px;
-    }
-    .btn-clear-search {
-      position: absolute;
-      right: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      color: #a78bfa;
-      font-size: 16px;
-      cursor: pointer;
-      display: none;
-    }
-    .btn-clear-search:hover { color: #ffffff; }
-    .search-stats {
-      font-size: 14.5px;
-      color: var(--text-muted);
+    .hero-tag {
+      display: inline-block;
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      color: #60a5fa;
+      font-size: 13px;
       font-weight: 600;
-      white-space: nowrap;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+    }
+    .hero h1 {
+      font-size: 28px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+    }
+    .hero p {
+      font-size: 16px;
+      color: var(--text-muted);
+      max-width: 650px;
     }
 
-    /* 區塊標題 */
+    /* Head */
     .sec-head {
       display: flex;
       align-items: center;
       justify-content: space-between;
       border-bottom: 1px solid var(--border);
-      padding-bottom: 16px;
-      margin-bottom: 24px;
+      padding-bottom: 14px;
+      margin-bottom: 20px;
     }
     .sec-title {
-      font-size: 24px;
+      font-size: 22px;
       font-weight: 800;
       color: #ffffff;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       letter-spacing: 0.5px;
     }
     .sec-tag {
-      font-size: 14px;
-      background: rgba(168, 85, 247, 0.18);
-      color: #fde68a;
-      border: 1px solid rgba(168, 85, 247, 0.35);
-      padding: 4px 12px;
+      font-size: 13px;
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+      padding: 3px 10px;
       border-radius: 6px;
       font-weight: 600;
     }
 
-    /* 卡片網格 (近 4~6 週近期特輯) */
+    /* Cards */
     .archive-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-      gap: 22px;
-      margin-bottom: 32px;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 18px;
+      margin-bottom: 28px;
     }
-    a.issue-card, div.issue-card {
-      background: var(--bg-card);
+    a.issue-card {
+      background: var(--bg-surface);
       border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 26px;
+      border-radius: 14px;
+      padding: 24px;
       text-decoration: none;
       color: inherit;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
+      cursor: pointer;
     }
-    a.issue-card { cursor: pointer; }
     a.issue-card:hover {
-      background: var(--bg-card-hover);
-      border-color: var(--accent-gold);
+      background: var(--bg-card);
+      border-color: var(--primary);
       transform: translateY(-4px);
-      box-shadow: 0 12px 25px -5px rgba(0,0,0,0.6), 0 0 20px var(--gold-glow);
+      box-shadow: 0 12px 25px -5px rgba(0,0,0,0.5), 0 0 20px var(--primary-glow);
     }
     .issue-badge {
       display: inline-block;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
-      color: #fde68a;
-      background: rgba(245, 158, 11, 0.18);
-      border: 1px solid rgba(245, 158, 11, 0.35);
-      padding: 4px 12px;
+      color: #60a5fa;
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      padding: 3px 10px;
       border-radius: 6px;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
       width: fit-content;
     }
     .issue-card h2 {
-      font-size: 22px;
-      font-weight: 800;
+      font-size: 20px;
+      font-weight: 700;
       color: #ffffff;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       line-height: 1.4;
     }
     .issue-card p.desc {
-      font-size: 15.5px;
-      color: #cbd5e1;
-      line-height: 1.7;
-      margin-bottom: 20px;
+      font-size: 14.5px;
+      color: var(--text-muted);
+      margin-bottom: 18px;
       flex-grow: 1;
+      line-height: 1.6;
     }
     .issue-footer {
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      border-top: 1px solid rgba(255, 255, 255, 0.08);
-      padding-top: 16px;
-      font-size: 14px;
+      align-items: center;
+      border-top: 1px solid var(--border);
+      padding-top: 14px;
+      font-size: 13.5px;
       color: var(--text-muted);
     }
     .action-btn-pill {
       background: var(--primary);
       color: #ffffff;
+      font-weight: 700;
+      font-size: 13px;
       padding: 6px 14px;
       border-radius: 8px;
-      font-weight: 600;
-      font-size: 13.5px;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      box-shadow: 0 0 10px var(--primary-glow);
-      transition: all 0.2s;
+      gap: 4px;
+      transition: background 0.2s;
     }
     a.issue-card:hover .action-btn-pill {
       background: var(--primary-hover);
-      box-shadow: 0 0 14px var(--primary-glow);
-    }
-
-    /* 方案 1 核心：歷史年份摺疊手風琴 (Yearly Accordion Drawer) */
-    .accordion-section {
-      margin-bottom: 32px;
-    }
-    .accordion-item {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      margin-bottom: 16px;
-      overflow: hidden;
-      transition: border-color 0.2s;
-    }
-    .accordion-item:hover {
-      border-color: rgba(245, 158, 11, 0.4);
-    }
-    .accordion-header {
-      width: 100%;
-      background: transparent;
-      border: none;
-      padding: 20px 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      color: #ffffff;
-      font-size: 18px;
-      font-weight: 800;
-      cursor: pointer;
-      text-align: left;
-      transition: background 0.2s;
-    }
-    .accordion-header:hover {
-      background: rgba(255, 255, 255, 0.03);
-    }
-    .accordion-title-group {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .accordion-count-tag {
-      font-size: 13px;
-      color: #fde68a;
-      background: rgba(245, 158, 11, 0.16);
-      border: 1px solid rgba(245, 158, 11, 0.3);
-      padding: 3px 10px;
-      border-radius: 12px;
-      font-weight: 600;
-    }
-    .accordion-arrow {
-      font-size: 16px;
-      color: #a78bfa;
-      transition: transform 0.25s ease;
-    }
-    .accordion-item.open .accordion-arrow {
-      transform: rotate(180deg);
-      color: var(--accent-gold);
-    }
-    .accordion-content {
-      display: none;
-      padding: 0 24px 24px;
-      border-top: 1px solid rgba(255, 255, 255, 0.06);
-    }
-    .accordion-item.open .accordion-content {
-      display: block;
-      animation: fadeIn 0.25s ease-in-out;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-4px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* 空搜尋結果提示卡 */
-    .empty-search-card {
-      display: none;
-      background: var(--bg-surface);
-      border: 1px dashed var(--border);
-      border-radius: 16px;
-      padding: 48px 24px;
-      text-align: center;
-      color: var(--text-muted);
-      margin: 20px 0;
-    }
-    .empty-search-card h3 {
-      font-size: 20px;
-      color: #ffffff;
-      margin-bottom: 8px;
-    }
-
-    @media (max-width: 768px) {
-      body { padding: 14px; font-size: 16px; }
-      .spotlight-hero { padding: 24px 20px; }
-      .spotlight-title { font-size: 25px; }
-      .spotlight-desc { font-size: 15.5px; }
-      .search-toolbar { padding: 14px 16px; }
-      .archive-grid { grid-template-columns: 1fr; gap: 16px; }
-      .accordion-header { padding: 16px 18px; font-size: 16px; }
-      .accordion-content { padding: 0 16px 18px; }
+      box-shadow: 0 0 10px var(--primary-glow);
     }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <!-- 1. Top Navigation Bar -->
+  <!-- Navigation Bar -->
   <nav>
     <a href="index.html" class="brand">
       <div class="brand-icon">🇹🇭</div>
@@ -522,74 +253,25 @@
     </div>
   </nav>
 
-  <!-- 2. 方案 1 核心：本週最新刊置頂大封面 (Spotlight Hero) -->
-  <div class="spotlight-hero">
-    <div>
-      <div class="spotlight-badge-row">
-        <span class="spotlight-tag-live">本週最新刊 ｜ VOL. 26w41</span>
-        <span class="spotlight-date">2026-10-10 SATURDAY</span>
-      </div>
-      <h1 class="spotlight-title">飲食預訂實務・語法名詞化與九皇齋節文化誌</h1>
-      <p class="spotlight-desc">
-        專為職場接待與生活實務打造。掌握九皇齋節 (เทศกาลกินเจ) 飲食禁忌與關鍵「กินเจ / มังสวิรัติ」語意差異；深入解析 การ (行為過程) 與 ความ (抽象心境) 名詞化公式，建立線控經理專業文化底蘊。
-      </p>
-    </div>
-    
-    <div class="spotlight-footer">
-      <div class="spotlight-pills">
-        <span class="spotlight-pill">🎯 9 個餐飲核心單字</span>
-        <span class="spotlight-pill">💬 5 組點餐預訂句型</span>
-        <span class="spotlight-pill">🔊 原地標準雙引擎發音</span>
-        <span class="spotlight-pill">👁️ 遮蔽記憶自測</span>
-      </div>
-      <a href="26w41.html" class="btn-enter-primary">進入 26w41 課程 →</a>
-    </div>
+  <!-- Hero Section -->
+  <div class="hero">
+    <div class="hero-tag">每週六晨間自動化出刊</div>
+    <h1>泰語自主學習・全期課程總覽首頁</h1>
+    <p>專為職場與生活實務打造。以「年份＋週數（如 26w41）」建立每週獨立課程存檔，點擊卡片即可進入當週頁面，支援原地音訊播放與自我測驗！</p>
   </div>
 
-  <!-- 3. 方案 4 核心：即時關鍵字搜尋工具列 (Instant Search Toolbar) -->
-  <div class="search-toolbar">
-    <div class="search-box-wrapper">
-      <span class="search-icon">🔍</span>
-      <input 
-        type="text" 
-        id="search-input" 
-        class="search-input" 
-        placeholder="搜尋週報期數、單元主題、核心單字或語法關鍵字（例如：素食、26w41、名詞化）..."
-        oninput="handleSearch()"
-      >
-      <button id="btn-clear" class="btn-clear-search" onclick="clearSearch()" title="清除搜尋">✕</button>
-    </div>
-    <div class="search-stats" id="search-stats">
-      收錄歷史期數中
-    </div>
-  </div>
-
-  <!-- 空搜尋結果卡片 -->
-  <div class="empty-search-card" id="empty-search">
-    <h3>🔍 找不到符合的週報專題</h3>
-    <p>請嘗試使用其他關鍵字（例如：飲食、預訂、海鮮、名詞化、26w41）</p>
-  </div>
-
-  <!-- 4. 近期特輯專區 (Recent Issues) -->
   <div class="sec-head">
-    <div class="sec-title"><span>🌟</span> 近期特輯課程</div>
-    <span class="sec-tag">最新發布</span>
+    <div class="sec-title">📚 週報歷史期數總覽</div>
+    <span class="sec-tag">持續累積中</span>
   </div>
 
-  <div class="archive-grid" id="recent-grid">
+  <div class="archive-grid">
     <!-- Issue 26w41 Card -->
-    <a 
-      href="26w41.html" 
-      class="issue-card" 
-      data-code="26w41" 
-      data-title="飲食預訂實務・語法名詞化與九皇齋節文化誌" 
-      data-desc="涵蓋素食接待、海鮮過敏、行程預訂核心單字與情境句型；解析 การ 與 ความ 名詞化前綴；對比 ขอ 與 ช่วย 商務請求句型；詳介泰國九皇齋節文化誌與線控實務備忘。"
-      data-tags="飲食 素食 吃齋 海鮮 過敏 預訂 確認 取消 九皇齋節 名詞化 การ ความ"
-    >
+    <a href="26w41.html" class="issue-card">
       <div>
         <span class="issue-badge">26w41 ｜ 2026 第 41 週</span>
         <h2>飲食預訂實務・語法名詞化與九皇齋節</h2>
-        <p class="desc">涵蓋素食接待、海鮮過敏、行程預訂核心單字與情境句型；解析 การ 與 ความ 名詞化前綴；對比 ขอ 與 ช่วย 商務請求句型；詳介泰國九皇齋節文化誌與線控實務備忘。</p>
+        <p class="desc">涵蓋素食接待、海鮮過敏、行程預訂核心單字與情境句型；解析 การ 與 ความ 名詞化前綴；對比 ได้、เป็น、ไหว 能力助詞；詳介泰國九皇齋節文化。</p>
       </div>
       <div class="issue-footer">
         <span>📅 2026/10/10 出刊</span>
@@ -598,136 +280,19 @@
     </a>
 
     <!-- Upcoming Issue 26w42 Card -->
-    <div 
-      class="issue-card" 
-      style="opacity: 0.65; cursor: default;" 
-      data-code="26w42" 
-      data-title="交通指引・機場退稅與水燈節前哨" 
-      data-desc="預計介紹泰國國內交通搭乘、問路、航廈退稅常見詞句；深入解析動詞連綴結構與生活對話。"
-      data-tags="交通 機場 退稅 水燈節 26w42"
-    >
+    <div class="issue-card" style="opacity: 0.6; cursor: default;">
       <div>
-        <span class="issue-badge" style="background: rgba(168, 85, 247, 0.15); color: #a78bfa; border-color: rgba(168, 85, 247, 0.3);">26w42 ｜ 2026 第 42 週</span>
+        <span class="issue-badge" style="background: rgba(156, 163, 175, 0.15); color: #9ca3af; border-color: transparent;">26w42 ｜ 2026 第 42 週</span>
         <h2>交通指引・機場退稅與水燈節前哨</h2>
         <p class="desc">預計介紹泰國國內交通搭乘、問路、航廈退稅常見詞句；深入解析動詞連綴結構與生活對話。</p>
       </div>
       <div class="issue-footer">
         <span>📅 2026/10/17 出刊</span>
-        <span style="color:#a78bfa; font-size:13.5px;">即將推出 ⏳</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- 5. 方案 1 核心：歷史年份收納手風琴抽屜 (Yearly Accordion Drawer) -->
-  <div class="accordion-section">
-    <div class="sec-head">
-      <div class="sec-title"><span>📂</span> 歷史年度歸檔抽屜</div>
-      <span class="sec-tag">折疊收納</span>
-    </div>
-
-    <!-- 2026 年度抽屜 -->
-    <div class="accordion-item" id="accordion-2026">
-      <button class="accordion-header" onclick="toggleAccordion('accordion-2026')">
-        <div class="accordion-title-group">
-          <span>📅 2026 年度課程歸檔（第 41 週 ～ 52 週）</span>
-          <span class="accordion-count-tag" id="count-2026">共 2 期</span>
-        </div>
-        <span class="accordion-arrow">▼</span>
-      </button>
-      <div class="accordion-content">
-        <p style="font-size:14.5px; color:var(--text-muted); margin: 16px 0 14px;">
-          此處自動收納 2026 年度所有發布之歷史週報，超過近期的舊期數會自動在此歸檔，保持首頁清爽舒適：
-        </p>
-        <div class="archive-grid" style="margin-bottom:0;" id="grid-2026">
-          <!-- 歸檔期數卡片範本（後續期數隨時間增加將自動集中於此） -->
-          <a 
-            href="26w41.html" 
-            class="issue-card" 
-            data-code="26w41" 
-            data-title="飲食預訂實務・語法名詞化與九皇齋節文化誌" 
-            data-desc="涵蓋素食接待、海鮮過敏、行程預訂核心單字與情境句型；解析 การ 與 ความ 名詞化前綴；對比 ขอ 與 ช่วย 商務請求句型；詳介泰國九皇齋節文化誌與線控實務備忘。"
-            data-tags="飲食 素食 吃齋 海鮮 過敏 預訂 確認 取消 九皇齋節 名詞化"
-          >
-            <div>
-              <span class="issue-badge">26w41 ｜ 2026 第 41 週</span>
-              <h2>飲食預訂實務・語法名詞化與九皇齋節</h2>
-              <p class="desc">涵蓋素食接待、海鮮過敏、行程預訂核心單字與情境句型；解析 การ 與 ความ 名詞化前綴。</p>
-            </div>
-            <div class="issue-footer">
-              <span>📅 2026/10/10 出刊</span>
-              <span class="action-btn-pill">閱讀歸檔 →</span>
-            </div>
-          </a>
-        </div>
+        <span style="color:#9ca3af; font-size:13px;">即將推出 ⏳</span>
       </div>
     </div>
   </div>
 </div>
-
-<!-- 即時搜尋與收納互動邏輯 Script -->
-<script>
-  function toggleAccordion(itemId) {
-    const item = document.getElementById(itemId);
-    if (item) {
-      item.classList.toggle('open');
-    }
-  }
-
-  function handleSearch() {
-    const input = document.getElementById('search-input');
-    const query = input.value.trim().toLowerCase();
-    const clearBtn = document.getElementById('btn-clear');
-    const statsEl = document.getElementById('search-stats');
-    const emptyCard = document.getElementById('empty-search');
-    
-    clearBtn.style.display = query.length > 0 ? 'block' : 'none';
-
-    const cards = document.querySelectorAll('.issue-card');
-    let matchedCount = 0;
-
-    cards.forEach(card => {
-      const code = (card.getAttribute('data-code') || '').toLowerCase();
-      const title = (card.getAttribute('data-title') || '').toLowerCase();
-      const desc = (card.getAttribute('data-desc') || '').toLowerCase();
-      const tags = (card.getAttribute('data-tags') || '').toLowerCase();
-
-      const isMatch = query === '' || 
-                      code.includes(query) || 
-                      title.includes(query) || 
-                      desc.includes(query) || 
-                      tags.includes(query);
-
-      card.style.display = isMatch ? 'flex' : 'none';
-      if (isMatch && card.getAttribute('data-code')) {
-        matchedCount++;
-      }
-    });
-
-    // 搜尋時若有輸入關鍵字，自動展開所有手風琴抽屜以供查看；清空時恢復折疊
-    const accordions = document.querySelectorAll('.accordion-item');
-    if (query.length > 0) {
-      accordions.forEach(acc => acc.classList.add('open'));
-    } else {
-      accordions.forEach(acc => acc.classList.remove('open'));
-    }
-
-    // 更新搜尋統計與空狀態
-    if (query.length > 0) {
-      statsEl.innerText = `找到 ${matchedCount} 筆相關課程`;
-      emptyCard.style.display = matchedCount === 0 ? 'block' : 'none';
-    } else {
-      statsEl.innerText = '全期收納中';
-      emptyCard.style.display = 'none';
-    }
-  }
-
-  function clearSearch() {
-    const input = document.getElementById('search-input');
-    input.value = '';
-    handleSearch();
-    input.focus();
-  }
-</script>
 
 </body>
 </html>
