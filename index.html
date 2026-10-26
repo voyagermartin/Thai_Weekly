@@ -518,31 +518,31 @@
       <span>泰語學習週報</span>
     </a>
     <div style="display:flex; gap:10px;">
-      <a href="26w43.html" class="nav-btn">📖 最新刊 26w43</a>
+      <a href="lesson.html" id="nav-latest-btn" class="nav-btn">📖 最新刊 26w43</a>
     </div>
   </nav>
 
   <!-- 2. 方案 1 核心：本週最新刊置頂大封面 (Spotlight Hero) -->
-  <div class="spotlight-hero">
+  <div class="spotlight-hero" id="spotlight-hero">
     <div>
       <div class="spotlight-badge-row">
-        <span class="spotlight-tag-live">● 本週最新刊 ｜ VOL. 26w43</span>
-        <span class="spotlight-date">2026-10-24 SATURDAY</span>
+        <span class="spotlight-tag-live" id="hero-badge-tag">● 本週最新刊 ｜ VOL. 26w43</span>
+        <span class="spotlight-date" id="hero-date">2026-10-24 SATURDAY</span>
       </div>
-      <h1 class="spotlight-title">飯店入住退房・房型設施與客訴溝通實務</h1>
-      <p class="spotlight-desc">
+      <h1 class="spotlight-title" id="hero-title">飯店入住退房・房型設施與客訴溝通實務</h1>
+      <p class="spotlight-desc" id="hero-desc">
         專為星級飯店接待與旅宿實務打造。掌握 Check-in/out、押金房卡、房型更換與冷氣熱水報修核心詞句；解析狀態存留助詞 ไว้ (wái) 與高情商委婉客訴公式；深入泰式「ใจเย็นๆ (心平氣和)」款待哲學、小費禮儀與雙床／大床房型字義陷阱（附文化專題單字發音）。
       </p>
     </div>
     
     <div class="spotlight-footer">
-      <div class="spotlight-pills">
+      <div class="spotlight-pills" id="hero-pills">
         <span class="spotlight-pill">🎯 9 個飯店住宿核心單字</span>
         <span class="spotlight-pill">💬 5 組櫃台與報修句型</span>
         <span class="spotlight-pill">🔊 含文化單字雙引擎發音</span>
         <span class="spotlight-pill">👁️ 遮蔽記憶自測</span>
       </div>
-      <a href="26w43.html" class="btn-enter-primary">進入 26w43 課程 →</a>
+      <a href="lesson.html?issue=26w43" id="hero-btn" class="btn-enter-primary">進入 26w43 課程 →</a>
     </div>
   </div>
 
@@ -746,6 +746,167 @@
 
 <!-- 即時搜尋與收納互動邏輯 Script -->
 <script>
+  const SPREADSHEET_ID = "1DvxPjzNRlTRSMSXr6eaktU2dBQZSS9oWadNfT3_ZUTM";
+
+  function parseGViz(text) {
+    const raw = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1));
+    if (!raw.table || !raw.table.cols) return [];
+
+    const colLabels = raw.table.cols.map(c => (c.label ? c.label.trim() : ''));
+    const hasLabels = colLabels.some(l => l.length > 0);
+
+    let headers = [];
+    let dataRows = [];
+
+    if (hasLabels) {
+      headers = colLabels;
+      dataRows = raw.table.rows;
+    } else {
+      headers = raw.table.rows[0].c.map(cell => (cell && cell.v !== null) ? String(cell.v).trim() : '');
+      dataRows = raw.table.rows.slice(1);
+    }
+
+    return dataRows.map(row => {
+      const item = {};
+      headers.forEach((h, i) => {
+        if (h && row.c && row.c[i] && row.c[i].v !== null) {
+          item[h] = row.c[i].v;
+        } else if (h) {
+          item[h] = '';
+        }
+      });
+      return item;
+    });
+  }
+
+  async function loadIssuesFromSheet() {
+    try {
+      const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=Issues`;
+      const resp = await fetch(url);
+      const text = await resp.text();
+      const issues = parseGViz(text);
+
+      if (!issues || issues.length === 0) return;
+
+      const published = issues.filter(i => i.status === 'published');
+      const upcoming = issues.filter(i => i.status === 'upcoming');
+
+      if (published.length > 0) {
+        // 最新一期（最後一筆 published）
+        const latest = published[published.length - 1];
+        
+        // 1. 更新頂部導航
+        const navBtn = document.getElementById('nav-latest-btn');
+        if (navBtn) {
+          navBtn.href = `lesson.html?issue=${latest.issue_code}`;
+          navBtn.innerText = `📖 最新刊 ${latest.issue_code}`;
+        }
+
+        // 2. 更新 Spotlight Hero
+        document.getElementById('hero-badge-tag').innerText = `● 本週最新刊 ｜ VOL. ${latest.issue_code}`;
+        document.getElementById('hero-date').innerText = `${latest.publish_date} SATURDAY`;
+        document.getElementById('hero-title').innerText = latest.title;
+        document.getElementById('hero-desc').innerText = `${latest.subtitle_1} ${latest.subtitle_2}`;
+        const heroBtn = document.getElementById('hero-btn');
+        if (heroBtn) {
+          heroBtn.href = `lesson.html?issue=${latest.issue_code}`;
+          heroBtn.innerText = `進入 ${latest.issue_code} 課程 →`;
+        }
+
+        // 3. 渲染 #recent-grid (最新 3-5 期 published 倒序排列 + upcoming 預告卡)
+        const recentGrid = document.getElementById('recent-grid');
+        const sortedDesc = [...published].reverse();
+        
+        let recentCardsHtml = sortedDesc.map((item, idx) => {
+          const isLatest = idx === 0;
+          const badgeStyle = isLatest ? 'style="background: rgba(245, 158, 11, 0.2); color: #fde68a; border-color: rgba(245, 158, 11, 0.4);"' : '';
+          const latestTag = isLatest ? ' ★最新刊' : '';
+          return `
+            <a 
+              href="lesson.html?issue=${item.issue_code}" 
+              class="issue-card" 
+              data-code="${item.issue_code}" 
+              data-title="${item.title}" 
+              data-desc="${item.subtitle_1} ${item.subtitle_2}"
+              data-tags="${item.highlights || ''} ${item.title}"
+            >
+              <div>
+                <span class="issue-badge" ${badgeStyle}>${item.issue_code} ｜ ${item.year} 第 ${item.week} 週${latestTag}</span>
+                <h2>${item.title}</h2>
+                <p class="desc">${item.subtitle_1} ${item.subtitle_2}</p>
+              </div>
+              <div class="issue-footer">
+                <span>📅 ${item.publish_date.replace(/-/g, '/')} 出刊</span>
+                <span class="action-btn-pill">進入 ${item.issue_code} 課程 →</span>
+              </div>
+            </a>
+          `;
+        }).join('');
+
+        // 加入預告卡片
+        if (upcoming.length > 0) {
+          const up = upcoming[0];
+          recentCardsHtml += `
+            <div 
+              class="issue-card" 
+              style="opacity: 0.65; cursor: default;" 
+              data-code="${up.issue_code}" 
+              data-title="${up.title}" 
+              data-desc="${up.subtitle_1} ${up.subtitle_2}"
+              data-tags="${up.title}"
+            >
+              <div>
+                <span class="issue-badge" style="background: rgba(168, 85, 247, 0.15); color: #a78bfa; border-color: rgba(168, 85, 247, 0.3);">${up.issue_code} ｜ 預告</span>
+                <h2>${up.title}</h2>
+                <p class="desc">${up.subtitle_1} ${up.subtitle_2}</p>
+              </div>
+              <div class="issue-footer">
+                <span>📅 ${up.publish_date.replace(/-/g, '/')} 出刊</span>
+                <span style="color:#a78bfa; font-size:13.5px;">即將推出 ⏳</span>
+              </div>
+            </div>
+          `;
+        }
+        recentGrid.innerHTML = recentCardsHtml;
+
+        // 4. 渲染 #grid-2026 歷史手風琴歸檔
+        const grid2026 = document.getElementById('grid-2026');
+        if (grid2026) {
+          grid2026.innerHTML = sortedDesc.map(item => `
+            <a 
+              href="lesson.html?issue=${item.issue_code}" 
+              class="issue-card" 
+              data-code="${item.issue_code}" 
+              data-title="${item.title}" 
+              data-desc="${item.subtitle_1} ${item.subtitle_2}"
+              data-tags="${item.highlights || ''} ${item.title}"
+            >
+              <div>
+                <span class="issue-badge">${item.issue_code} ｜ ${item.year} 第 ${item.week} 週</span>
+                <h2>${item.title}</h2>
+                <p class="desc">${item.subtitle_1} ${item.subtitle_2}</p>
+              </div>
+              <div class="issue-footer">
+                <span>📅 ${item.publish_date.replace(/-/g, '/')} 出刊</span>
+                <span class="action-btn-pill">閱讀歸檔 →</span>
+              </div>
+            </a>
+          `).join('');
+        }
+
+        const countEl = document.getElementById('count-2026');
+        if (countEl) {
+          countEl.innerText = `共 ${published.length} 期`;
+        }
+
+        // 重新同步搜尋索引
+        handleSearch();
+      }
+    } catch (e) {
+      console.warn("自 Google Sheet 即時更新首頁未完成，維持本機快照狀態:", e);
+    }
+  }
+
   function toggleAccordion(itemId) {
     const item = document.getElementById(itemId);
     if (item) {
@@ -783,7 +944,6 @@
       }
     });
 
-    // 搜尋時若有輸入關鍵字，自動展開所有手風琴抽屜以供查看；清空時恢復折疊
     const accordions = document.querySelectorAll('.accordion-item');
     if (query.length > 0) {
       accordions.forEach(acc => acc.classList.add('open'));
@@ -791,7 +951,6 @@
       accordions.forEach(acc => acc.classList.remove('open'));
     }
 
-    // 更新搜尋統計與空狀態
     if (query.length > 0) {
       statsEl.innerText = `找到 ${matchedCount} 筆相關課程`;
       emptyCard.style.display = matchedCount === 0 ? 'block' : 'none';
@@ -807,6 +966,8 @@
     handleSearch();
     input.focus();
   }
+
+  window.addEventListener('DOMContentLoaded', loadIssuesFromSheet);
 </script>
 
 </body>

@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- 關鍵：防止向外部資源傳遞 Referer，避免 Google TTS 串流回傳 404 -->
+  <meta name="referrer" content="no-referrer">
+  <title id="page-title">泰語學習週報｜載入中...</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="apple-touch-icon" href="favicon.svg">
+  <style>
+    :root {
+      /* 背景層次：泰國皇室紫金風 (暹羅暗夜紫與大皇宮金箔) */
+      --bg-base: #0d0814;          /* 暹羅暗夜紫底 */
+      --bg-surface: #170f24;       /* 皇室深紫表層 */
+      --bg-card: #231738;          /* 帝王紫卡片背景 */
+      --bg-card-hover: #2f1f4a;    /* 卡片懸浮高光 */
+      --border: #443063;           /* 沉穩紫金邊框 */
+      --border-accent: #f59e0b;    /* 泰皇金箔高光邊框 */
+
+      /* 皇家金色系統（佛寺金箔與皇室尊爵） */
+      --accent-gold: #f59e0b;       /* 泰皇金箔金 */
+      --accent-gold-light: #fde68a; /* 亮香檳金 */
+      --text-thai: #fde047;         /* 泰文字級專屬金色（黑底金字極致辨識度） */
+      --gold-glow: rgba(245, 158, 11, 0.28); /* 金色發光光暈 */
+
+      /* 皇室紫色系統 */
+      --primary: #a855f7;          /* 皇家紫羅蘭色 */
+      --primary-hover: #c084fc;    /* 亮紫高光 */
+      --primary-glow: rgba(168, 85, 247, 0.3);
+
+      /* 文字與中性色 */
+      --text-main: #f8fafc;        /* 象牙白主文字 */
+      --text-muted: #a78bfa;       /* 柔紫灰輔助次要文字 */
+      --accent-red: #f43f5e;
+      --accent-emerald: #10b981;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      line-height: 1.7;
+      font-size: 17.5px;
+      padding: 24px;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1160px;
+      margin: 0 auto;
+    }
+    @media (min-width: 1400px) {
+      .container {
+        max-width: 1240px;
+      }
+    }
+
+    /* Top Navigation */
+    nav {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px 24px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 14px;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      font-size: 20px;
+      color: #ffffff;
+      text-decoration: none;
+    }
+    .brand-icon {
+      background: linear-gradient(135deg, #7e22ce, #a855f7);
+      box-shadow: 0 0 10px var(--primary-glow);
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+    .nav-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 9px 20px;
+      border-radius: 10px;
+      font-size: 15.5px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .nav-btn:hover {
+      background: var(--bg-card-hover);
+      color: #ffffff;
+      border-color: var(--accent-gold);
+    }
+
+    /* Editorial Magazine Header */
+    .mag-header {
+      background: linear-gradient(135deg, #170f24 0%, #2e1065 60%, #451a03 100%);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 40px 38px;
+      margin-bottom: 26px;
+      box-shadow: 0 16px 40px -8px rgba(0,0,0,0.7), 0 0 24px rgba(245, 158, 11, 0.15);
+      position: relative;
+      overflow: hidden;
+    }
+    .mag-header::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 4px;
+      background: linear-gradient(90deg, #f59e0b, #fde68a, #d97706);
+    }
+    .mag-meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+      font-size: 14px;
+      letter-spacing: 1px;
+      font-weight: 700;
+      color: #fde68a;
+      text-transform: uppercase;
+    }
+    .mag-tag-vol {
+      background: rgba(245, 158, 11, 0.18);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #fde68a;
+      padding: 5px 14px;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    .mag-title {
+      font-size: 38px;
+      font-weight: 900;
+      color: #ffffff;
+      line-height: 1.35;
+      margin-bottom: 16px;
+      letter-spacing: 0.5px;
+    }
+    .mag-subtitle {
+      font-size: 19px;
+      color: #e2e8f0;
+      line-height: 1.75;
+      margin-bottom: 24px;
+      max-width: 950px;
+      text-wrap: pretty;
+    }
+    .mag-footer-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 18px;
+      font-size: 15px;
+      color: var(--text-muted);
+    }
+    .mag-meta-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .mag-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    /* Learning Controls Toolbar */
+    .controls-toolbar {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px 24px;
+      margin-bottom: 28px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+    }
+    .ctrl-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 16px;
+    }
+    .btn-toggle {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 9px 18px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-toggle:hover { background: var(--bg-card-hover); color: #ffffff; border-color: var(--primary); }
+    .btn-toggle.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 0 14px var(--primary-glow);
+    }
+
+    /* Content Sections */
+    section {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 34px 32px;
+      margin-bottom: 28px;
+    }
+    .sec-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+    }
+    .sec-title {
+      font-size: 25px;
+      font-weight: 800;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      letter-spacing: 0.5px;
+    }
+    .sec-tag {
+      font-size: 14px;
+      background: rgba(168, 85, 247, 0.18);
+      color: #fde68a;
+      border: 1px solid rgba(168, 85, 247, 0.35);
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    /* Vocabulary Cards Grid */
+    .vocab-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+    }
+    .vocab-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.2s;
+    }
+    .vocab-card:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--accent-gold);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px -4px rgba(0,0,0,0.5), 0 0 16px var(--gold-glow);
+    }
+    .vocab-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+    .thai-word {
+      font-size: 34px;
+      font-weight: 700;
+      color: var(--text-thai);
+      letter-spacing: 1px;
+      line-height: 1.35;
+      text-shadow: 0 0 12px rgba(253, 224, 71, 0.2);
+    }
+    .phonetic {
+      font-size: 16px;
+      color: var(--text-muted);
+      font-style: italic;
+      margin-bottom: 14px;
+    }
+    .meaning {
+      font-size: 17px;
+      color: #f8fafc;
+      background: rgba(13, 8, 20, 0.6);
+      padding: 10px 14px;
+      border-radius: 10px;
+      border-left: 4px solid var(--accent-gold);
+      transition: all 0.2s;
+      line-height: 1.5;
+    }
+    .meaning.masked {
+      background: #372352;
+      color: transparent;
+      user-select: none;
+      cursor: pointer;
+    }
+    .meaning.masked::after {
+      content: "👁️ 點擊翻開中文釋義";
+      color: #c084fc;
+      font-size: 14px;
+      display: block;
+    }
+
+    /* In-place Audio Play Button */
+    .btn-audio {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      color: #fde047;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 21px;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .btn-audio:hover {
+      background: var(--accent-gold);
+      color: #0d0814;
+      transform: scale(1.08);
+      box-shadow: 0 0 18px var(--gold-glow);
+    }
+    .btn-audio.playing {
+      animation: audioPulse 0.9s infinite alternate;
+      background: var(--accent-gold);
+      color: #0d0814;
+    }
+    @keyframes audioPulse {
+      0% { transform: scale(1); box-shadow: 0 0 6px var(--gold-glow); }
+      100% { transform: scale(1.15); box-shadow: 0 0 20px rgba(245, 158, 11, 0.85); }
+    }
+
+    /* Sentences */
+    .sentence-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 22px 24px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      transition: all 0.2s;
+    }
+    .sentence-card:hover {
+      background: var(--bg-card-hover);
+      border-color: rgba(245, 158, 11, 0.4);
+    }
+    .sentence-thai {
+      font-size: 25px;
+      font-weight: 700;
+      color: var(--text-thai);
+      margin-bottom: 8px;
+      line-height: 1.45;
+      text-shadow: 0 0 10px rgba(253, 224, 71, 0.18);
+    }
+    .sentence-phonetic {
+      font-size: 16px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .sentence-meaning {
+      font-size: 17px;
+      color: #f8fafc;
+      line-height: 1.5;
+    }
+    .sentence-meaning.masked {
+      color: transparent;
+      background: #372352;
+      border-radius: 6px;
+      padding: 4px 10px;
+      display: inline-block;
+      cursor: pointer;
+    }
+    .sentence-meaning.masked::after {
+      content: "👁️ 點擊查看中文翻譯";
+      color: #c084fc;
+      font-size: 14px;
+    }
+
+    /* Grammar Section */
+    .grammar-card {
+      background: rgba(23, 15, 36, 0.8);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 26px;
+      margin-bottom: 22px;
+    }
+    .grammar-card-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #fde047;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .grammar-sub {
+      font-size: 17px;
+      font-weight: 600;
+      color: #f8fafc;
+      margin: 14px 0 8px;
+    }
+    .pill-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .example-pill {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 10px 16px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 16px;
+      transition: border-color 0.2s;
+    }
+    .example-pill:hover { border-color: var(--accent-gold); }
+    .example-pill .th {
+      font-weight: 700;
+      color: var(--text-thai);
+      font-size: 20px;
+    }
+    .example-pill .btn-audio-mini {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      color: #fde047;
+      transition: transform 0.15s;
+    }
+    .example-pill .btn-audio-mini:hover { transform: scale(1.2); }
+
+    /* Culture Section */
+    .culture-card {
+      line-height: 1.9;
+      font-size: 17.5px;
+      color: #cbd5e1;
+    }
+    .culture-card h3 {
+      font-size: 21px;
+      color: #fde68a;
+      margin: 22px 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .culture-callout {
+      background: rgba(245, 158, 11, 0.12);
+      border-left: 4px solid var(--accent-gold);
+      padding: 16px 22px;
+      border-radius: 0 12px 12px 0;
+      margin: 20px 0;
+      font-size: 17px;
+      color: #fde68a;
+    }
+
+    /* Loading Spinner */
+    #loading-state {
+      text-align: center;
+      padding: 80px 20px;
+    }
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(245, 158, 11, 0.2);
+      border-top-color: var(--accent-gold);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 20px auto;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Toast Notification */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #231738;
+      border: 1px solid var(--border);
+      color: #ffffff;
+      padding: 14px 22px;
+      border-radius: 12px;
+      font-size: 15px;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+      z-index: 1000;
+    }
+
+    @media (max-width: 768px) {
+      body { padding: 14px; font-size: 16px; }
+      .container { width: 100%; }
+      nav { padding: 12px 16px; }
+      .brand { font-size: 18px; }
+      .brand-icon { width: 32px; height: 32px; font-size: 16px; }
+      .nav-btn { padding: 7px 14px; font-size: 14px; }
+      .mag-header { padding: 24px 18px; }
+      .mag-title { font-size: 25px; }
+      .mag-subtitle { font-size: 15.5px; }
+      .thai-word { font-size: 26px; }
+      .sentence-thai { font-size: 19px; }
+      section { padding: 20px 16px; }
+      .sec-title { font-size: 21px; }
+      .btn-audio { width: 44px; height: 44px; font-size: 18px; }
+      .vocab-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- 1. Top Navigation Bar -->
+  <nav>
+    <a href="index.html" class="brand">
+      <div class="brand-icon">🇹🇭</div>
+      <span>泰語學習週報</span>
+    </a>
+    <div style="display:flex; gap:10px;">
+      <a href="index.html" class="nav-btn">← 返回週報總覽</a>
+    </div>
+  </nav>
+
+  <!-- 載入中骨架 -->
+  <div id="loading-state">
+    <div class="spinner"></div>
+    <div style="color:var(--accent-gold); font-size:18px; font-weight:700;">連線雲端資料庫讀取教材中...</div>
+    <div style="color:var(--text-muted); font-size:14px; margin-top:8px;">即時自 Google Sheet (Thai_Weekly_DB) 載入結構化課程</div>
+  </div>
+
+  <!-- 動態渲染主容器 (預設隱藏) -->
+  <div id="lesson-content" style="display: none;">
+    <!-- 2. Editorial Magazine Header -->
+    <div class="mag-header">
+      <div class="mag-meta-row">
+        <span class="mag-tag-vol" id="tag-vol">VOL. -- ｜ 2026 第 -- 週</span>
+        <span id="tag-date">-- SATURDAY</span>
+        <span style="color:var(--text-thai);">SPECIAL EDITORIAL</span>
+      </div>
+      <h1 class="mag-title" id="lesson-title">載入中...</h1>
+      <p class="mag-subtitle" id="lesson-subtitle"></p>
+      
+      <div class="mag-footer-bar">
+        <div class="mag-meta-pills">
+          <span class="mag-pill">✍️ <b>編審</b>：Gemini Spark</span>
+          <span class="mag-pill" id="pill-time">⏱️ <b>閱讀時間</b>：約 10 分鐘</span>
+          <span class="mag-pill" id="pill-highlights">🎯 <b>本期重點</b>：載入中...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Learning Controls Toolbar (語音速率 + 遮蔽測驗自測開關) -->
+    <div class="controls-toolbar">
+      <div class="ctrl-group">
+        <span style="font-weight:600; color:#9ca3af;">語音速率：</span>
+        <button class="btn-toggle active" id="btn-rate-1" onclick="toggleRate(1.0)">1.0x 標準速</button>
+        <button class="btn-toggle" id="btn-rate-075" onclick="toggleRate(0.75)">0.75x 慢速跟讀</button>
+      </div>
+      <div class="ctrl-group">
+        <span style="font-weight:600; color:#9ca3af;">記憶自測：</span>
+        <button class="btn-toggle" id="btn-mask-toggle" onclick="toggleMask()">👁️ 遮蔽中文自測</button>
+      </div>
+    </div>
+
+    <!-- 4. Section 1: 實務核心單字庫 -->
+    <section>
+      <div class="sec-head">
+        <div class="sec-title"><span>📌</span> 實務核心單字庫</div>
+        <span class="sec-tag">精選高頻字</span>
+      </div>
+      <div class="vocab-grid" id="vocab-grid"></div>
+    </section>
+
+    <!-- 5. Section 2: 職場與日常情境句型 -->
+    <section>
+      <div class="sec-head">
+        <div class="sec-title"><span>💬</span> 職場與日常情境句型</div>
+        <span class="sec-tag">對話實戰</span>
+      </div>
+      <div id="sentences-list"></div>
+    </section>
+
+    <!-- 6. Section 3: 深度語法拆解 -->
+    <section>
+      <div class="sec-head">
+        <div class="sec-title"><span>🔍</span> 核心語法與句型解析</div>
+        <span class="sec-tag">文法剖析</span>
+      </div>
+      <div id="grammar-list"></div>
+    </section>
+
+    <!-- 7. Section 4: 文化時事與風俗隨筆 -->
+    <section>
+      <div class="sec-head">
+        <div class="sec-title"><span>🏮</span> 文化時事漫談</div>
+        <span class="sec-tag">人文背景</span>
+      </div>
+      <div class="culture-card" id="culture-card"></div>
+    </section>
+  </div>
+</div>
+
+<!-- 浮動提示 Toast -->
+<div id="toast"></div>
+
+<!-- 即時從 Google Sheet (GViz API) 載入並動態渲染邏輯 -->
+<script>
+  const SPREADSHEET_ID = "1DvxPjzNRlTRSMSXr6eaktU2dBQZSS9oWadNfT3_ZUTM";
+
+  function parseGViz(text) {
+    const raw = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1));
+    if (!raw.table || !raw.table.cols) return [];
+
+    const colLabels = raw.table.cols.map(c => (c.label ? c.label.trim() : ''));
+    const hasLabels = colLabels.some(l => l.length > 0);
+
+    let headers = [];
+    let dataRows = [];
+
+    if (hasLabels) {
+      headers = colLabels;
+      dataRows = raw.table.rows;
+    } else {
+      headers = raw.table.rows[0].c.map(cell => (cell && cell.v !== null) ? String(cell.v).trim() : '');
+      dataRows = raw.table.rows.slice(1);
+    }
+
+    return dataRows.map(row => {
+      const item = {};
+      headers.forEach((h, i) => {
+        if (h && row.c && row.c[i] && row.c[i].v !== null) {
+          item[h] = row.c[i].v;
+        } else if (h) {
+          item[h] = '';
+        }
+      });
+      return item;
+    });
+  }
+
+  async function fetchSheetData(sheetName) {
+    const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
+    const resp = await fetch(url);
+    const text = await resp.text();
+    return parseGViz(text);
+  }
+
+  async function initLesson() {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      let targetIssue = urlParams.get('issue');
+
+      // 平行拉取 4 個分頁資料
+      const [issues, vocab, sentences, grammar] = await Promise.all([
+        fetchSheetData('Issues'),
+        fetchSheetData('Vocab'),
+        fetchSheetData('Sentences'),
+        fetchSheetData('Grammar')
+      ]);
+
+      // 若未指定期數，取最新一期 published
+      let currentIssueData = null;
+      if (targetIssue) {
+        currentIssueData = issues.find(i => i.issue_code === targetIssue);
+      }
+      if (!currentIssueData) {
+        // 尋找已發布的最新期數（倒序）
+        const publishedIssues = issues.filter(i => i.status === 'published');
+        currentIssueData = publishedIssues[publishedIssues.length - 1] || issues[0];
+        targetIssue = currentIssueData.issue_code;
+      }
+
+      renderLesson(currentIssueData, vocab, sentences, grammar);
+    } catch (err) {
+      console.error("載入課程失敗:", err);
+      document.getElementById('loading-state').innerHTML = `
+        <div style="color:var(--accent-red); font-size:22px; font-weight:800; margin-bottom:12px;">⚠️ 課程資料載入失敗</div>
+        <div style="color:var(--text-muted); font-size:15px;">請確認網路連線或稍後再試。錯誤細節: ${err.message}</div>
+      `;
+    }
+  }
+
+  function renderLesson(issue, vocabAll, sentencesAll, grammarAll) {
+    const code = issue.issue_code;
+    document.title = `泰語學習週報｜${code} ${issue.title}`;
+    document.getElementById('tag-vol').innerText = `VOL. ${code} ｜ ${issue.year} 第 ${issue.week} 週`;
+    document.getElementById('tag-date').innerText = `${issue.publish_date} SATURDAY`;
+    document.getElementById('lesson-title').innerText = issue.title;
+    document.getElementById('lesson-subtitle').innerHTML = `
+      <span style="display:inline-block">${issue.subtitle_1}</span>
+      <span style="display:inline-block">${issue.subtitle_2}</span>
+    `;
+    document.getElementById('pill-time').innerHTML = `⏱️ <b>閱讀時間</b>：${issue.read_time}`;
+    document.getElementById('pill-highlights').innerHTML = `🎯 <b>本期重點</b>：${issue.highlights}`;
+
+    // 1. 渲染單字庫 (Core Vocab)
+    const issueVocab = vocabAll.filter(v => v.issue_code === code);
+    const coreVocab = issueVocab.filter(v => v.type === 'core');
+    const vocabGrid = document.getElementById('vocab-grid');
+    vocabGrid.innerHTML = coreVocab.map(v => `
+      <div class="vocab-card">
+        <div class="vocab-top">
+          <div>
+            <div class="thai-word">${v.thai}</div>
+            <div class="phonetic">${v.phonetic}</div>
+          </div>
+          <button class="btn-audio" onclick="playTTS('${v.thai}', this)" title="播放泰語標準發音">🔊</button>
+        </div>
+        <div class="meaning">${v.meaning}</div>
+      </div>
+    `).join('');
+
+    // 2. 渲染情境句型
+    const issueSentences = sentencesAll.filter(s => s.issue_code === code).sort((a,b) => Number(a.order) - Number(b.order));
+    const sentenceList = document.getElementById('sentences-list');
+    sentenceList.innerHTML = issueSentences.map(s => `
+      <div class="sentence-card">
+        <div>
+          <div class="sentence-thai">${s.thai}</div>
+          <div class="sentence-phonetic">${s.phonetic}</div>
+          <div class="sentence-meaning">${s.meaning}</div>
+        </div>
+        <button class="btn-audio" onclick="playTTS('${s.thai}', this)" title="播放例句發音">🔊</button>
+      </div>
+    `).join('');
+
+    // 3. 渲染語法解析
+    const issueGrammar = grammarAll.filter(g => g.issue_code === code).sort((a,b) => Number(a.point_num) - Number(b.point_num));
+    const grammarList = document.getElementById('grammar-list');
+    grammarList.innerHTML = issueGrammar.map((g, idx) => {
+      let examples = [];
+      try {
+        examples = JSON.parse(g.examples_json);
+      } catch (e) {
+        examples = [];
+      }
+      const pillsHtml = examples.map(eg => `
+        <div class="example-pill">
+          <span class="th">${eg.thai}</span>
+          <span style="color:#cbd5e1;">(${eg.phonetic}) ${eg.meaning}</span>
+          <button class="btn-audio-mini" onclick="playTTS('${eg.thai}', this)" title="播放發音">🔊</button>
+        </div>
+      `).join('');
+
+      return `
+        <div class="grammar-card">
+          <div class="grammar-card-title">💡 語法重點 ${idx + 1}：${g.title}</div>
+          <p style="color:#d1d5db; line-height:1.75;">${g.explanation_html}</p>
+          <div class="grammar-sub">常用搭配例句：</div>
+          <div class="pill-group">
+            ${pillsHtml}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // 4. 渲染文化時事與文化專題發音膠囊 (culture-vocab-sec)
+    const cultCard = document.getElementById('culture-card');
+    const cultVocab = issueVocab.filter(v => v.type === 'culture');
+    const cultPillsHtml = cultVocab.map(cv => `
+      <div class="example-pill">
+        <span class="th">${cv.thai}</span>
+        <span style="color:#cbd5e1;">(${cv.phonetic}) ${cv.meaning}</span>
+        <button class="btn-audio-mini" onclick="playTTS('${cv.thai}', this)" title="播放發音">🔊</button>
+      </div>
+    `).join('');
+
+    cultCard.innerHTML = `
+      <h3>🏛️ ${issue.culture_title}</h3>
+      ${issue.culture_body_html}
+      <div class="culture-callout">
+        <b>💡 線控經理實務備忘（Line Control Tourism Memo）：</b><br>
+        ${issue.culture_memo_html}
+      </div>
+      <div class="culture-vocab-sec" style="margin-top: 24px; border-top: 1px solid rgba(245, 158, 11, 0.25); padding-top: 20px;">
+        <div style="font-size: 17px; font-weight: 700; color: var(--accent-gold); margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
+          <span>🎧</span> 文化專題精選語彙（點擊按鈕聆聽標準泰語發音）：
+        </div>
+        <div class="pill-group">
+          ${cultPillsHtml || '<span style="color:var(--text-muted); font-size:14px;">本期文化特輯專題單字</span>'}
+        </div>
+      </div>
+    `;
+
+    // 顯示內容並隱藏載入中狀態
+    document.getElementById('loading-state').style.display = 'none';
+    document.getElementById('lesson-content').style.display = 'block';
+  }
+
+  // 語音播放系統 (Google TTS + Web Speech API 雙引擎備援)
+  let currentAudio = null;
+  let playbackRate = 1.0;
+  let isMasked = false;
+
+  function toggleRate(rate) {
+    playbackRate = rate;
+    document.getElementById('btn-rate-1').classList.toggle('active', rate === 1.0);
+    document.getElementById('btn-rate-075').classList.toggle('active', rate === 0.75);
+    if (currentAudio) currentAudio.playbackRate = rate;
+    showToast(`語音速度切換為 ${rate}x`);
+  }
+
+  function toggleMask() {
+    isMasked = !isMasked;
+    const btn = document.getElementById('btn-mask-toggle');
+    btn.classList.toggle('active', isMasked);
+    btn.innerText = isMasked ? '👁️‍🗨️ 恢復中文顯示' : '👁️ 遮蔽中文自測';
+
+    document.querySelectorAll('.meaning').forEach(el => {
+      el.classList.toggle('masked', isMasked);
+      if (!isMasked) el.onclick = null;
+      else el.onclick = () => el.classList.remove('masked');
+    });
+
+    document.querySelectorAll('.sentence-meaning').forEach(el => {
+      el.classList.toggle('masked', isMasked);
+      if (!isMasked) el.onclick = null;
+      else el.onclick = () => el.classList.remove('masked');
+    });
+
+    showToast(isMasked ? '已開啟遮蔽測驗（點擊即可翻開）' : '已恢復顯示中文');
+  }
+
+  function playTTS(text, btnElement) {
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio = null;
+    }
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    document.querySelectorAll('.btn-audio, .btn-audio-mini').forEach(b => b.classList.remove('playing'));
+
+    if (btnElement) {
+      btnElement.classList.add('playing');
+    }
+
+    showToast(`🔊 正在播放：${text}`);
+
+    const encoded = encodeURIComponent(text);
+    const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=th&q=${encoded}`;
+    
+    const audio = new Audio();
+    currentAudio = audio;
+    audio.playbackRate = playbackRate;
+
+    const cleanup = () => {
+      if (btnElement) btnElement.classList.remove('playing');
+      if (currentAudio === audio) currentAudio = null;
+    };
+
+    audio.onended = cleanup;
+
+    // 若 Google 語音因任何網路因素異常，自動切換至 Web Speech API 原生泰語發音
+    audio.onerror = () => {
+      console.warn('Google TTS 載入受阻，自動切換至 Web Speech API 原生語音播放');
+      playWebSpeech(text, btnElement);
+    };
+
+    audio.src = audioUrl;
+    audio.play().catch(e => {
+      console.warn('Google TTS 播放異常，切換至 Web Speech API:', e);
+      playWebSpeech(text, btnElement);
+    });
+  }
+
+  function playWebSpeech(text, btnElement) {
+    if (!('speechSynthesis' in window)) {
+      showToast('⚠️ 瀏覽器不支援語音播放');
+      if (btnElement) btnElement.classList.remove('playing');
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'th-TH';
+    utterance.rate = playbackRate;
+
+    const voices = window.speechSynthesis.getVoices();
+    const thaiVoice = voices.find(v => v.lang === 'th-TH' || v.lang.toLowerCase().includes('th'));
+    if (thaiVoice) {
+      utterance.voice = thaiVoice;
+    }
+
+    utterance.onend = () => {
+      if (btnElement) btnElement.classList.remove('playing');
+    };
+
+    utterance.onerror = (e) => {
+      console.error('Web Speech 播放錯誤:', e);
+      if (btnElement) btnElement.classList.remove('playing');
+      showToast('⚠️ 語音播放受阻，請檢查音效設定');
+    };
+
+    window.speechSynthesis.speak(utterance);
+  }
+
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.innerText = msg;
+    toast.style.display = 'flex';
+    clearTimeout(toast.timer);
+    toast.timer = setTimeout(() => {
+      toast.style.display = 'none';
+    }, 2000);
+  }
+
+  // 初始化載入
+  window.addEventListener('DOMContentLoaded', initLesson);
+</script>
+</body>
+</html>

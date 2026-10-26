@@ -1,6 +1,6 @@
 # Thai_Weekly (泰語學習週報自動化發布系統) 專案協作手冊
 
-> **專案版本**：v2.0 (GitHub Actions 原地一條龍全自動發布版)  
+> **專案版本**：v3.0 (Google Sheet 結構化資料庫驅動架構 ｜ Sheet-as-a-CMS)  
 > **最後更新日期**：2026-10-26  
 > **維護者**：Martin × Antigravity (Anti) × Gemini API
 
@@ -9,165 +9,160 @@
 ## 1. 專案願景與協作架構 (Vision & Pipeline)
 
 ### 1.1 願景 (Vision)
-打造一個**全自動、零手動維護、支援原地標準語音播放與卡片互動自測**的現代化泰語自主學習網站。每週六定時自動編纂精選時事與生活實務主題，享有沈浸式泰國皇室紫金雜誌閱讀體驗、雙引擎 TTS 語音發音與高效率學習工具。
+打造一個**全自動、零手動維護、支援原地標準語音播放與卡片互動自測**的現代化泰語自主學習網站。全站採用**泰國皇室紫金風（Dark Editorial Magazine UI）**，支援雙引擎 TTS 語音發音與沉浸式大字級排版。
 
-### 1.2 v2.0 原地一條龍全自動流水線 (End-to-End Cloud Pipeline)
+### 1.2 v3.0 結構化資料庫驅動架構 (Sheet-as-a-CMS)
 
-在 v2.0 架構中，系統**徹底廢除 Google Drive 中轉站與 Gemini 聊天室排程**，徹底根治以下三大痛點：
-1. **Google Drive 根目錄權限卡死**（避免服務帳號或檔案存取因雲端硬碟權限受限）。
-2. **真人確認卡攔截**（避免聊天室排程等待人工點擊確認卡而停滯中斷）。
-3. **時序顛倒 404 漏洞**（強制加入 HTTP 200 OK 輪詢驗證機制，確保 GitHub Pages 部署完畢後才寄信）。
+在 v3.0 重構中，系統徹底邁向 **「Google Sheet-as-a-CMS 驅動架構」**，全面解決以下痛點：
+- **消滅檔案搬移失敗與 Git Push 依賴**：每週出刊只需將結構化資料寫入 Google Sheet，前端網頁即時動態渲染出最新期數，徹底免去每週生成靜態 HTML 與 Git Commit Push 的維護負擔。
+- **根絕真人確認卡與流程攔截**：採用 Google Apps Script 原生 `MailApp.sendEmail`，享受 Google 帳戶每日原生發信額度，無真人確認卡阻擋。
+- **根除 404 找不到網頁時序爭執**：資料一入庫，前端 `lesson.html?issue=YYwWW` 隨即生效，信件中的閱讀按鈕點擊必有網頁！
 
 ```mermaid
 flowchart TD
-    A["GitHub Actions 排程觸發 (每週六 09:00 CST / 01:00 UTC)"] --> B["執行 scripts/auto_publish_weekly.py --step generate"]
-    B --> C["讀取 index.html 預告卡 ➔ 呼叫 Gemini API 產出教材 JSON"]
-    C --> D["套用 lesson_template.html 產出 YYwWW.html ＆ 更新 index.html ＆ 產出 email_YYwWW.html"]
-    D --> E["Git Commit & Push 至 main 分支"]
-    E --> F["GitHub Pages 雲端部署構建中..."]
-    F --> G["執行 scripts/auto_publish_weekly.py --step verify-and-send"]
-    G --> H{"輪詢驗證線上網址是否 HTTP 200 OK？\n(每 10s 檢查一次，最多 3 分鐘)"}
-    H -- "尚未就緒" --> H
-    H -- "HTTP 200 OK (部署確認就緒)" --> I["透過 Gmail SMTP 獨立發送 3 封一對一專屬問候信"]
-    I --> J["讀者收到專屬信件 ➔ 點擊直達線上特輯（零 404）"]
+    A["時間驅動排程 (每週六 09:00 台北時間)"] --> B["Google Apps Script 執行 weeklyAutoPublish()"]
+    B --> C["呼叫 Google Gemini API 產出教材 JSON (嚴格台灣繁中)"]
+    C --> D["SpreadsheetApp 寫入 Google Sheet 四大分頁\n(Issues, Vocab, Sentences, Grammar)"]
+    D --> E["資料入庫即刻生效！前端即時可用"]
+    D --> F["MailApp.sendEmail 獨立發送 3 封一對一專屬問候信"]
+    
+    subgraph 前端即時讀取 (GitHub Pages)
+        G["讀者造訪 index.html 或 lesson.html?issue=YYwWW"]
+        G --> H["Google Visualization JSON API (GViz) 即時查詢試算表"]
+        H --> I["動態渲染紫金首頁 Hero、手風琴歸檔或課程四大專欄"]
+    end
+
+    F --> G
     
     style A fill:#1e293b,stroke:#38bdf8,color:#fff
     style B fill:#1e293b,stroke:#a855f7,color:#fff
     style C fill:#0f172a,stroke:#38bdf8,color:#fff
-    style D fill:#1e293b,stroke:#ec4899,color:#fff
+    style D fill:#047857,stroke:#10b981,color:#fff
     style E fill:#0284c7,stroke:#f59e0b,color:#fff
-    style F fill:#0f172a,stroke:#a855f7,color:#fff
-    style G fill:#1e293b,stroke:#38bdf8,color:#fff
-    style H fill:#b45309,stroke:#f59e0b,color:#fff
-    style I fill:#047857,stroke:#10b981,color:#fff
-    style J fill:#1e293b,stroke:#fde047,color:#fff
+    style F fill:#b45309,stroke:#f59e0b,color:#fff
+    style G fill:#1e293b,stroke:#fde047,color:#fff
+    style H fill:#1e293b,stroke:#38bdf8,color:#fff
+    style I fill:#231738,stroke:#f59e0b,color:#fff
 ```
-
-### 1.3 核心角色與分工
-* **Martin (主理人)**：定義每週課程走向、審閱線上站點體驗與整體演進方向。
-* **GitHub Actions (雲端全自動化心臟)**：
-  * 每週六 09:00（台灣時間）定時喚醒，執行原地一條龍腳本。
-  * 呼叫 Google Gemini API 自動完成高品質繁中內容生成。
-  * 自動套版、更新門戶首頁、Git Push 與 GitHub Pages 部署。
-  * 嚴格防呆把關：確認 HTTP 200 成功後，透過 Gmail SMTP 獨立寄發專屬電子報。
 
 ---
 
-## 2. 目錄與檔案結構規範 (Repository Structure)
+## 2. 雲端資料庫規格 (Database Specifications)
+
+* **目標資料夾**：`泰文小短篇` (Folder ID: `1xTWvfaAEIqzHFpDKtG7ipdMBZf8PYbBA`)
+* **試算表名稱**：`Thai_Weekly_DB（泰語學習週報資料庫）`
+* **試算表 ID**：[`1DvxPjzNRlTRSMSXr6eaktU2dBQZSS9oWadNfT3_ZUTM`](https://docs.google.com/spreadsheets/d/1DvxPjzNRlTRSMSXr6eaktU2dBQZSS9oWadNfT3_ZUTM/edit)
+* **存取權限**：公開（知道連結的任何人均可檢視，無需 API Key，零 CORS 限制）
+* **線上編輯網址**：[開啟 Google Sheet 資料庫](https://docs.google.com/spreadsheets/d/1DvxPjzNRlTRSMSXr6eaktU2dBQZSS9oWadNfT3_ZUTM/edit)
+
+### 2.1 四大工作表 (Tabs) 結構與欄位定義
+
+1. **`Issues`（期數主表）**
+   - `issue_code` (如 26w43) ｜ `year` ｜ `week` ｜ `publish_date` ｜ `status` (published / upcoming) ｜ `title` ｜ `subtitle_1` ｜ `subtitle_2` ｜ `read_time` ｜ `highlights` ｜ `culture_title` ｜ `culture_body_html` ｜ `culture_memo_html` ｜ `email_subject` ｜ `email_intro_html` ｜ `email_highlights_html`
+2. **`Vocab`（單字庫）**
+   - `issue_code` ｜ `type` (`core` 核心字 / `culture` 文化專題單字) ｜ `thai` ｜ `phonetic` ｜ `meaning`
+3. **`Sentences`（情境句型庫）**
+   - `issue_code` ｜ `order` (1~5) ｜ `thai` ｜ `phonetic` ｜ `meaning`
+4. **`Grammar`（語法解析庫）**
+   - `issue_code` ｜ `point_num` (1~2) ｜ `title` ｜ `explanation_html` ｜ `examples_json` (例句陣列 JSON：`[{"thai": "...", "phonetic": "...", "meaning": "..."}]`)
+
+---
+
+## 3. 前端動態渲染系統架構 (Frontend Dynamic CMS)
 
 ```text
 Thai_Weekly/
-├── .github/
-│   └── workflows/
-│       └── weekly_auto_publish.yml # 每週六 09:00 原地一條龍全自動出刊與寄信 Workflows
-├── scripts/
-│   └── auto_publish_weekly.py      # 一條龍核心腳本（Gemini API 產出、套版、防呆檢驗、Gmail SMTP 寄信）
+├── index.html                  # 站點首頁（即時讀取 Issues 分頁，動態渲染 Spotlight Hero、近期特輯與歷史手風琴）
+├── lesson.html                 # 動態課程頁（依 ?issue=YYwWW 參數即時載入渲染四大專題，支援語音發音與遮蔽自測）
+├── 26w41.html                  # 歷史相容跳轉頁（內嵌自動導向 lesson.html?issue=26w41）
+├── 26w42.html                  # 歷史相容跳轉頁（內嵌自動導向 lesson.html?issue=26w42）
+├── 26w43.html                  # 歷史相容跳轉頁（內嵌自動導向 lesson.html?issue=26w43）
+├── favicon.svg                 # 專屬深邃曜石黑 × 科技藍漸層泰語學習 App 圖標
 ├── templates/
-│   └── lesson_template.html        # 紫金雜誌版標準 HTML 骨架（34px 單字、25px 句子、雙引擎 TTS）
-├── favicon.svg                     # 專屬深邃曜石黑 × 科技藍漸層泰語學習 App 圖標
-├── index.html                      # 站點首頁（方案 1 置頂封面 + 方案 4 即時搜尋手風琴抽屜）
-├── 26w41.html                      # 第 1 期課程實體頁（飲食預訂實務・語法名詞化與九皇齋節）
-├── 26w42.html                      # 第 2 期課程實體頁（交通指引・機場退稅與水燈節前哨）
-├── 26w43.html                      # 第 3 期課程實體頁（飯店入住退房・房型設施與客訴溝通實務）
-├── email_26w43.html                # 26w43 專屬皇室紫金 HTML 電子報模板
-├── HANDBOOK.MD                     # 本專案協作手冊（規格與最高指引）
-└── README.md                       # 專案概覽說明
+│   └── lesson_template.html    # 紫金版面設計基準模板（供動態骨架參考）
+├── gas/
+│   └── Code.gs                 # 綁定 Google Apps Script 原生自動化腳本
+├── scripts/
+│   ├── Thai_Weekly_DB.xlsx     # 結構化資料庫本地工作簿快照
+│   ├── create_sheet_from_xlsx.py # 試算表轉換建立工具
+│   ├── deploy_gas.py           # Google Apps Script 遠端程式碼部署工具
+│   ├── parse_lessons.py        # 歷史 HTML 解析工具
+│   └── db_config.json          # 資料庫 ID 與端點快照設定檔
+└── HANDBOOK.MD                 # 本專案協作手冊（最高指導指引）
 ```
 
-* **每週獨立課程命名規則**：`YYwWW.html`
-  * `YY`：公元年份後兩碼（例如 `2026` 年為 `26`）
-  * `w`：固定小寫字母 `w`（表示 week）
-  * `WW`：兩位數週次（01 ~ 53，例如第 43 週為 `43`，檔名即為 `26w43.html`）
+### 3.1 視覺與技術規範 (Design & Interaction System)
+* **配色系統**：
+  * 背景基底：`--bg-base: #0d0814` (暹羅暗夜紫底)
+  * 卡片表層：`--bg-card: #231738` (帝王紫卡片)
+  * 金箔高光：`--accent-gold: #f59e0b` (泰皇金箔金)
+  * 泰文專屬：`--text-thai: #fde047` (黑底金字 34px 大字體)
+* **字級與容器**：
+  * 桌機容器寬度：1160px（大螢幕自動擴展至 1240px）。
+  * 核心單字 34px、情境例句 25px、內文 17.5px。
+* **安全標頭**：`<meta name="referrer" content="no-referrer">`。
+* **雙引擎語音播放系統**：
+  * 第一引擎：Google TTS 原地串流 (`audio/mpeg`)。
+  * 第二引擎：自動備援 Web Speech API 原生合成語音 (`th-TH`)。
+  * 文化專題精選單字發音：文末必備 8 組文化單字發音按鈕 (`culture-vocab-sec`) 🔊。
+* **相容性保證**：
+  * 舊信件點擊 `26w41.html`、`26w42.html`、`26w43.html` 均自動無縫跳轉至 `lesson.html?issue=26wXX`，舊連結 100% 正常開啟。
 
 ---
 
-## 3. 技術與 UI / UX 規範 (Design & Interaction System)
+## 4. Google Apps Script 自動化中樞
 
-### 3.1 視覺風格：泰國皇室紫金風 (Dark Editorial Magazine UI)
-全站統一採用高對比、護眼且極具大皇宮金箔質感的配色系統：
+* **綁定試算表**：`Thai_Weekly_DB`
+* **Script ID**：[`1fJ_JIB0aET_pLwDOJasv47YzSBn3xk7NhW3h96919NRd2opJpq-VOOmA`](https://script.google.com/home/projects/1fJ_JIB0aET_pLwDOJasv47YzSBn3xk7NhW3h96919NRd2opJpq-VOOmA/edit)
+* **線上指令碼編輯器**：[開啟 Google Apps Script 控制台](https://script.google.com/home/projects/1fJ_JIB0aET_pLwDOJasv47YzSBn3xk7NhW3h96919NRd2opJpq-VOOmA/edit)
 
-```css
-:root {
-  /* 背景層次 */
-  --bg-base: #0d0814;          /* 暹羅暗夜紫底 */
-  --bg-surface: #170f24;       /* 皇室深紫表層 */
-  --bg-card: #231738;          /* 帝王紫卡片背景 */
-  --bg-card-hover: #2f1f4a;    /* 卡片懸浮高光 */
-  --border: #443063;           /* 沉穩紫金邊框 */
-  --border-accent: #f59e0b;    /* 泰皇金箔高光邊框 */
+### 4.1 試算表上方專屬操作選單
+開啟試算表時，上方功能選單會自動出現 **「🚀 週報自動化控制台」**：
+1. **▶️ 立即手動執行出刊與寄信**：手動立即觸發當週 AI 出刊流水線。
+2. **📧 立即補寄 26w43 給 Annie 與 昌哥**：一鍵將 26w43 導讀信獨立補寄給 Annie 與 昌哥。
+3. **⏰ 設定每週六 09:00 自動出刊排程**：一鍵建立每週六 09:00 的時間驅動排程。
+4. **🔑 寫入/更新 GEMINI_API_KEY 至指令碼屬性**：一鍵將 Gemini API 金鑰持久化寫入指令碼屬性 (`PropertiesService.getScriptProperties`)。
 
-  /* 皇家金色系統（佛寺金箔與尊爵榮耀） */
-  --accent-gold: #f59e0b;       /* 泰皇金箔金（主要按鈕、標題裝飾） */
-  --accent-gold-light: #fde68a; /* 亮香檳金（重點文字與標籤） */
-  --text-thai: #fde047;         /* 泰文字級專屬金色（黑底金字極致辨識度） */
-  --gold-glow: rgba(245, 158, 11, 0.28); /* 金色發光光暈 */
+### 4.2 API 金鑰管理機制 (Script Properties)
+* **指令碼屬性**：全面採用 Apps Script 雲端原生指令碼屬性庫 (`PropertiesService.getScriptProperties`)，專案程式碼與 Git 倉庫中絕不硬編碼任何 API Key。
+* **安全維護**：可隨時透過試算表頂部選單「🚀 週報自動化控制台 ➔ 🔑 寫入/更新 GEMINI_API_KEY」彈窗更新金鑰，零外洩風險。
 
-  /* 皇室紫色系統 */
-  --primary: #a855f7;          /* 皇家紫羅蘭色（功能按鈕、標籤） */
-  --primary-hover: #c084fc;    /* 亮紫高光 */
-  --primary-glow: rgba(168, 85, 247, 0.3);
-
-  /* 文字與中性色 */
-  --text-main: #f8fafc;        /* 象牙白主文字 */
-  --text-muted: #a78bfa;       /* 柔紫灰輔助次要文字 */
-}
-```
-
-### 3.2 字級規格與版面佈局
-* **容器寬度**：桌機主要容器 1160px，視窗 `>= 1400px` 自動延展至 1240px。
-* **字級規格**：
-  * **34px 核心泰語單字**：黑底金字高對比，音標清晰。
-  * **25px 情境泰語句型**：加強跟讀與實務應用辨識。
-  * **17.5px 正文閱讀**：行高 1.7 ~ 1.8，搭配柔和象牙白。
-
-### 3.3 原地語音雙引擎播放系統 (Dual-Engine Audio & Referrer-Policy)
-1. **安全性防護（必備）**：
-   ```html
-   <meta name="referrer" content="no-referrer">
-   ```
-   * 移除請求中的 `Referer` 標頭，防止 Google TTS 伺服器因來源阻擋回傳 404。
-2. **雙引擎備援機制**：
-   * **第一引擎 (Primary)**：Google 泰語標準 TTS 原地串流 (`audio/mpeg`)。
-   * **第二引擎 (Fallback)**：若 Google TTS 受阻，無縫降級切換至瀏覽器原生 **Web Speech API** (`SpeechSynthesisUtterance`，指定 `th-TH`)。
-3. **文化單字發音擴充 (`culture-vocab-sec`)**：
-   * 每期文化專題文末必備 8 組文化專題精選語彙，各附獨立發音按鈕 🔊。
-
-### 3.4 門戶首頁收納與檢索機制（方案 1 ＋ 方案 4）
-* **Spotlight Hero**：最新刊置頂呼吸燈大封面，直覺進入最新課程。
-* **近期特輯區 (`#recent-grid`)**：展示最新發布之期數，末張卡片自動更新為「下期即將推出 ⏳」預告。
-* **歷史手風琴抽屜 (`#grid-2026`)**：過往期數依年份收納，**預設為折疊狀態**。
-* **毫秒級即時搜尋**：輸入任意字詞即強制展開手風琴抽屜進行全域檢索；清除關鍵字後自動恢復折疊。
-
----
-
-## 4. 自動化環境變數與 GitHub Secrets 設定
-
-為了讓 GitHub Actions 能原地完成生成與寄信，必須在 GitHub 倉庫設定以下 Secrets：
-
-| 變數名稱 | 說明 | 範例 / 來源 |
-| :--- | :--- | :--- |
-| `GEMINI_API_KEY` | Google AI Studio 產生的 Gemini API Key | 於 [Google AI Studio](https://aistudio.google.com/) 取得 |
-| `GMAIL_USER` | 發信用的 Gmail 帳號 | `voyager.martin@gmail.com` |
-| `GMAIL_APP_PASSWORD` | Google 帳戶 16 位元應用程式專用密碼 | 於 [Google 帳戶安全性](https://myaccount.google.com/apppasswords) 產生 |
-
-### 4.1 收件人清單與個別問候規範
-系統發送電子郵件時，採用**一對一獨立發送**，嚴禁將所有人合併列在 `To` 或 `Cc` 中：
-
-1. `("Martin", "voyager.martin@gmail.com")` ➔ 問候語：`早安 Martin！`
-2. `("Annie", "anniechen0209@gmail.com")` ➔ 問候語：`早安 Annie！`
-3. `("昌哥", "tienzitw@yahoo.com.tw")` ➔ 問候語：`早安 昌哥！`
+### 4.3 收件人一對一寄信規範 (MailApp.sendEmail)
+迴圈分三次個別獨立寄送，`To` 僅包含該位收件者，信首呈現專屬稱謂（嚴禁合併發送）：
+1. `voyager.martin@gmail.com` ➔ `早安 Martin！`
+2. `anniechen0209@gmail.com` ➔ `早安 Annie！`
+3. `tienzitw@yahoo.com.tw` ➔ `早安 昌哥！`
 
 ---
 
 ## 5. 里程碑記錄 (Milestones)
 
-- [x] **v1.0**：全站深色雜誌風升級為「大皇宮金箔 × 暹羅暗夜紫」主題。
+- [x] **v1.0**：視覺風格升級為「大皇宮金箔 × 暹羅暗夜紫」雜誌風。
 - [x] **v1.1**：完成 34px 大字級與 1160px/1240px 桌機沉浸式排版升級。
-- [x] **v1.2**：解決 Google TTS 播放失敗問題，完成 `<meta name="referrer">` 防護與 Web Speech API 雙引擎備援。
-- [x] **v1.3**：完成首頁「方案 1 ＋ 方案 4」檢索與折疊收納架構。
-- [x] **v2.0 (重大升級)**：
-  - [x] 發布 **26w43《飯店入住退房・房型設施與客訴溝通實務》**，更新首頁 Spotlight Hero。
-  - [x] 擴充文化專題 8 組精選文化單字與原地發音功能 (`culture-vocab-sec`)。
-  - [x] 徹底廢除 Google Drive 中轉站與 Gemini 聊天室排程，全面升級為 **GitHub Actions 原地一條龍全自動發布系統**。
-  - [x] 建立 `scripts/auto_publish_weekly.py` 與 `.github/workflows/weekly_auto_publish.yml`。
-  - [x] 實作 GitHub Pages 上線 HTTP 200 輪詢防呆機制與 Gmail SMTP 獨立一對一寄信。
+- [x] **v1.2**：解決 Google TTS 跨域播放問題，完成雙引擎語音備援機制。
+- [x] **v1.3**：完成首頁「方案 1 ＋ 方案 4」檢索與折疊收納抽屜。
+- [x] **v2.0**：移除本地排程依賴，上線 26w43 特輯與文化專題發音膠囊。
+- [x] **v3.0 (重大架構升級 ｜ Sheet-as-a-CMS)**：
+  - [x] 建立結構化試算表資料庫 `Thai_Weekly_DB`（涵蓋 Issues, Vocab, Sentences, Grammar 四大分頁）。
+  - [x] 將 26w41、26w42、26w43 完整解析入庫，並配置 26w44 預告資料列。
+  - [x] 前端網站改為純動態即時渲染架構：建立 `lesson.html` 並升級 `index.html`。
+  - [x] 舊期數檔案無縫配置重定向機制，確保歷史連結 100% 不失效。
+  - [x] 建立綁定 Google Apps Script 中樞（含 Gemini 出刊生成、MailApp 一對一獨立寄信與自訂工具列選單）。
+
+---
+
+## 6. 下階段開發演進展望 (Next Phase Roadmap)
+
+本節作為 v3.0 穩定運行後，後續迭代與學習體驗擴充的起點基準：
+
+1. **學習歷程本地持久化 (Local Progress Tracking)**：
+   * 利用瀏覽器 `localStorage` 記錄讀者的「已讀期數徽章」、「核心單字收藏本 (Saved Vocab)」。
+   * 在首頁卡片上呈現輕量化已讀進度狀態（如：`✓ 已閱讀`）。
+2. **單元測驗模式增強 (Interactive Learning Enhancements)**：
+   * 提供更精細的「遮蔽模式」：獨立切換遮蔽「泰文單字」、「音標」或「中文釋義」。
+   * 單元快速自測：於 `lesson.html` 底部整合隨機 3 題快速選擇測驗，即時檢視學習成效。
+3. **語音播放自訂記憶 (Audio Preferences)**：
+   * 記憶讀者自選之語音速率（1.0x 或 0.75x），換頁時自動保持偏好。
+   * 新增發音波形動畫或跟讀計時器。
+4. **多媒體內容延伸 (Rich Media Support)**：
+   * 評估在 Google Sheet 中增加欄位支援短影片嵌入（YouTube Shorts）或情境音檔直連，豐富每週文化專題深度。
