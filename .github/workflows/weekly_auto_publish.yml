@@ -1,0 +1,50 @@
+name: Weekly Thai Lesson Auto-Publish & Email
+
+on:
+  schedule:
+    # 每週六台灣時間早上 09:00 準時執行 (UTC 01:00)
+    - cron: '0 1 * * 6'
+  workflow_dispatch: # 支援手動一鍵觸發測試
+
+permissions:
+  contents: write
+
+jobs:
+  publish-and-notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: pip install google-genai requests beautifulsoup4
+
+      - name: Generate Weekly Lesson & Update Index
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python scripts/auto_publish_weekly.py --step generate
+
+      - name: Commit and Push to GitHub Pages
+        run: |
+          git config --global user.name "thai-weekly-bot"
+          git config --global user.email "voyager.martin@gmail.com"
+          git add *.html
+          if git diff --staged --quiet; then
+            echo "No HTML changes to commit."
+          else
+            git commit -m "Auto-publish Thai Weekly $(date +'%Y-%m-%d')"
+            git push origin main
+          fi
+
+      - name: Wait for GitHub Pages Live (Verify HTTP 200) & Send Individual Emails
+        env:
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        run: python scripts/auto_publish_weekly.py --step verify-and-send

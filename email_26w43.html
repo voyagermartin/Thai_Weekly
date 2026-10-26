@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0d0814; color: #f8fafc; margin: 0; padding: 24px; }
+  .email-container { max-width: 640px; margin: 0 auto; background: #170f24; border: 1px solid #443063; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+  .header { background: linear-gradient(135deg, #231738 0%, #3b1d61 100%); padding: 32px 28px; border-bottom: 2px solid #f59e0b; }
+  .tag { display: inline-block; background: rgba(245, 158, 11, 0.2); color: #fde68a; border: 1px solid #f59e0b; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 12px; }
+  .title { color: #ffffff; font-size: 24px; font-weight: 800; margin: 0 0 8px 0; line-height: 1.35; }
+  .subtitle { color: #cbd5e1; font-size: 15px; margin: 0; line-height: 1.6; }
+  .content { padding: 28px; }
+  .greeting { font-size: 17px; font-weight: 700; color: #fde68a; margin-bottom: 16px; }
+  .intro-text { font-size: 15.5px; line-height: 1.8; color: #e2e8f0; margin-bottom: 24px; }
+  .highlight-card { background: #231738; border: 1px solid #443063; border-left: 4px solid #f59e0b; border-radius: 10px; padding: 18px 20px; margin-bottom: 24px; }
+  .highlight-title { font-size: 16px; font-weight: 700; color: #fde047; margin-bottom: 12px; }
+  .highlight-item { font-size: 14.5px; line-height: 1.7; color: #cbd5e1; margin-bottom: 10px; }
+  .highlight-item:last-child { margin-bottom: 0; }
+  .btn-wrapper { text-align: center; margin: 32px 0 24px 0; }
+  .btn-cta { display: inline-block; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #0d0814 !important; font-size: 16px; font-weight: 800; text-decoration: none; padding: 14px 32px; border-radius: 30px; box-shadow: 0 4px 18px rgba(245, 158, 11, 0.35); }
+  .footer { background: #0f0a18; padding: 20px 28px; text-align: center; border-top: 1px solid #231738; font-size: 13px; color: #a78bfa; line-height: 1.6; }
+  .footer a { color: #fde68a; text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="email-container">
+  <div class="header">
+    <div class="tag">VOL. 26w43 ｜ 2026.10.24 泰國皇室紫金特輯</div>
+    <h1 class="title">微笑之國的款待密碼：從星級飯店 Check-in 到「ใจเย็นๆ」的高情商溝通藝術</h1>
+    <p class="subtitle">飯店入住退房・房型設施・狀態存留助詞與泰式小費禮儀文化誌</p>
+  </div>
+  
+  <div class="content">
+    <div class="greeting">早安 {{RECIPIENT_NAME}}！</div>
+    
+    <div class="intro-text">
+      推開曼谷昭披耶河畔星級飯店厚重的玻璃大門，迎面而來的是揉合著香茅與蘭花氣息的微涼空氣、迎賓人員優雅低頭的雙手合十禮（ไหว้ - Wai），以及一杯沁人心脾的蝶豆花迎賓茶。<br><br>
+      在泰國的旅宿體驗中，從櫃台報上姓名辦理入住、寄放行李，到偶遇房間冷氣不夠涼、或是需要調整為兩張單人床，懂得以泰式「ใจเย็นๆ（心平氣和）」的溫和語氣開口請求協助，不僅能瞬間拉近與飯店人員的距離，更常能換來超乎預期的熱情款待與升等禮遇。
+    </div>
+
+    <div class="highlight-card">
+      <div class="highlight-title">✨ 本期三大核心專欄亮點</div>
+      <div class="highlight-item"><b>1. 🏨 星級飯店入住與報修字庫</b>：精選 9 個旅宿核心詞（如 <code>ค่ามัดจำ</code> 押金、<code>คีย์การ์ด</code> 房卡、<code>แอร์ไม่เย็น</code> 冷氣不涼），並拆解最易混淆的「<code>ห้องเตียงเดี่ยว</code>（大床房）vs <code>ห้องเตียงคู่</code>（雙床房）」字義陷阱！</div>
+      <div class="highlight-item"><b>2. 🧭 語法思維破局點</b>：剖析動詞後加上 <code>ไว้ (wái)</code> 表達「預先做好、留著備用」（如預訂好房間、寄放行李），以及高情商委婉報修公式 <code>ไม่ค่อย...（不太…）+ ช่วย...หน่อย（麻煩稍微…）</code>。</div>
+      <div class="highlight-item"><b>3. 🏮 泰式款待哲學與小費文化誌（新增文化單字發音 🔊）</b>：深入探索 <code>ใจเย็นๆ (Jai Yen-Yen)</code> 與 <code>เกรงใจ (Kreng-Jai)</code> 處世基因、飯店小費「必給紙鈔（<code>ธนบัตร</code>）、忌給硬幣（<code>เหรียญ</code>）」禮儀，文末更全新附上 8 組文化專題單字原地發音！</div>
+    </div>
+
+    <div class="btn-wrapper">
+      <a href="https://voyagermartin.github.io/Thai_Weekly/26w43.html" class="btn-cta">
+        👉 點此前往 26w43 線上數位雜誌特輯
+      </a>
+      <div style="font-size: 13px; color: #a78bfa; margin-top: 10px;">
+        💡 支援網頁原地 1.0x / 0.75x 雙引擎語音播放、文化單字發音與卡片遮蔽記憶測驗
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    泰語學習週報｜全期索引門戶：<a href="https://voyagermartin.github.io/Thai_Weekly/index.html">voyagermartin.github.io/Thai_Weekly</a><br>
+    由 Gemini Spark 自動編審出刊 ｜ 敬祝閱讀愉快，週末充實順遂！
+  </div>
+</div>
+</body>
+</html>
