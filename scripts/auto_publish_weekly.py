@@ -261,7 +261,7 @@ def generate_lesson_content(issue_meta, upcoming_info, api_key):
       "深度文化隨筆第 2 段（實務情境應對、避雷破局點）",
       "深度文化隨筆第 3 段（相關風俗禮儀或文化細節）"
     ],
-    "callout": "線控經理實務備忘（Line Control Tourism Memo）：針對該主題提出極具同業實務價值的避坑指南或專業防呆法則。",
+    "callout": "線控經理實務備忘（Tour Product Manager Memo）：針對該主題提出極具同業實務價值的避坑指南或專業防呆法則。",
     "vocab_items": [
       // 嚴格產出 8 組文化專題關鍵精選語彙（供原地標準語音發音使用）
       {{
@@ -390,7 +390,7 @@ def render_lesson_html(data, issue_meta):
 {culture_paras}
       
       <div class="culture-callout">
-        <b>💡 線控經理實務備忘（Line Control Tourism Memo）：</b><br>
+        <b>💡 線控經理實務備忘（Tour Product Manager Memo）：</b><br>
         {clean_callout}
       </div>
 

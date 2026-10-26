@@ -440,7 +440,7 @@ function callGeminiGenerate(upcomingIssue) {
   "culture": {
     "title": "文化專題標題",
     "paragraphs": ["第1段", "第2段", "第3段"],
-    "callout": "線控經理實務備忘（Line Control Tourism Memo）",
+    "callout": "線控經理實務備忘（Tour Product Manager Memo）",
     "vocab_items": [
       {"thai": "泰文詞", "phonetic": "拼音", "meaning": "中文釋義"}
     ]
