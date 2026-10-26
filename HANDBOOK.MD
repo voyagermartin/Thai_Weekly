@@ -1,8 +1,9 @@
 # Thai_Weekly (泰語學習週報自動化發布系統) 專案協作手冊
 
-> **專案版本**：v3.0 (Google Sheet 結構化資料庫驅動架構 ｜ Sheet-as-a-CMS)  
+> **專案版本**：v3.0 (Sheet-as-a-CMS 結構化資料庫與零洩漏安全架構完善版)  
 > **最後更新日期**：2026-10-26  
-> **維護者**：Martin × Antigravity (Anti) × Gemini API
+> **維護者**：Martin × Antigravity (Anti) × Gemini API  
+> **線上站點**：[Thai_Weekly GitHub Pages](https://voyagermartin.github.io/Thai_Weekly/)
 
 ---
 
@@ -17,32 +18,35 @@
 - **消滅檔案搬移失敗與 Git Push 依賴**：每週出刊只需將結構化資料寫入 Google Sheet，前端網頁即時動態渲染出最新期數，徹底免去每週生成靜態 HTML 與 Git Commit Push 的維護負擔。
 - **根絕真人確認卡與流程攔截**：採用 Google Apps Script 原生 `MailApp.sendEmail`，享受 Google 帳戶每日原生發信額度，無真人確認卡阻擋。
 - **根除 404 找不到網頁時序爭執**：資料一入庫，前端 `lesson.html?issue=YYwWW` 隨即生效，信件中的閱讀按鈕點擊必有網頁！
+- **雲端安全零暴露防禦**：API 金鑰由 Google Apps Script 雲端原生指令碼屬性庫 (`ScriptProperties`) 加密持久化，Git 倉庫與本機原始碼達成 100% 零硬編碼洩漏風險。
 
 ```mermaid
 flowchart TD
     A["時間驅動排程 (每週六 09:00 台北時間)"] --> B["Google Apps Script 執行 weeklyAutoPublish()"]
-    B --> C["呼叫 Google Gemini API 產出教材 JSON (嚴格台灣繁中)"]
-    C --> D["SpreadsheetApp 寫入 Google Sheet 四大分頁\n(Issues, Vocab, Sentences, Grammar)"]
-    D --> E["資料入庫即刻生效！前端即時可用"]
-    D --> F["MailApp.sendEmail 獨立發送 3 封一對一專屬問候信"]
+    B --> C["從 ScriptProperties 讀取 GEMINI_API_KEY"]
+    C --> D["呼叫 Google Gemini API 產出教材 JSON (嚴格台灣繁中)"]
+    D --> E["SpreadsheetApp 寫入 Google Sheet 四大分頁\n(Issues, Vocab, Sentences, Grammar)"]
+    E --> F["資料入庫即刻生效！前端即時可用"]
+    E --> G["MailApp.sendEmail 獨立發送 3 封一對一專屬問候信"]
     
     subgraph 前端即時讀取 (GitHub Pages)
-        G["讀者造訪 index.html 或 lesson.html?issue=YYwWW"]
-        G --> H["Google Visualization JSON API (GViz) 即時查詢試算表"]
-        H --> I["動態渲染紫金首頁 Hero、手風琴歸檔或課程四大專欄"]
+        H["讀者造訪 index.html 或 lesson.html?issue=YYwWW"]
+        H --> I["Google Visualization JSON API (GViz) 即時查詢試算表"]
+        I --> J["動態渲染紫金首頁 Hero、手風琴歸檔或課程四大專欄"]
     end
 
-    F --> G
+    G --> H
     
     style A fill:#1e293b,stroke:#38bdf8,color:#fff
     style B fill:#1e293b,stroke:#a855f7,color:#fff
-    style C fill:#0f172a,stroke:#38bdf8,color:#fff
-    style D fill:#047857,stroke:#10b981,color:#fff
-    style E fill:#0284c7,stroke:#f59e0b,color:#fff
-    style F fill:#b45309,stroke:#f59e0b,color:#fff
-    style G fill:#1e293b,stroke:#fde047,color:#fff
-    style H fill:#1e293b,stroke:#38bdf8,color:#fff
-    style I fill:#231738,stroke:#f59e0b,color:#fff
+    style C fill:#0f172a,stroke:#f59e0b,color:#fff
+    style D fill:#0f172a,stroke:#38bdf8,color:#fff
+    style E fill:#047857,stroke:#10b981,color:#fff
+    style F fill:#0284c7,stroke:#f59e0b,color:#fff
+    style G fill:#b45309,stroke:#f59e0b,color:#fff
+    style H fill:#1e293b,stroke:#fde047,color:#fff
+    style I fill:#1e293b,stroke:#38bdf8,color:#fff
+    style J fill:#231738,stroke:#f59e0b,color:#fff
 ```
 
 ---
@@ -66,6 +70,10 @@ flowchart TD
 4. **`Grammar`（語法解析庫）**
    - `issue_code` ｜ `point_num` (1~2) ｜ `title` ｜ `explanation_html` ｜ `examples_json` (例句陣列 JSON：`[{"thai": "...", "phonetic": "...", "meaning": "..."}]`)
 
+### 2.2 GViz API 前端無密鑰查詢規範
+前端採用 Google Visualization API (GViz) 直接查詢試算表，零 CORS 限制、無需任何前端 API Key：
+`https://docs.google.com/spreadsheets/d/1DvxPjzNRlTRSMSXr6eaktU2dBQZSS9oWadNfT3_ZUTM/gviz/tq?tqx=out:json&sheet={工作表名稱}`
+
 ---
 
 ## 3. 前端動態渲染系統架構 (Frontend Dynamic CMS)
@@ -81,11 +89,11 @@ Thai_Weekly/
 ├── templates/
 │   └── lesson_template.html    # 紫金版面設計基準模板（供動態骨架參考）
 ├── gas/
-│   └── Code.gs                 # 綁定 Google Apps Script 原生自動化腳本
+│   └── Code.gs                 # 綁定 Google Apps Script 原生自動化腳本（零硬編碼安全版）
 ├── scripts/
 │   ├── Thai_Weekly_DB.xlsx     # 結構化資料庫本地工作簿快照
 │   ├── create_sheet_from_xlsx.py # 試算表轉換建立工具
-│   ├── deploy_gas.py           # Google Apps Script 遠端程式碼部署工具
+│   ├── deploy_gas.py           # Google Apps Script 遠端程式碼部署工具（原地更新部署）
 │   ├── parse_lessons.py        # 歷史 HTML 解析工具
 │   └── db_config.json          # 資料庫 ID 與端點快照設定檔
 └── HANDBOOK.MD                 # 本專案協作手冊（最高指導指引）
@@ -110,22 +118,25 @@ Thai_Weekly/
 
 ---
 
-## 4. Google Apps Script 自動化中樞
+## 4. Google Apps Script 自動化中樞與安全防禦
 
 * **綁定試算表**：`Thai_Weekly_DB`
 * **Script ID**：[`1fJ_JIB0aET_pLwDOJasv47YzSBn3xk7NhW3h96919NRd2opJpq-VOOmA`](https://script.google.com/home/projects/1fJ_JIB0aET_pLwDOJasv47YzSBn3xk7NhW3h96919NRd2opJpq-VOOmA/edit)
 * **線上指令碼編輯器**：[開啟 Google Apps Script 控制台](https://script.google.com/home/projects/1fJ_JIB0aET_pLwDOJasv47YzSBn3xk7NhW3h96919NRd2opJpq-VOOmA/edit)
+* **Web App 執行端點**：`https://script.google.com/macros/s/AKfycbxiY6t8K_BmB2oRWhbi7UZCHpN1Blmd1BEH8APe3PW6gXCKX2XcNYHcDZhZfMZtifi4/exec`
 
 ### 4.1 試算表上方專屬操作選單
 開啟試算表時，上方功能選單會自動出現 **「🚀 週報自動化控制台」**：
 1. **▶️ 立即手動執行出刊與寄信**：手動立即觸發當週 AI 出刊流水線。
 2. **📧 立即補寄 26w43 給 Annie 與 昌哥**：一鍵將 26w43 導讀信獨立補寄給 Annie 與 昌哥。
 3. **⏰ 設定每週六 09:00 自動出刊排程**：一鍵建立每週六 09:00 的時間驅動排程。
-4. **🔑 寫入/更新 GEMINI_API_KEY 至指令碼屬性**：一鍵將 Gemini API 金鑰持久化寫入指令碼屬性 (`PropertiesService.getScriptProperties`)。
+4. **🔑 寫入/更新 GEMINI_API_KEY 至指令碼屬性**：一鍵彈出輸入對話框，將金鑰直接儲存至雲端指令碼屬性庫 (`ScriptProperties`)。
 
-### 4.2 API 金鑰管理機制 (Script Properties)
-* **指令碼屬性**：全面採用 Apps Script 雲端原生指令碼屬性庫 (`PropertiesService.getScriptProperties`)，專案程式碼與 Git 倉庫中絕不硬編碼任何 API Key。
-* **安全維護**：可隨時透過試算表頂部選單「🚀 週報自動化控制台 ➔ 🔑 寫入/更新 GEMINI_API_KEY」彈窗更新金鑰，零外洩風險。
+### 4.2 零暴露 API 金鑰安全管理機制 (Zero-Exposure Architecture)
+* **完全消除硬編碼**：專案所有前端原始碼、後端 `Code.gs` 以及 Git Commit 歷史中，徹底杜絕任何真實 API Key 字串。
+* **雲端屬性隔離儲存**：金鑰僅保存在 Google 雲端 `PropertiesService.getScriptProperties()` 中，由 GAS 內部環境沙盒隔離保護。
+* **介面互動式更新**：使用者若更換金鑰，只需在試算表點選「🔑 寫入/更新 GEMINI_API_KEY」，於跳出的 `ui.prompt` 對話框輸入即可，永不落地於檔案。
+* **端點驗證機制**：Web App `doPost` 支援 `check_key`（遮蔽預覽驗證）與 `set_key`，確保部署後可遠端確認金鑰持久化狀態。
 
 ### 4.3 收件人一對一寄信規範 (MailApp.sendEmail)
 迴圈分三次個別獨立寄送，`To` 僅包含該位收件者，信首呈現專屬稱謂（嚴禁合併發送）：
@@ -142,12 +153,15 @@ Thai_Weekly/
 - [x] **v1.2**：解決 Google TTS 跨域播放問題，完成雙引擎語音備援機制。
 - [x] **v1.3**：完成首頁「方案 1 ＋ 方案 4」檢索與折疊收納抽屜。
 - [x] **v2.0**：移除本地排程依賴，上線 26w43 特輯與文化專題發音膠囊。
-- [x] **v3.0 (重大架構升級 ｜ Sheet-as-a-CMS)**：
+- [x] **v3.0 (重大架構升級 ｜ Sheet-as-a-CMS 與安全架構完善版)**：
   - [x] 建立結構化試算表資料庫 `Thai_Weekly_DB`（涵蓋 Issues, Vocab, Sentences, Grammar 四大分頁）。
   - [x] 將 26w41、26w42、26w43 完整解析入庫，並配置 26w44 預告資料列。
   - [x] 前端網站改為純動態即時渲染架構：建立 `lesson.html` 並升級 `index.html`。
   - [x] 舊期數檔案無縫配置重定向機制，確保歷史連結 100% 不失效。
   - [x] 建立綁定 Google Apps Script 中樞（含 Gemini 出刊生成、MailApp 一對一獨立寄信與自訂工具列選單）。
+  - [x] 建立 API 金鑰雲端指令碼屬性 (`ScriptProperties`) 持久化與試算表彈窗輸入機制。
+  - [x] 徹底清除原始碼硬編碼金鑰，重構淨化 Git 歷史紀錄（Purge Git History），達成零外洩資安防禦。
+  - [x] 升級 `deploy_gas.py` 支援原地覆蓋部署，保持 Web App URL 恆定。
 
 ---
 
