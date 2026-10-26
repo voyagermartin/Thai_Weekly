@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- 關鍵：防止向外部資源傳遞 Referer，避免 Google TTS 串流回傳 404 -->
+  <meta name="referrer" content="no-referrer">
+  <title>泰語學習週報｜26w43 飯店入住退房・房型設施與客訴溝通實務</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="apple-touch-icon" href="favicon.svg">
+  <style>
+    :root {
+      /* 背景層次：由深邃暗夜紫向宮廷夜色延伸 */
+      --bg-base: #0d0814;          /* 暹羅暗夜紫底（取代原石板黑） */
+      --bg-surface: #170f24;       /* 皇室深紫表層 */
+      --bg-card: #231738;          /* 帝王紫卡片背景 */
+      --bg-card-hover: #2f1f4a;    /* 卡片懸浮高光 */
+      --border: #443063;           /* 沉穩紫金邊框 */
+      --border-accent: #f59e0b;    /* 泰皇金箔高光邊框 */
+
+      /* 皇家金色系統（象徵大皇宮佛寺金箔與皇室尊爵） */
+      --accent-gold: #f59e0b;       /* 泰皇金箔金（主要按鈕、標題高光） */
+      --accent-gold-light: #fde68a; /* 亮香檳金（重點文字） */
+      --text-thai: #fde047;         /* 泰文字級專屬金色（黑底金字，尊貴且辨識度極高） */
+      --gold-glow: rgba(245, 158, 11, 0.28); /* 金色發光光暈 */
+
+      /* 皇室紫色系統（泰國詩琳通公主與皇室經典代表色） */
+      --primary: #a855f7;          /* 皇家紫羅蘭色（功能按鈕、標籤） */
+      --primary-hover: #c084fc;    /* 亮紫高光 */
+      --primary-glow: rgba(168, 85, 247, 0.3);
+
+      /* 文字與中性色 */
+      --text-main: #f8fafc;        /* 象牙白主文字 */
+      --text-muted: #a78bfa;       /* 柔紫灰輔助次要文字 */
+      --accent-red: #f43f5e;
+      --accent-emerald: #10b981;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      line-height: 1.7;
+      font-size: 17.5px;
+      padding: 24px;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1160px;
+      margin: 0 auto;
+    }
+    @media (min-width: 1400px) {
+      .container {
+        max-width: 1240px;
+      }
+    }
+
+    /* Top Navigation */
+    nav {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px 24px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 14px;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      font-size: 20px;
+      color: #ffffff;
+      text-decoration: none;
+    }
+    .brand-icon {
+      background: linear-gradient(135deg, #7e22ce, #a855f7);
+      box-shadow: 0 0 10px var(--primary-glow);
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+    .nav-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 9px 20px;
+      border-radius: 10px;
+      font-size: 15.5px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .nav-btn:hover {
+      background: var(--bg-card-hover);
+      color: #ffffff;
+      border-color: var(--accent-gold);
+    }
+
+    /* Editorial Magazine Header */
+    .mag-header {
+      background: linear-gradient(135deg, #170f24 0%, #2e1065 60%, #451a03 100%);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 40px 38px;
+      margin-bottom: 26px;
+      box-shadow: 0 16px 40px -8px rgba(0,0,0,0.7), 0 0 24px rgba(245, 158, 11, 0.15);
+      position: relative;
+      overflow: hidden;
+    }
+    .mag-header::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 4px;
+      background: linear-gradient(90deg, #f59e0b, #fde68a, #d97706);
+    }
+    .mag-meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+      font-size: 14px;
+      letter-spacing: 1px;
+      font-weight: 700;
+      color: #fde68a;
+      text-transform: uppercase;
+    }
+    .mag-tag-vol {
+      background: rgba(245, 158, 11, 0.18);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #fde68a;
+      padding: 5px 14px;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    .mag-title {
+      font-size: 38px;
+      font-weight: 900;
+      color: #ffffff;
+      line-height: 1.35;
+      margin-bottom: 16px;
+      letter-spacing: 0.5px;
+    }
+    .mag-subtitle {
+      font-size: 19px;
+      color: #e2e8f0;
+      line-height: 1.75;
+      margin-bottom: 24px;
+      max-width: 950px;
+      text-wrap: pretty;
+    }
+    .mag-footer-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 18px;
+      font-size: 15px;
+      color: var(--text-muted);
+    }
+    .mag-meta-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .mag-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    /* Learning Controls Toolbar */
+    .controls-toolbar {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px 24px;
+      margin-bottom: 28px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+    }
+    .ctrl-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 16px;
+    }
+    .btn-toggle {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 9px 18px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-toggle:hover { background: var(--bg-card-hover); color: #ffffff; border-color: var(--primary); }
+    .btn-toggle.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 0 14px var(--primary-glow);
+    }
+
+    /* Content Sections */
+    section {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 34px 32px;
+      margin-bottom: 28px;
+    }
+    .sec-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+    }
+    .sec-title {
+      font-size: 25px;
+      font-weight: 800;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      letter-spacing: 0.5px;
+    }
+    .sec-tag {
+      font-size: 14px;
+      background: rgba(168, 85, 247, 0.18);
+      color: #fde68a;
+      border: 1px solid rgba(168, 85, 247, 0.35);
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    /* Vocabulary Cards Grid */
+    .vocab-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+    }
+    .vocab-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.2s;
+    }
+    .vocab-card:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--accent-gold);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px -4px rgba(0,0,0,0.5), 0 0 16px var(--gold-glow);
+    }
+    .vocab-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+    .thai-word {
+      font-size: 34px;
+      font-weight: 700;
+      color: var(--text-thai);
+      letter-spacing: 1px;
+      line-height: 1.35;
+      text-shadow: 0 0 12px rgba(253, 224, 71, 0.2);
+    }
+    .phonetic {
+      font-size: 16px;
+      color: var(--text-muted);
+      font-style: italic;
+      margin-bottom: 14px;
+    }
+    .meaning {
+      font-size: 17px;
+      color: #f8fafc;
+      background: rgba(13, 8, 20, 0.6);
+      padding: 10px 14px;
+      border-radius: 10px;
+      border-left: 4px solid var(--accent-gold);
+      transition: all 0.2s;
+      line-height: 1.5;
+    }
+    .meaning.masked {
+      background: #372352;
+      color: transparent;
+      user-select: none;
+      cursor: pointer;
+    }
+    .meaning.masked::after {
+      content: "👁️ 點擊翻開中文釋義";
+      color: #c084fc;
+      font-size: 14px;
+      display: block;
+    }
+
+    /* In-place Audio Play Button */
+    .btn-audio {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      color: #fde047;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 21px;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .btn-audio:hover {
+      background: var(--accent-gold);
+      color: #0d0814;
+      transform: scale(1.08);
+      box-shadow: 0 0 18px var(--gold-glow);
+    }
+    .btn-audio.playing {
+      animation: audioPulse 0.9s infinite alternate;
+      background: var(--accent-gold);
+      color: #0d0814;
+    }
+    @keyframes audioPulse {
+      0% { transform: scale(1); box-shadow: 0 0 6px var(--gold-glow); }
+      100% { transform: scale(1.15); box-shadow: 0 0 20px rgba(245, 158, 11, 0.85); }
+    }
+
+    /* Sentences */
+    .sentence-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 22px 24px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      transition: all 0.2s;
+    }
+    .sentence-card:hover {
+      background: var(--bg-card-hover);
+      border-color: rgba(245, 158, 11, 0.4);
+    }
+    .sentence-thai {
+      font-size: 25px;
+      font-weight: 700;
+      color: var(--text-thai);
+      margin-bottom: 8px;
+      line-height: 1.45;
+      text-shadow: 0 0 10px rgba(253, 224, 71, 0.18);
+    }
+    .sentence-phonetic {
+      font-size: 16px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .sentence-meaning {
+      font-size: 17px;
+      color: #f8fafc;
+      line-height: 1.5;
+    }
+    .sentence-meaning.masked {
+      color: transparent;
+      background: #372352;
+      border-radius: 6px;
+      padding: 4px 10px;
+      display: inline-block;
+      cursor: pointer;
+    }
+    .sentence-meaning.masked::after {
+      content: "👁️ 點擊查看中文翻譯";
+      color: #c084fc;
+      font-size: 14px;
+    }
+
+    /* Grammar Section */
+    .grammar-card {
+      background: rgba(23, 15, 36, 0.8);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 26px;
+      margin-bottom: 22px;
+    }
+    .grammar-card-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #fde047;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .grammar-sub {
+      font-size: 17px;
+      font-weight: 600;
+      color: #f8fafc;
+      margin: 14px 0 8px;
+    }
+    .pill-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .example-pill {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 10px 16px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 16px;
+      transition: border-color 0.2s;
+    }
+    .example-pill:hover { border-color: var(--accent-gold); }
+    .example-pill .th {
+      font-weight: 700;
+      color: var(--text-thai);
+      font-size: 20px;
+    }
+    .example-pill .btn-audio-mini {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      color: #fde047;
+      transition: transform 0.15s;
+    }
+    .example-pill .btn-audio-mini:hover { transform: scale(1.2); }
+
+    /* Culture Section */
+    .culture-card {
+      line-height: 1.9;
+      font-size: 17.5px;
+      color: #cbd5e1;
+    }
+    .culture-card h3 {
+      font-size: 21px;
+      color: #fde68a;
+      margin: 22px 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .culture-callout {
+      background: rgba(245, 158, 11, 0.12);
+      border-left: 4px solid var(--accent-gold);
+      padding: 16px 22px;
+      border-radius: 0 12px 12px 0;
+      margin: 20px 0;
+      font-size: 17px;
+      color: #fde68a;
+    }
+
+    /* Toast Notification */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #231738;
+      border: 1px solid var(--border);
+      color: #ffffff;
+      padding: 14px 22px;
+      border-radius: 12px;
+      font-size: 15px;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+      z-index: 1000;
+    }
+
+    /* Mobile Responsive preservation */
+    @media (max-width: 768px) {
+      body { padding: 14px; font-size: 16px; }
+      .container { width: 100%; }
+      nav { padding: 12px 16px; }
+      .brand { font-size: 18px; }
+      .brand-icon { width: 32px; height: 32px; font-size: 16px; }
+      .nav-btn { padding: 7px 14px; font-size: 14px; }
+      .mag-header { padding: 24px 18px; }
+      .mag-title { font-size: 25px; }
+      .mag-subtitle { font-size: 15.5px; }
+      .thai-word { font-size: 26px; }
+      .sentence-thai { font-size: 19px; }
+      section { padding: 20px 16px; }
+      .sec-title { font-size: 21px; }
+      .btn-audio { width: 44px; height: 44px; font-size: 18px; }
+      .vocab-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- 1. Top Navigation Bar -->
+  <nav>
+    <a href="index.html" class="brand">
+      <div class="brand-icon">🇹🇭</div>
+      <span>泰語學習週報</span>
+    </a>
+    <div style="display:flex; gap:10px;">
+      <a href="index.html" class="nav-btn">← 返回週報總覽</a>
+    </div>
+  </nav>
+
+  <!-- 2. Editorial Magazine Header -->
+  <div class="mag-header">
+    <div class="mag-meta-row">
+      <span class="mag-tag-vol">VOL. 26w43 ｜ 2026 第 43 週</span>
+      <span>2026-10-24 SATURDAY</span>
+      <span style="color:var(--text-thai);">SPECIAL EDITORIAL</span>
+    </div>
+    <h1 class="mag-title">飯店入住退房・房型設施與客訴溝通實務</h1>
+    <p class="mag-subtitle">
+      <span style="display: inline-block;">掌握泰國星級飯店 Check-in/out、房型更換與設備報修核心詞句，</span>
+      <span style="display: inline-block;">解析狀態存留助詞與委婉溝通結構，深入泰式款待禮儀與小費文化。</span>
+    </p>
+    
+    <div class="mag-footer-bar">
+      <div class="mag-meta-pills">
+        <span class="mag-pill">✍️ <b>編審</b>：Gemini Spark</span>
+        <span class="mag-pill">⏱️ <b>閱讀時間</b>：約 10 分鐘</span>
+        <span class="mag-pill">🎯 <b>本期重點</b>：9個飯店住宿核心單字 ｜ 5組櫃台與客房溝通句型 ｜ 狀態存留與委婉客訴語法 ｜ 泰式款待與小費文化誌（附文化發音）</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Learning Controls Toolbar (語音速率 + 遮蔽測驗自測開關) -->
+  <div class="controls-toolbar">
+    <div class="ctrl-group">
+      <span style="font-weight:600; color:#9ca3af;">語音速率：</span>
+      <button class="btn-toggle active" id="btn-rate-1" onclick="toggleRate(1.0)">1.0x 標準速</button>
+      <button class="btn-toggle" id="btn-rate-075" onclick="toggleRate(0.75)">0.75x 慢速跟讀</button>
+    </div>
+    <div class="ctrl-group">
+      <span style="font-weight:600; color:#9ca3af;">記憶自測：</span>
+      <button class="btn-toggle" id="btn-mask-toggle" onclick="toggleMask()">👁️ 遮蔽中文自測</button>
+    </div>
+  </div>
+
+  <!-- 4. Section 1: 核心單字庫 (大字體 34px + 原地語音) -->
+  <section>
+    <div class="sec-head">
+      <div class="sec-title"><span>📌</span> 實務核心單字庫</div>
+      <span class="sec-tag">精選高頻字</span>
+    </div>
+    <div class="vocab-grid">
+      <div class="vocab-card">
+        <div class="vocab-top">
+          <div>
+            <div class="thai-word">เช็คอิน</div>
+            <div class="phonetic">chék-in</div>
+          </div>
+          <button class="btn-audio" onclick="playTTS('เช็คอิน', this)" title="播放泰語標準發音">🔊</button>
+        </div>
+        <div class="meaning">[動詞] 辦理入住 (Check-in)</div>
+      </div>
+      <div class="vocab-card">
+        <div class="vocab-top">
+          <div>
+            <div class="thai-word">เช็คเอาท์</div>
+            <div class="phonetic">chék-ao</div>
+          </div>
+          <button class="btn-audio" onclick="playTTS('เช็คเอาท์', this)" title="播放泰語標準發音">🔊</button>
+        </div>
+        <div class="meaning">[動詞] 辦理退房 (Check-out)</div>
+      </div>
+      <div class="vocab-card">
+        <div class="vocab-top">
+          <div>
+            <div class="thai-word">ค่ามัดจำ</div>
+            <div class="phonetic">khâa mát-jam</div>
+          </div>
+          <button class="btn-audio" onclick="playTTS('ค่ามัดจำ', this)" title="播放泰語標準發音">🔊</button>
+        </div>
+        <div class="meaning">[名詞] 押金 / 保證金（入住時刷卡預授權或現金押金）</div>
+      </div>
+      <div class="vocab-card">
+        <div class="vocab-top">
+          <div>
+            <div class="thai-word">คีย์การ์ด</div>
+            <div class="phonetic">khii-gàat</div>
+          </div>
+          <button class="btn-audio" onclick="playTTS('คีย์การ์ด', this)" title="播放泰語標準發音">🔊</button>
+        </div>
+        <div class="meaning">[名詞] 房卡 / 門禁感應卡 (Key card)</div>
+      </div>
+      <div class="vocab-card">
+        <div class="vocab-top">
+          <div>
+            <div class="thai-word">ห้องเตียงคู่</div>
+            <div class="phonetic">hɔ̂ng dtiang khûu</div>
+          </div>
+          <button class="btn-audio" onclick="playTTS('ห้องเตียงคู่', this)" title="播放泰語標準發音">🔊</button>
+        </div>
+        <div class="meaning">[名詞] 雙床房 (Twin Room，內含兩張獨立單人床)</div>
+      </div>
+      <div class="vocab-card">
+        <div class="vocab-top">
+          <div>
+            <div class="thai-word">ห้องเตียงเดี่ยว</div>
+            <div class="phonetic">hɔ̂ng dtiang dìaw</div>
+          </div>
+          <button class="btn-audio" onclick="playTTS('ห้องเตียงเดี่ยว', this)" title="播放泰語標準發音">🔊</button>
+        </div>
+        <div class="meaning">[名詞] 大床房 (Double/King Room，注意指「單張大床」而非單人窄床！)</div>
+      </div>
+      <div class="vocab-card">
+        <div class="vocab-top">
+          <div>
+            <div class="thai-word">แอร์ไม่เย็น</div>
+            <div class="phonetic">ɛɛ mâi yen</div>
+          </div>
+          <button class="btn-audio" onclick="playTTS('แอร์ไม่เย็น', this)" title="播放泰語標準發音">🔊</button>
+        </div>
+        <div class="meaning">[片語] 冷氣不涼 / 空調不冷（客房報修最高頻詞）</div>
+      </div>
+      <div class="vocab-card">
+        <div class="vocab-top">
+          <div>
+            <div class="thai-word">น้ำไม่ร้อน</div>
+            <div class="phonetic">náam mâi rɔ́ɔn</div>
+          </div>
+          <button class="btn-audio" onclick="playTTS('น้ำไม่ร้อน', this)" title="播放泰語標準發音">🔊</button>
+        </div>
+        <div class="meaning">[片語] 水不熱 / 熱水器故障沒熱水</div>
+      </div>
+      <div class="vocab-card">
+        <div class="vocab-top">
+          <div>
+            <div class="thai-word">เปลี่ยนห้อง</div>
+            <div class="phonetic">bplìan hɔ̂ng</div>
+          </div>
+          <button class="btn-audio" onclick="playTTS('เปลี่ยนห้อง', this)" title="播放泰語標準發音">🔊</button>
+        </div>
+        <div class="meaning">[動賓片語] 換房間（เปลี่ยน 更換 + ห้อง 房間）</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. Section 2: 情境實用短篇與句型 -->
+  <section>
+    <div class="sec-head">
+      <div class="sec-title"><span>💬</span> 職場與日常情境句型</div>
+      <span class="sec-tag">對話實戰</span>
+    </div>
+    <div class="sentence-card">
+      <div>
+        <div class="sentence-thai">จองห้องพักไว้ในชื่อคุณเฉินครับ</div>
+        <div class="sentence-phonetic">Jɔɔng hɔ̂ng-phák wái nai chʉ̂ʉ Khun Chə̌ən khráp.</div>
+        <div class="sentence-meaning">我以陳先生（Khun Chen）的名義預訂了房間。（櫃台辦理入住報到必備）</div>
+      </div>
+      <button class="btn-audio" onclick="playTTS('จองห้องพักไว้ในชื่อคุณเฉินครับ', this)" title="播放例句發音">🔊</button>
+    </div>
+    <div class="sentence-card">
+      <div>
+        <div class="sentence-thai">อาหารเช้าเริ่มกี่โมงถึงกี่โมงครับ</div>
+        <div class="sentence-phonetic">Aa-hǎan cháo rə̂əm gìi moong thʉ̌ng gìi moong khráp?</div>
+        <div class="sentence-meaning">請問早餐是幾點開始到幾點結束？</div>
+      </div>
+      <button class="btn-audio" onclick="playTTS('อาหารเช้าเริ่มกี่โมงถึงกี่โมงครับ', this)" title="播放例句發音">🔊</button>
+    </div>
+    <div class="sentence-card">
+      <div>
+        <div class="sentence-thai">แอร์ในห้องไม่ค่อยเย็น ช่วยส่งช่างมาดูหน่อยได้ไหมครับ</div>
+        <div class="sentence-phonetic">Ɛɛ nai hɔ̂ng mâi khɔ̂i yen, chûai sòng châng maa duu nɔ̀i dâai mǎi khráp?</div>
+        <div class="sentence-meaning">房間裡的冷氣不太涼，能麻煩派工程人員過來看看嗎？</div>
+      </div>
+      <button class="btn-audio" onclick="playTTS('แอร์ในห้องไม่ค่อยเย็น ช่วยส่งช่างมาดูหน่อยได้ไหมครับ', this)" title="播放例句發音">🔊</button>
+    </div>
+    <div class="sentence-card">
+      <div>
+        <div class="sentence-thai">ขอเปลี่ยนเป็นห้องเตียงคู่ได้ไหมครับ</div>
+        <div class="sentence-phonetic">Khɔ̌ɔ bplìan bpen hɔ̂ng dtiang khûu dâai mǎi khráp?</div>
+        <div class="sentence-meaning">請問可以更換成雙床房（兩張床）嗎？</div>
+      </div>
+      <button class="btn-audio" onclick="playTTS('ขอเปลี่ยนเป็นห้องเตียงคู่ได้ไหมครับ', this)" title="播放例句發音">🔊</button>
+    </div>
+    <div class="sentence-card">
+      <div>
+        <div class="sentence-thai">ฝากกระเป๋าไว้ที่ล็อบบี้ก่อนได้ไหมครับ</div>
+        <div class="sentence-phonetic">Fàak grà-bpǎo wái thîi lɔ́p-bîi gɔ̀ɔn dâai mǎi khráp?</div>
+        <div class="sentence-meaning">可以先把行李寄放在大廳（Lobby）嗎？</div>
+      </div>
+      <button class="btn-audio" onclick="playTTS('ฝากกระเป๋าไว้ที่ล็อบบี้ก่อนได้ไหมครับ', this)" title="播放例句發音">🔊</button>
+    </div>
+  </section>
+
+  <!-- 6. Section 3: 深度語法拆解 -->
+  <section>
+    <div class="sec-head">
+      <div class="sec-title"><span>🔍</span> 核心語法與句型解析</div>
+      <span class="sec-tag">文法剖析</span>
+    </div>
+    <!-- 文法卡 1: 動詞 + ไว้ (wái) -->
+    <div class="grammar-card">
+      <div class="grammar-card-title">💡 語法重點 1：狀態存留助詞 —— 動詞 + ไว้ (wái)「預先做好、留著備用」</div>
+      <p style="color:#d1d5db; line-height:1.75;">
+        在飯店住宿與旅遊行程中，動詞後方加上 <b>ไว้ (wái)</b> 是極為道地的高頻結構，用來表達<b>「預先完成某個動作，並讓該狀態持續保留著，以供後續使用」</b>（對應中文的「先…好」、「寄放著」、「存留著」）：<br>
+        • <b>公式結構</b>：<code>動作動詞 + (受詞) + ไว้ (wái)</code><br>
+        • <b>實務語境</b>：已經預訂好的房間、先寄放著的行李、事先準備好的護照文件。
+      </p>
+      
+      <div class="grammar-sub">📌 飯店與旅遊高頻搭配實例：</div>
+      <div class="pill-group">
+        <div class="example-pill">
+          <span class="th">จองห้องพักไว้</span>
+          <span style="color:#cbd5e1;">(jɔɔng hɔ̂ng-phák wái) 預先訂好房間</span>
+          <button class="btn-audio-mini" onclick="playTTS('จองห้องพักไว้', this)" title="播放發音">🔊</button>
+        </div>
+        <div class="example-pill">
+          <span class="th">ฝากกระเป๋าไว้</span>
+          <span style="color:#cbd5e1;">(fàak grà-bpǎo wái) 把行李寄放著</span>
+          <button class="btn-audio-mini" onclick="playTTS('ฝากกระเป๋าไว้', this)" title="播放發音">🔊</button>
+        </div>
+        <div class="example-pill">
+          <span class="th">เตรียมพาสปอร์ตไว้</span>
+          <span style="color:#cbd5e1;">(dtriam phaat-sà-bpɔ̀ɔt wái) 預先準備好護照</span>
+          <button class="btn-audio-mini" onclick="playTTS('เตรียมพาสปอร์ตไว้', this)" title="播放發音">🔊</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 文法卡 2: 委婉反映與求助公式 -->
+    <div class="grammar-card">
+      <div class="grammar-card-title">💡 語法重點 2：高情商客訴與報修公式 —— ไม่ค่อย... (不太...) ＋ ช่วย...หน่อย (麻煩稍微...)</div>
+      <p style="color:#d1d5db; line-height:1.75;">
+        泰國社會極度重視「顧全顏面」與「溫和溝通」。當客房設備故障需向櫃台反映時，使用軟化語氣的結構能讓飯店人員倍感尊重，進而提供最積極迅速的協助：<br>
+        • <b>ไม่ค่อย (mâi khɔ̂i) + 形容詞</b>：表達「不太…、沒那麼…」，比直接說「不…」更委婉得體。<br>
+        • <b>ช่วย (chûai) + 動詞 + หน่อย (nɔ̀i)</b>：字面為「請幫忙…一下」，句尾的 <code>หน่อย</code> 具有柔化請求的魔力。
+      </p>
+      <div class="pill-group">
+        <div class="example-pill">
+          <span class="th">แอร์ไม่ค่อยเย็น</span>
+          <span style="color:#cbd5e1;">(ɛɛ mâi khɔ̂i yen) 冷氣不太涼（委婉報修）</span>
+          <button class="btn-audio-mini" onclick="playTTS('แอร์ไม่ค่อยเย็น', this)" title="播放發音">🔊</button>
+        </div>
+        <div class="example-pill">
+          <span class="th">ไวไฟไม่ค่อยแรง</span>
+          <span style="color:#cbd5e1;">(wai-fai mâi khɔ̂i rɛɛng) Wi-Fi 訊號不太強</span>
+          <button class="btn-audio-mini" onclick="playTTS('ไวไฟไม่ค่อยแรง', this)" title="播放發音">🔊</button>
+        </div>
+        <div class="example-pill">
+          <span class="th">ช่วยเช็คให้หน่อยครับ</span>
+          <span style="color:#cbd5e1;">(chûai chék hâi nɔ̀i khráp) 麻煩幫忙檢查一下</span>
+          <button class="btn-audio-mini" onclick="playTTS('ช่วยเช็คให้หน่อยครับ', this)" title="播放發音">🔊</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. Section 4: 文化時事與風俗隨筆 -->
+  <section>
+    <div class="sec-head">
+      <div class="sec-title"><span>🏮</span> 文化時事漫談</div>
+      <span class="sec-tag">人文背景</span>
+    </div>
+    <div class="culture-card">
+      <h3>🏛️ 泰式款待哲學「ใจเย็นๆ (Jai Yen-Yen)」與星級飯店客訴溝通、小費禮儀誌</h3>
+      <p>
+        泰國素有「微笑之國（Land of Smiles）」美譽，其觀光旅宿業更是全球公認的服務標竿。從踏入飯店大廳那刻起，迎賓人員優雅的雙手合十禮（ไหว้ - Wai）與冰涼的香茅蝶豆花迎賓茶，皆展現了深植於泰國文化的「款待之道」。而在這份溫柔背後，支撐泰國人日常人際互動的兩大核心心理密碼，正是<b>「ใจเย็นๆ (Jai Yen-Yen，心平氣和／冷靜慢行)」</b>與<b>「เกรงใจ (Kreng-Jai，體貼客氣／怕給人添麻煩)」</b>。
+      </p>
+      
+      <p style="margin-top:14px;">
+        理解這兩項文化基因，是處理泰國飯店客訴與客房問題的關鍵破局點。當遇到房間冷氣不冷、熱水不熱或房型不符時，若採取高分貝咆哮或強硬指責，會直接觸發泰國人的「เสียหน้า (Sǐa Nâa - 丟臉／失面子)」防衛機制，反而導致櫃台人員僵住或消極應對；相反地，若能保持微笑、語氣平和地運用本期所學的「ไม่ค่อย...（不太…）」與「ช่วย...หน่อย（麻煩幫個忙）」柔性溝通，往往能換來對方傾盡全力的協助，甚至主動獲得免費升等房型（Upgrade）的驚喜禮遇！
+      </p>
+
+      <p style="margin-top:14px;">
+        此外，在泰國星級飯店文化中，<b>「給小費（การให้ทิป）」</b>是一門展現旅人風度的溫暖禮儀。雖然帳單多已內含 10% 服務費，但針對協助搬運行李的行李員（Bellboy）與每日整理房間的房務員（Housekeeping），給予 20 至 50 泰銖小費已是國際慣例。最核心的文化禁忌在於：<b>「給小費務必使用紙鈔（ธนบัตร），絕對不可給硬幣（เหรียญ）」</b>，因為在泰國傳統觀念中，零錢硬幣是用來施捨給乞丐的，拿硬幣當小費會被視為對服務人員的不敬。
+      </p>
+
+      <div class="culture-callout">
+        <b>💡 線控經理實務備忘（Line Control Tourism Memo）：</b><br>
+        在台泰觀光同業對接飯店房單（Rooming List）與現場領隊分房時，有一個極易踩雷的<b>「泰語房型字義陷阱」</b>務必高度警惕：<br>
+        1. <b>ห้องเตียงเดี่ยว (Hɔ̂ng dtiang dìaw)</b>：字面直譯雖是「單床房」，但在泰國飯店術語中，指的卻是<b>「一張大床的雙人房（Double / King Size Bed Room）」</b>（因為只有「一張」大床）！<br>
+        2. <b>ห้องเตียงคู่ (Hɔ̂ng dtiang khûu)</b>：字面是「成對床房」，實務上才是台灣旅客習慣稱呼的<b>「兩張單人床房（Twin Room）」</b>！<br>
+        3. <b>操作防呆準則</b>：台灣團體旅客（如同事、朋友同住）極度要求「一人睡一張床（Twin Beds）」。向泰國 Local 地接社或飯店訂房組確認時，務必明確指定需要 <b>Twin Room (ห้องเตียงคู่ - 2 เตียง)</b>，切勿因字面誤會訂成 <code>เตียงเดี่ยว</code>，從源頭杜絕團體進房後的換房風波！
+      </div>
+
+      <!-- 🏮 文化專題關鍵字庫（點擊播放原地標準語音） -->
+      <div class="culture-vocab-sec" style="margin-top: 24px; border-top: 1px solid rgba(245, 158, 11, 0.25); padding-top: 20px;">
+        <div style="font-size: 17px; font-weight: 700; color: var(--accent-gold); margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
+          <span>🎧</span> 文化專題精選語彙（點擊按鈕聆聽標準泰語發音）：
+        </div>
+        <div class="pill-group">
+          <div class="example-pill">
+            <span class="th">ใจเย็นๆ</span>
+            <span style="color:#cbd5e1;">(jai yen-yen) 心平氣和 / 冷靜勿躁（泰式處世哲學）</span>
+            <button class="btn-audio-mini" onclick="playTTS('ใจเย็นๆ', this)" title="播放發音">🔊</button>
+          </div>
+          <div class="example-pill">
+            <span class="th">เกรงใจ</span>
+            <span style="color:#cbd5e1;">(greeng-jai) 客氣 / 體貼 / 不好意思麻煩別人</span>
+            <button class="btn-audio-mini" onclick="playTTS('เกรงใจ', this)" title="播放發音">🔊</button>
+          </div>
+          <div class="example-pill">
+            <span class="th">เสียหน้า</span>
+            <span style="color:#cbd5e1;">(sǐa nâa) 丟臉 / 失面子（客訴時應避免讓對方難堪）</span>
+            <button class="btn-audio-mini" onclick="playTTS('เสียหน้า', this)" title="播放發音">🔊</button>
+          </div>
+          <div class="example-pill">
+            <span class="th">การให้ทิป</span>
+            <span style="color:#cbd5e1;">(gaan hâi thíp) 給小費（泰式旅宿文化禮儀）</span>
+            <button class="btn-audio-mini" onclick="playTTS('การให้ทิป', this)" title="播放發音">🔊</button>
+          </div>
+          <div class="example-pill">
+            <span class="th">ธนบัตร</span>
+            <span style="color:#cbd5e1;">(thá-ná-bàt) 紙鈔（給小費必用 20/50 泰銖紙鈔）</span>
+            <button class="btn-audio-mini" onclick="playTTS('ธนบัตร', this)" title="播放發音">🔊</button>
+          </div>
+          <div class="example-pill">
+            <span class="th">เหรียญ</span>
+            <span style="color:#cbd5e1;">(rǐan) 硬幣（切忌拿硬幣當床頭小費）</span>
+            <button class="btn-audio-mini" onclick="playTTS('เหรียญ', this)" title="播放發音">🔊</button>
+          </div>
+          <div class="example-pill">
+            <span class="th">พนักงานยกกระเป๋า</span>
+            <span style="color:#cbd5e1;">(phá-nák-ngaan yók grà-bpǎo) 行李員 (Bellboy)</span>
+            <button class="btn-audio-mini" onclick="playTTS('พนักงานยกกระเป๋า', this)" title="播放發音">🔊</button>
+          </div>
+          <div class="example-pill">
+            <span class="th">แม่บ้าน</span>
+            <span style="color:#cbd5e1;">(mɛ̂ɛ-bâan) 房務員 / 客房清潔人員 (Housekeeping)</span>
+            <button class="btn-audio-mini" onclick="playTTS('แม่บ้าน', this)" title="播放發音">🔊</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- 浮動提示 Toast -->
+<div id="toast"></div>
+
+<!-- 全功能雙引擎播放器與互動邏輯 Script -->
+<script>
+  let currentAudio = null;
+  let playbackRate = 1.0;
+  let isMasked = false;
+
+  function toggleRate(rate) {
+    playbackRate = rate;
+    document.getElementById('btn-rate-1').classList.toggle('active', rate === 1.0);
+    document.getElementById('btn-rate-075').classList.toggle('active', rate === 0.75);
+    if (currentAudio) currentAudio.playbackRate = rate;
+    showToast(`語音速度切換為 ${rate}x`);
+  }
+
+  function toggleMask() {
+    isMasked = !isMasked;
+    const btn = document.getElementById('btn-mask-toggle');
+    btn.classList.toggle('active', isMasked);
+    btn.innerText = isMasked ? '👁️‍🗨️ 恢復中文顯示' : '👁️ 遮蔽中文自測';
+
+    document.querySelectorAll('.meaning').forEach(el => {
+      el.classList.toggle('masked', isMasked);
+      if (!isMasked) el.onclick = null;
+      else el.onclick = () => el.classList.remove('masked');
+    });
+
+    document.querySelectorAll('.sentence-meaning').forEach(el => {
+      el.classList.toggle('masked', isMasked);
+      if (!isMasked) el.onclick = null;
+      else el.onclick = () => el.classList.remove('masked');
+    });
+
+    showToast(isMasked ? '已開啟遮蔽測驗（點擊即可翻開）' : '已恢復顯示中文');
+  }
+
+  function playTTS(text, btnElement) {
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio = null;
+    }
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    document.querySelectorAll('.btn-audio, .btn-audio-mini').forEach(b => b.classList.remove('playing'));
+
+    if (btnElement) {
+      btnElement.classList.add('playing');
+    }
+
+    showToast(`🔊 正在播放：${text}`);
+
+    const encoded = encodeURIComponent(text);
+    const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=th&q=${encoded}`;
+    
+    const audio = new Audio();
+    currentAudio = audio;
+    audio.playbackRate = playbackRate;
+
+    const cleanup = () => {
+      if (btnElement) btnElement.classList.remove('playing');
+      if (currentAudio === audio) currentAudio = null;
+    };
+
+    audio.onended = cleanup;
+
+    // 若 Google 語音因任何網路因素異常，自動無縫切換為 Web Speech API 原生泰語發音
+    audio.onerror = () => {
+      console.warn('Google TTS 載入受阻，自動切換至 Web Speech API 原生語音播放');
+      playWebSpeech(text, btnElement);
+    };
+
+    audio.src = audioUrl;
+    audio.play().catch(e => {
+      console.warn('Google TTS 播放異常，切換至 Web Speech API:', e);
+      playWebSpeech(text, btnElement);
+    });
+  }
+
+  function playWebSpeech(text, btnElement) {
+    if (!('speechSynthesis' in window)) {
+      showToast('⚠️ 瀏覽器不支援語音播放');
+      if (btnElement) btnElement.classList.remove('playing');
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'th-TH';
+    utterance.rate = playbackRate;
+
+    // 優先匹配泰語專用發音引擎
+    const voices = window.speechSynthesis.getVoices();
+    const thaiVoice = voices.find(v => v.lang === 'th-TH' || v.lang.toLowerCase().includes('th'));
+    if (thaiVoice) {
+      utterance.voice = thaiVoice;
+    }
+
+    utterance.onend = () => {
+      if (btnElement) btnElement.classList.remove('playing');
+    };
+
+    utterance.onerror = (e) => {
+      console.error('Web Speech 播放錯誤:', e);
+      if (btnElement) btnElement.classList.remove('playing');
+      showToast('⚠️ 語音播放受阻，請檢查音效設定');
+    };
+
+    window.speechSynthesis.speak(utterance);
+  }
+
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.innerText = msg;
+    toast.style.display = 'flex';
+    clearTimeout(toast.timer);
+    toast.timer = setTimeout(() => {
+      toast.style.display = 'none';
+    }, 2000);
+  }
+</script>
+</body>
+</html>
