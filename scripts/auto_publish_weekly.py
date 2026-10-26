@@ -381,13 +381,17 @@ def render_lesson_html(data, issue_meta):
         cult_vocab_pills.append(pill)
     cult_vocab_html = "\n".join(cult_vocab_pills)
 
+    # 清理 callout 避免模型自帶前綴與模板重複
+    clean_callout = data['culture']['callout'].strip()
+    clean_callout = re.sub(r'^(<b>)?\s*💡?\s*線控經理實務備忘[（(][^）)]*[）)][:：]?\s*(</b>)?\s*(<br\s*/?>)?', '', clean_callout, flags=re.I).strip()
+
     culture_section_html = f"""    <div class="culture-card">
       <h3>🏛️ {data['culture']['title']}</h3>
 {culture_paras}
       
       <div class="culture-callout">
         <b>💡 線控經理實務備忘（Line Control Tourism Memo）：</b><br>
-        {data['culture']['callout']}
+        {clean_callout}
       </div>
 
       <!-- 🏮 文化專題關鍵字庫（點擊播放原地標準語音） -->

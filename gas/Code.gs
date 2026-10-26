@@ -28,6 +28,7 @@ function onOpen() {
     .addItem("📧 立即補寄 26w43 給 Annie 與 昌哥", "resend26w43ToAnnieAndChang")
     .addSeparator()
     .addItem("⏰ 設定每週六 09:00 自動出刊排程", "setupWeeklyTrigger")
+    .addItem("🧹 一鍵清理現有備忘重複前綴", "cleanExistingMemos")
     .addItem("🔑 寫入/更新 GEMINI_API_KEY 至指令碼屬性", "setScriptProperties")
     .addToUi();
 }
@@ -79,6 +80,10 @@ function getApiKey() {
 }
 
 function doGet(e) {
+  if (e && e.parameter && e.parameter.clean === "1") {
+    const res = cleanExistingMemos();
+    return ContentService.createTextOutput(JSON.stringify(res)).setMimeType(ContentService.MimeType.JSON);
+  }
   const prop = PropertiesService.getScriptProperties().getProperty("GEMINI_API_KEY");
   return ContentService.createTextOutput(JSON.stringify({
     status: "ok",
@@ -93,7 +98,10 @@ function doPost(e) {
     const postData = JSON.parse(e.postData.contents);
     const action = postData.action;
 
-    if (action === "publish_weekly") {
+    if (action === "clean_memos") {
+      const res = cleanExistingMemos();
+      return ContentService.createTextOutput(JSON.stringify(res)).setMimeType(ContentService.MimeType.JSON);
+    } else if (action === "publish_weekly") {
       const res = weeklyAutoPublish();
       return ContentService.createTextOutput(JSON.stringify(res)).setMimeType(ContentService.MimeType.JSON);
     } else if (action === "resend_26w43") {
@@ -325,7 +333,9 @@ function weeklyAutoPublish() {
   sheetIssues.getRange(upcomingRowIndex, 10).setValue(generated.highlights_summary);
   sheetIssues.getRange(upcomingRowIndex, 11).setValue(generated.culture.title);
   sheetIssues.getRange(upcomingRowIndex, 12).setValue(generated.culture.paragraphs.map(p => "<p>" + p + "</p>").join("\n"));
-  sheetIssues.getRange(upcomingRowIndex, 13).setValue(generated.culture.callout);
+  let cleanCallout = (generated.culture.callout || "").trim();
+  cleanCallout = cleanCallout.replace(/^(<b>)?\s*💡?\s*線控經理實務備忘[（(][^）)]*[）)][:：]?\s*(<\/b>)?\s*(<br\s*\/?>)?/i, "").trim();
+  sheetIssues.getRange(upcomingRowIndex, 13).setValue(cleanCallout);
   sheetIssues.getRange(upcomingRowIndex, 14).setValue(generated.email.subject_line);
   sheetIssues.getRange(upcomingRowIndex, 15).setValue(generated.email.intro_text);
   sheetIssues.getRange(upcomingRowIndex, 16).setValue(generated.email.highlights.map(h => '<div class="highlight-item">' + h + '</div>').join("\n"));
@@ -486,4 +496,26 @@ function callGeminiGenerate(upcomingIssue) {
   }
 
   throw new Error("Gemini 模型生成失敗，請檢查 API Key！");
+}
+
+/**
+ * 清理 Issues 工作表中已存在的 memo 重複標題前綴
+ */
+function cleanExistingMemos() {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet = ss.getSheetByName("Issues");
+  const data = sheet.getDataRange().getValues();
+  let updatedCount = 0;
+  for (let i = 1; i < data.length; i++) {
+    let memo = String(data[i][12] || "");
+    if (memo) {
+      let cleaned = memo.replace(/^(<b>)?\s*💡?\s*線控經理實務備忘[（(][^）)]*[）)][:：]?\s*(<\/b>)?\s*(<br\s*\/?>)?/i, "").trim();
+      if (cleaned !== memo) {
+        sheet.getRange(i + 1, 13).setValue(cleaned);
+        updatedCount++;
+      }
+    }
+  }
+  Logger.log("已清理備忘數量: " + updatedCount);
+  return { status: "success", updatedCount: updatedCount };
 }

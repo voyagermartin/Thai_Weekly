@@ -145,7 +145,10 @@ def parse_lesson_file(file_path: Path):
         
         callout = cult_card.select_one(".culture-callout")
         if callout:
-            cult_memo_html = "".join([str(c) for c in callout.contents]).strip()
+            raw_memo = "".join([str(c) for c in callout.contents]).strip()
+            # 移除自帶的標題前綴，避免與模板或前台重複
+            raw_memo = re.sub(r"^(<b>)?\s*💡?\s*線控經理實務備忘[（(][^）)]*[）)][:：]?\s*(</b>)?\s*(<br\s*/?>)?", "", raw_memo, flags=re.I).strip()
+            cult_memo_html = raw_memo
             
         # Culture Vocab items (if culture-vocab-sec exists)
         cult_sec = cult_card.select_one(".culture-vocab-sec")
