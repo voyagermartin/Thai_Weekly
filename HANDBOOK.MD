@@ -199,3 +199,11 @@ Thai_Weekly/
    * 新增發音波形動畫或跟讀計時器。
 4. **多媒體內容延伸 (Rich Media Support)**：
    * 評估在 Google Sheet 中增加欄位支援短影片嵌入（YouTube Shorts）或情境音檔直連，豐富每週文化專題深度。
+5. **訂閱制與個人化語境客製引擎 (Personalized Context & Subscription Engine)**：
+   * **核心願景**：突破通用教材限制，以「大盤共用＋個人客製 (Hybrid Prompting)」架構，提供與讀者個人生活、工作及興趣高度相關的專屬泰語學習語境。
+   * **訂閱者輪廓資料庫 (`Subscribers` 工作表)**：
+     - 規格規劃：`email` ｜ `nickname` ｜ `gender` ｜ `interest_tags` (如：馬拉松、金融經濟、網路科技、美食咖啡) ｜ `status` (active / inactive)。
+   * **GAS 獨立發信客製注入 (MailApp Personal Patch)**：
+     - 利用既有的一對一獨立寄信迴圈，在發送前以輕量 Prompt 結合當週核心句型與該讀者的 `interest_tags`，自動生成 1 組專屬情境句與 2 個延伸生活詞彙，無縫注入專屬信件導讀。
+   * **網頁端動態個人化專欄 (Personalized Lesson Dynamic Slot)**：
+     - 前端 `lesson.html?issue=YYwWW&uid={user_id}` 支援讀取個人參數，於課程底層動態長出「🎯 為你特調的專屬單字與情境卡」，不污染公版試算表與首頁歷史歸檔。
