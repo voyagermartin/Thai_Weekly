@@ -325,14 +325,65 @@
       display: block;
     }
 
-    /* Word Anatomy Component (說文解字・詞彙拆解) */
-    .word-anatomy {
+    .vocab-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .btn-anatomy-toggle {
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      color: #fde68a;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.25s ease;
+      line-height: 1.2;
+      user-select: none;
+    }
+    .btn-anatomy-toggle:hover {
+      background: rgba(245, 158, 11, 0.22);
+      border-color: var(--accent-gold);
+      color: #ffffff;
+      transform: translateY(-1px);
+      box-shadow: 0 0 10px var(--gold-glow);
+    }
+    .btn-anatomy-toggle.active {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.35), rgba(168, 85, 247, 0.4));
+      border-color: var(--accent-gold);
+      color: #ffffff;
+      box-shadow: 0 0 14px var(--gold-glow);
+    }
+
+    /* Word Anatomy Drawer (抽屜式說文解字容器) */
+    .anatomy-drawer {
+      display: none;
       margin-top: 16px;
-      padding-top: 14px;
-      border-top: 1px dashed rgba(245, 158, 11, 0.35);
+      padding: 16px;
+      background: rgba(0, 0, 0, 0.28);
+      border-radius: 12px;
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      border-top: 2px solid var(--accent-gold);
+      box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.35);
+      animation: drawerFadeIn 0.25s ease-out;
+    }
+    .anatomy-drawer.open {
+      display: block;
+    }
+    @keyframes drawerFadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .word-anatomy {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 14px;
     }
     .anatomy-block {
       display: flex;
@@ -894,16 +945,17 @@
 
     const escapeQuote = (str) => String(str || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 
-    // 1. 渲染單字庫 (Core Vocab + 說文解字 Word Anatomy)
+    // 1. 渲染單字庫 (Core Vocab + 說文解字按鈕觸發展開)
     const issueVocab = vocabAll.filter(v => v.issue_code === code);
     const coreVocab = issueVocab.filter(v => v.type === 'core');
     const vocabGrid = document.getElementById('vocab-grid');
-    vocabGrid.innerHTML = coreVocab.map(v => {
+    vocabGrid.innerHTML = coreVocab.map((v, index) => {
       const breakdown = safeParseJsonArray(v.breakdown_json);
       const extensions = safeParseJsonArray(v.extensions_json);
-      const hasAnatomy = breakdown.length > 0 || extensions.length > 0;
+      const hasBreakdown = breakdown.length > 0;
+      const drawerId = `anatomy-drawer-${index}`;
 
-      const breakdownHtml = breakdown.length > 0 ? `
+      const breakdownHtml = hasBreakdown ? `
         <div class="anatomy-block">
           <div class="anatomy-label"><span>🧩</span> 說文解字・詞彙拆解</div>
           <div class="breakdown-flow">
@@ -937,10 +989,18 @@
         </div>
       ` : '';
 
-      const anatomySectionHtml = hasAnatomy ? `
-        <div class="word-anatomy">
-          ${breakdownHtml}
-          ${extensionsHtml}
+      const anatomyToggleBtn = hasBreakdown ? `
+        <button class="btn-anatomy-toggle" data-target="${drawerId}" onclick="toggleAnatomy('${drawerId}', this)" title="查看說文解字詞彙拆解">
+          <span class="anatomy-icon">🧩</span> <span class="anatomy-text">拆解</span>
+        </button>
+      ` : '';
+
+      const anatomyDrawerHtml = hasBreakdown ? `
+        <div class="anatomy-drawer" id="${drawerId}">
+          <div class="word-anatomy">
+            ${breakdownHtml}
+            ${extensionsHtml}
+          </div>
         </div>
       ` : '';
 
@@ -952,11 +1012,14 @@
                 <div class="thai-word">${v.thai}</div>
                 <div class="phonetic">${v.phonetic}</div>
               </div>
-              <button class="btn-audio" onclick="playTTS('${escapeQuote(v.thai)}', this)" title="播放泰語標準發音">🔊</button>
+              <div class="vocab-actions">
+                ${anatomyToggleBtn}
+                <button class="btn-audio" onclick="playTTS('${escapeQuote(v.thai)}', this)" title="播放泰語標準發音">🔊</button>
+              </div>
             </div>
             <div class="meaning">${v.meaning}</div>
           </div>
-          ${anatomySectionHtml}
+          ${anatomyDrawerHtml}
         </div>
       `;
     }).join('');
@@ -1073,6 +1136,22 @@
       localStorage.setItem('thai_weekly_audio_rate', String(rate));
     } catch (e) {}
     showToast(`語音速度切換為 ${rate}x`);
+  }
+
+// 說文解字抽屜切換
+  function toggleAnatomy(drawerId, btn) {
+    const drawer = document.getElementById(drawerId);
+    if (!drawer) return;
+    const isOpen = drawer.classList.toggle('open');
+    btn.classList.toggle('active', isOpen);
+    const textSpan = btn.querySelector('.anatomy-text');
+    const iconSpan = btn.querySelector('.anatomy-icon');
+    if (textSpan) {
+      textSpan.innerText = isOpen ? '收合' : '拆解';
+    }
+    if (iconSpan) {
+      iconSpan.innerText = isOpen ? '✕' : '🧩';
+    }
   }
 
   function toggleMask() {
