@@ -29,7 +29,7 @@ function onOpen() {
     .addSeparator()
     .addItem("⏰ 設定每週六 09:00 自動出刊排程", "setupWeeklyTrigger")
     .addItem("🧹 一鍵清理現有備忘重複前綴", "cleanExistingMemos")
-    .addItem("🧩 初始化/補齊 Vocab 說文解字欄位與歷史拆解", "initVocabAnatomy")
+    .addItem("🧩 自動補齊歷史單字說文解字 (Auto-Backfill)", "menuBackfillAnatomy")
     .addItem("🔑 寫入/更新 GEMINI_API_KEY 至指令碼屬性", "setScriptProperties")
     .addToUi();
 }
@@ -102,8 +102,9 @@ function doPost(e) {
     if (action === "clean_memos") {
       const res = cleanExistingMemos();
       return ContentService.createTextOutput(JSON.stringify(res)).setMimeType(ContentService.MimeType.JSON);
-    } else if (action === "init_vocab_anatomy") {
-      const res = initVocabAnatomy();
+
+    } else if (action === "init_vocab_anatomy" || action === "backfill_anatomy") {
+      const res = backfillAnatomyForIssue(postData.issue_code);
       return ContentService.createTextOutput(JSON.stringify(res)).setMimeType(ContentService.MimeType.JSON);
     } else if (action === "publish_weekly") {
       const res = weeklyAutoPublish();
@@ -429,7 +430,7 @@ function weeklyAutoPublish() {
  */
 function callGeminiGenerate(upcomingIssue) {
   const apiKey = getApiKey();
-  const models = ["gemini-flash-latest", "gemini-2.5-flash-lite", "gemini-2.5-flash"];
+  const models = ["gemini-3.5-flash-lite", "gemini-3.8-flash"];
   
   const prompt = `
 你是一位深諳泰語教學法與觀光文化底蘊的頂級泰語教育專家，請為「Thai_Weekly（泰語學習週報）」編纂本期（VOL. ${upcomingIssue.code}）的完整教材內容。
@@ -437,10 +438,11 @@ function callGeminiGenerate(upcomingIssue) {
 【主題簡介】：${upcomingIssue.desc}
 【目標受眾】：台灣商務人士、自由行旅客、觀光旅遊從業人員。
 【文字規範】：必須嚴格使用「台灣繁體中文」，絕對嚴禁出現任何簡體字！
-【說文解字・詞彙拆解規範】：請針對 vocab 陣列中挑選 1~2 組最具結構代表性的重點複合詞（例如由字根、字綴組合而成之詞彙），額外提供：
-  - breakdown：拆解字根/字綴結構，為包含 thai, phonetic, meaning 的物件陣列（例如 [{"thai": "ยา", "phonetic": "yaa", "meaning": "藥"}, {"thai": "แก้", "phonetic": "kâe", "meaning": "解/止"}, {"thai": "ปวด", "phonetic": "pùat", "meaning": "疼痛"}]）。
-  - extensions：2~4 個具代表性的同字根延伸派生詞，為包含 thai, phonetic, meaning 的物件陣列（例如 [{"thai": "ยาแก้ไอ", "phonetic": "yaa kâe ai", "meaning": "止咳藥"}, {"thai": "ยาแก้แพ้", "phonetic": "yaa kâe phae", "meaning": "抗過敏藥"}]）。
-  - 若該單字不需拆解，breakdown 與 extensions 請填入空陣列 []。
+【說文解字・詞彙拆解全自動辨識規範】：請針對 vocab 陣列中每個單字進行構詞結構判斷：
+  1. 【複合詞與實用片語必須拆解】：凡是由兩個以上具獨立意義之詞素組成的複合詞、動賓短語、偏正詞組（如：ห้องเตียงเดี่ยว、แอร์ไม่เย็น、น้ำไม่ร้อน、เปลี่ยนห้อง、ยาแก้ปวด、คืนภาษี、อาหารทะเล、ลูกค้า、สนามบิน、ใบเสร็จ 等），必須輸出：
+     - breakdown：拆解各詞素結構，為包含 thai, phonetic, meaning 的物件陣列（例如 ยาแก้ปวด 拆解為 ยา[藥] + แก้[解/止] + ปวด[疼痛]）。
+     - extensions：2~3 個同字根之實用高頻派生詞（包含 thai, phonetic, meaning）。
+  2. 【純外來語與單一字根嚴禁拆解】：純音譯外來語（如 คีย์การ์ด Key card、มิเตอร์ Meter）或單一獨立字根詞（如 แพ้、นวด、เบา、แรง），breakdown 與 extensions 一律回傳空陣列 []。
 
 請直接回傳合法的 JSON 格式，不要包含額外文字：
 {
@@ -560,107 +562,186 @@ function cleanExistingMemos() {
   return { status: "success", updatedCount: updatedCount };
 }
 /**
- * 初始化 Vocab 工作表之 breakdown_json (F欄) 與 extensions_json (G欄)，並為現有期數重點複合詞補齊說文解字資料
+ * 試算表選單觸發的自動補齊歷史單字說文解字入口
  */
-function initVocabAnatomy() {
-  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-  const sheet = ss.getSheetByName("Vocab");
-  sheet.getRange(1, 6, 1, 2).setValues([["breakdown_json", "extensions_json"]]);
-
-  const anatomySeed = {
-    "26w41|อาหารทะเล": {
-      breakdown: [
-        { thai: "อาหาร", phonetic: "aa-hǎan", meaning: "食物/料理" },
-        { thai: "ทะเล", phonetic: "thá-lee", meaning: "海洋" }
-      ],
-      extensions: [
-        { thai: "อาหารไทย", phonetic: "aa-hǎan thai", meaning: "泰國料理" },
-        { thai: "อาหารเจ", phonetic: "aa-hǎan jee", meaning: "齋食/全素料理" },
-        { thai: "อาหารเช้า", phonetic: "aa-hǎan cháo", meaning: "早餐" }
-      ]
-    },
-    "26w41|ลูกค้า": {
-      breakdown: [
-        { thai: "ลูก", phonetic: "lûuk", meaning: "子/成員字首" },
-        { thai: "ค้า", phonetic: "kháa", meaning: "商業/買賣" }
-      ],
-      extensions: [
-        { thai: "ลูกทัวร์", phonetic: "lûuk thua", meaning: "團員/參團旅客" },
-        { thai: "ลูกเรือ", phonetic: "lûuk rʉa", meaning: "機組員/船員" },
-        { thai: "แม่ค้า", phonetic: "mâe kháa", meaning: "女攤販/老闆娘" }
-      ]
-    },
-    "26w42|สนามบิน": {
-      breakdown: [
-        { thai: "สนาม", phonetic: "sà-nǎam", meaning: "場地/廣場" },
-        { thai: "บิน", phonetic: "bin", meaning: "飛翔/飛行" }
-      ],
-      extensions: [
-        { thai: "เครื่องบิน", phonetic: "khrʉ̂ang-bin", meaning: "飛機" },
-        { thai: "สนามกีฬา", phonetic: "sà-nǎam gii-laa", meaning: "體育場" },
-        { thai: "สนามกอล์ฟ", phonetic: "sà-nǎam gɔ́f", meaning: "高爾夫球場" }
-      ]
-    },
-    "26w42|ใบเสร็จ": {
-      breakdown: [
-        { thai: "ใบ", phonetic: "bai", meaning: "葉/張/單據字首" },
-        { thai: "เสร็จ", phonetic: "sèt", meaning: "完成/完畢" }
-      ],
-      extensions: [
-        { thai: "ใบเมนู", phonetic: "bai mee-nuu", meaning: "菜單" },
-        { thai: "ใบขับขี่", phonetic: "bai khàp-khìi", meaning: "駕駛執照" },
-        { thai: "ใบตอง", phonetic: "bai dtɔɔng", meaning: "芭蕉葉" }
-      ]
-    },
-    "26w43|ค่ามัดจำ": {
-      breakdown: [
-        { thai: "ค่า", phonetic: "khâa", meaning: "費用/款項字首" },
-        { thai: "มัดจำ", phonetic: "mát-jam", meaning: "抵押/預付定金" }
-      ],
-      extensions: [
-        { thai: "ค่าห้อง", phonetic: "khâa hɔ̂ng", meaning: "房費" },
-        { thai: "ค่ารถ", phonetic: "khâa rót", meaning: "車資/交通費" },
-        { thai: "ค่าทิป", phonetic: "khâa thíp", meaning: "小費" }
-      ]
-    },
-    "26w43|ห้องเตียงคู่": {
-      breakdown: [
-        { thai: "ห้อง", phonetic: "hɔ̂ng", meaning: "房間" },
-        { thai: "เตียง", phonetic: "dtiang", meaning: "床鋪" },
-        { thai: "คู่", phonetic: "khûu", meaning: "雙/成對" }
-      ],
-      extensions: [
-        { thai: "ห้องพัก", phonetic: "hɔ̂ng phák", meaning: "客房" },
-        { thai: "ห้องน้ำ", phonetic: "hɔ̂ng náam", meaning: "洗手間/浴室" },
-        { thai: "ห้องอาหาร", phonetic: "hɔ̂ng aa-hǎan", meaning: "飯店餐廳" }
-      ]
-    },
-    "26w44|ยาแก้ปวด": {
-      breakdown: [
-        { thai: "ยา", phonetic: "yaa", meaning: "藥" },
-        { thai: "แก้", phonetic: "kâe", meaning: "解/止" },
-        { thai: "ปวด", phonetic: "pùat", meaning: "疼痛" }
-      ],
-      extensions: [
-        { thai: "ยาแก้ไอ", phonetic: "yaa kâe ai", meaning: "止咳藥" },
-        { thai: "ยาแก้แพ้", phonetic: "yaa kâe phae", meaning: "抗過敏藥" },
-        { thai: "ยาแก้เมารถ", phonetic: "yaa kâe mao rót", meaning: "暈車藥" }
-      ]
-    }
-  };
-
-  const data = sheet.getDataRange().getValues();
-  let updatedRows = 0;
-  for (let i = 1; i < data.length; i++) {
-    const key = String(data[i][0]).trim() + "|" + String(data[i][2]).trim();
-    if (anatomySeed[key]) {
-      const seed = anatomySeed[key];
-      sheet.getRange(i + 1, 6, 1, 2).setValues([[
-        JSON.stringify(seed.breakdown),
-        JSON.stringify(seed.extensions)
-      ]]);
-      updatedRows++;
+function menuBackfillAnatomy() {
+  let issueCode = null;
+  if (SpreadsheetApp.getUi) {
+    try {
+      const ui = SpreadsheetApp.getUi();
+      const resp = ui.prompt(
+        "自動補齊歷史單字說文解字 (Auto-Backfill)",
+        "請輸入欲補齊的期數代碼（如 26w43），若留空則自動檢查並補齊所有已發布期數缺漏之複合詞：",
+        ui.ButtonSet.OK_CANCEL
+      );
+      if (resp.getSelectedButton() === ui.Button.OK) {
+        issueCode = resp.getResponseText().trim() || null;
+      } else {
+        return;
+      }
+    } catch (e) {
+      Logger.log("非 UI 執行環境: " + e);
     }
   }
-  return { status: "success", headers: ["breakdown_json", "extensions_json"], updatedRows: updatedRows };
-}
+  const result = backfillAnatomyForIssue(issueCode);
+  if (SpreadsheetApp.getUi) {
+    try {
+      SpreadsheetApp.getUi().alert(
+        "回填完成",
+        "處理狀態: " + result.status + "\n成功回填單字數量: " + (result.updatedCount || 0) + "\n" + (result.msg || ""),
+        SpreadsheetApp.getUi().ButtonSet.OK
+      );
+    } catch (e) {}
+  }
+  return result;
+}
+
+/**
+ * 自動抓取缺少說文解字之單字，呼叫 Gemini API 智慧辨識複合詞結構並自動回填回 Google Sheet
+ * @param {string|null} issueCode 指定期數（如 '26w43'），未指定則檢查全體已發布期數
+ */
+function backfillAnatomyForIssue(issueCode) {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheetVocab = ss.getSheetByName("Vocab");
+  if (!sheetVocab) {
+    return { status: "error", msg: "找不到 Vocab 工作表" };
+  }
+
+  // 確保 F1:G1 標頭存在
+  if (!sheetVocab.getRange(1, 6).getValue()) {
+    sheetVocab.getRange(1, 6, 1, 2).setValues([["breakdown_json", "extensions_json"]]);
+  }
+
+  const data = sheetVocab.getDataRange().getValues();
+  const pendingItems = [];
+
+  for (let i = 1; i < data.length; i++) {
+    const rowIssue = String(data[i][0]).trim();
+    const type = String(data[i][1]).trim();
+    const thai = String(data[i][2]).trim();
+    const phonetic = String(data[i][3]).trim();
+    const meaning = String(data[i][4]).trim();
+    const breakdownJson = String(data[i][5] || "").trim();
+
+    // 僅處理指定期數（若未指定則處理所有期數之核心單字）
+    if (issueCode && rowIssue !== issueCode) continue;
+    if (type !== "core") continue;
+
+    // 若 breakdown_json 已有合法內容（非空且非 []），則跳過
+    if (breakdownJson && breakdownJson !== "[]") continue;
+
+    pendingItems.push({
+      rowIndex: i + 1,
+      issue_code: rowIssue,
+      thai: thai,
+      phonetic: phonetic,
+      meaning: meaning
+    });
+  }
+
+  if (pendingItems.length === 0) {
+    Logger.log("無缺少說文解字之單字需要回填。");
+    return { status: "success", msg: "所有核心單字均已完成拆解或已填妥", updatedCount: 0 };
+  }
+
+  Logger.log("待呼叫 Gemini 分析拆解之單字數量: " + pendingItems.length);
+
+  // 批次呼叫 Gemini 解析
+  const analysisResults = callGeminiBatchAnatomy(pendingItems);
+  let updatedCount = 0;
+
+  pendingItems.forEach(item => {
+    const res = analysisResults[item.thai];
+    if (res) {
+      const breakdownStr = (Array.isArray(res.breakdown) && res.breakdown.length > 0) ? JSON.stringify(res.breakdown) : "";
+      const extensionsStr = (Array.isArray(res.extensions) && res.extensions.length > 0) ? JSON.stringify(res.extensions) : "";
+      sheetVocab.getRange(item.rowIndex, 6, 1, 2).setValues([[breakdownStr, extensionsStr]]);
+      if (breakdownStr) updatedCount++;
+    }
+  });
+
+  SpreadsheetApp.flush();
+  Logger.log("回填完成！成功寫入複合詞拆解數量: " + updatedCount);
+  return {
+    status: "success",
+    processedCount: pendingItems.length,
+    updatedCount: updatedCount,
+    keys: Object.keys(analysisResults),
+    msg: "已分析 " + pendingItems.length + " 個單字，成功寫入 " + updatedCount + " 組複合詞拆解資料！"
+  };
+}
+
+/**
+ * 批次呼叫 Gemini 分析複合詞構詞結構
+ */
+function callGeminiBatchAnatomy(vocabItems) {
+  const apiKey = getApiKey();
+  const models = ["gemini-3.5-flash-lite", "gemini-3.8-flash"];
+  let lastErr = "";
+
+  const prompt = `
+你是一位深諳泰語構詞學的資深教育語言學家。請針對以下清單中的泰語單字進行【說文解字・詞彙拆解構詞分析】。
+
+【嚴格規則】：
+1. 【複合詞與實用片語必須拆解】：
+   - 凡由兩個以上具獨立意義之詞素組合而成的複合詞、動賓片語、偏正結構（例如：ห้องเตียงเดี่ยว, แอร์ไม่เย็น, น้ำไม่ร้อน, เปลี่ยนห้อง, ยาแก้ปวด, คืนภาษี, อาหารทะเล, ลูกค้า, สนามบิน, ใบเสร็จ 等）。
+   - 必須輸出 breakdown 陣列：包含各組成詞素之 thai, phonetic, meaning（繁體中文釋義）。
+   - 必須輸出 extensions 陣列：2~3 個同字根之高頻實用衍生詞（包含 thai, phonetic, meaning）。
+2. 【純音譯外來語與單一字根嚴禁拆解】：
+   - 純外來語音譯詞（如 คีย์การ์ด Key card, มิเตอร์ Meter）或單一字根詞（如 แพ้, นวด, เบา, แรง），其 breakdown 與 extensions 一律填入空陣列 []。
+3. 【文字規範】：必須嚴格使用「台灣繁體中文」，嚴禁使用簡體字！
+
+【待分析單字清單】：
+${JSON.stringify(vocabItems.map(v => ({ thai: v.thai, phonetic: v.phonetic, meaning: v.meaning })), null, 2)}
+
+請直接回傳合法的 JSON 物件（Key 為單字的泰文），格式如下：
+{
+  "單字泰文": {
+    "breakdown": [
+      {"thai": "詞素", "phonetic": "拼音", "meaning": "字義"}
+    ],
+    "extensions": [
+      {"thai": "衍生詞", "phonetic": "拼音", "meaning": "釋義"}
+    ]
+  }
+}
+`;
+
+  for (let i = 0; i < models.length; i++) {
+    const model = models[i];
+    const url = "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + apiKey;
+    const payload = {
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: {
+        responseMimeType: "application/json",
+        temperature: 0.2
+      }
+    };
+
+    try {
+      const resp = UrlFetchApp.fetch(url, {
+        method: "post",
+        contentType: "application/json",
+        payload: JSON.stringify(payload),
+        muteHttpExceptions: true
+      });
+
+      if (resp.getResponseCode() === 200) {
+        const json = JSON.parse(resp.getContentText());
+        let t = json.candidates[0].content.parts[0].text.trim();
+        if (t.startsWith("```")) {
+          t = t.replace(/^```[a-zA-Z]*\n/, "").replace(/\n```$/, "");
+        }
+        return JSON.parse(t);
+      } else {
+        lastErr = "HTTP " + resp.getResponseCode() + ": " + resp.getContentText();
+        Logger.log("Batch Anatomy Model " + model + " 回應異常: " + lastErr);
+      }
+    } catch (e) {
+      lastErr = String(e);
+      Logger.log("Batch Anatomy Model " + model + " 失敗: " + e);
+    }
+  }
+
+  throw new Error("Gemini 批次說文解字分析失敗: " + lastErr);
+}
