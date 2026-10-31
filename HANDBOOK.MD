@@ -222,7 +222,8 @@ Thai_Weekly/
   - [x] 實作即時線上說文解字 API 端點 (`analyzeSingleWord`)，支援 `doGet` 與 `doPost` 雙通道，部署匿名跨域存取 (`ANYONE_ANONYMOUS`)。
   - [x] 前端 `lesson.html` 與首頁 `index.html` 雙端同步掛載「🧩 泰語說文解字・即時構詞詞典」，支援雙重傳輸容錯（POST 優先＋GET 備援）與全域字串跳脫保護。
   - [x] 首頁完整繼承雙引擎 TTS 語音播放與速度偏好記憶（`localStorage['thai_weekly_audio_rate']`）。
-  - [x] 正式將「個人化語境客製與訂閱制引擎」演進方案寫入專案手冊第 6 節，作為後續開發基石。
+  - [x] 廢棄並移除 GitHub Actions 舊版自動出刊與寄信工作流程（`Weekly Thai Lesson Auto-Publish & Email`），徹底杜絕定時報錯通知，出刊全權收斂至 Google Apps Script 原生時間驅動排程。
+  - [x] 正式將「Web-First 個人化學習與訂閱演進架構」寫入專案手冊第 6 節，確立以網站為核心的兩階段演進基石。
 
 ---
 
@@ -241,11 +242,14 @@ Thai_Weekly/
    * 新增發音波形動畫或跟讀計時器。
 4. **多媒體內容延伸 (Rich Media Support)**：
    * 評估在 Google Sheet 中增加欄位支援短影片嵌入（YouTube Shorts）或情境音檔直連，豐富每週文化專題深度。
-5. **訂閱制與個人化語境客製引擎 (Personalized Context & Subscription Engine)**：
-   * **核心願景**：突破通用教材限制，以「大盤共用＋個人客製 (Hybrid Prompting)」架構，提供與讀者個人生活、工作及興趣高度相關的專屬泰語學習語境。
-   * **訂閱者輪廓資料庫 (`Subscribers` 工作表)**：
-     - 規格規劃：`email` ｜ `nickname` ｜ `gender` ｜ `interest_tags` (如：馬拉松、金融經濟、網路科技、美食咖啡) ｜ `status` (active / inactive)。
-   * **GAS 獨立發信客製注入 (MailApp Personal Patch)**：
-     - 利用既有的一對一獨立寄信迴圈，在發送前以輕量 Prompt 結合當週核心句型與該讀者的 `interest_tags`，自動生成 1 組專屬情境句與 2 個延伸生活詞彙，無縫注入專屬信件導讀。
-   * **網頁端動態個人化專欄 (Personalized Lesson Dynamic Slot)**：
-     - 前端 `lesson.html?issue=YYwWW&uid={user_id}` 支援讀取個人參數，於課程底層動態長出「🎯 為你特調的專屬單字與情境卡」，不污染公版試算表與首頁歷史歸檔。
+5. **Web-First 個人化學習與訂閱演進架構 (Personalized Learning Hub & Subscription Engine)**：
+   * **核心戰略轉向（Web-First, Mail-Light）**：
+     - **郵件弱化為純提醒鬧鐘**：電子郵件不再承載長篇教材與複雜排版，純粹作為每週六早晨的「極簡喚醒通知」（含專屬問候、一句懸念導讀、直達本週特輯的按鈕），零排版負擔且徹底免除垃圾郵件過濾風險。
+     - **功能全面網站化 (Web App Centric)**：所有教學互動、說文解字抽屜、語音發音、自測遮蔽與個人化客製內容，100% 收斂於網站端完成。
+   * **第一階段：前端本機偏好設定抽屜 (Local Preferences Drawer)**：
+     - 免登入架構：網站右上角增設「👤 學習偏好」設定按鈕（以 `localStorage` 持久化記憶）。
+     - 讀者可自訂：暱稱、性別（網頁例句尾音自動即時切換 `ครับ / ค่ะ`）、興趣主題標籤（如：跑步馬拉松、金融商務、網路科技、美妝咖啡）。
+     - 課程頁動態載入：`lesson.html` 依據標籤透過 Web App 端點即時動態掛載「🎯 專屬興趣加強包（3 個單字＋1 句實戰）」，完全不污染公共試算表資料庫。
+   * **第二階段：VIP 訂閱制與雲端 Profile 聯動 (Cloud Sync & Membership)**：
+     - 試算表增設 `Subscribers` 分頁（`email | nickname | gender | interest_tags | status`）。
+     - 郵件提醒按鈕附帶個人識別碼（`lesson.html?issue=YYwWW&uid={user_id}`），一鍵直達自動載入雲端設定之個人專屬課堂。
