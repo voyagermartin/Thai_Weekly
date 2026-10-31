@@ -661,8 +661,9 @@
     return dataRows.map(row => {
       const item = {};
       headers.forEach((h, i) => {
-        if (h && row.c && row.c[i] && row.c[i].v !== null) {
-          item[h] = row.c[i].v;
+        if (h && row.c && row.c[i]) {
+          const cell = row.c[i];
+          item[h] = (cell.f !== undefined && cell.f !== null) ? cell.f : (cell.v !== null ? cell.v : '');
         } else if (h) {
           item[h] = '';
         }
@@ -672,7 +673,7 @@
   }
 
   async function fetchSheetData(sheetName) {
-    const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
+    const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${sheetName}&headers=1`;
     const resp = await fetch(url);
     const text = await resp.text();
     return parseGViz(text);

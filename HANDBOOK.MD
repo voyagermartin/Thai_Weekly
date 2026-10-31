@@ -71,8 +71,8 @@ flowchart TD
    - `issue_code` ｜ `point_num` (1~2) ｜ `title` ｜ `explanation_html` ｜ `examples_json` (例句陣列 JSON：`[{"thai": "...", "phonetic": "...", "meaning": "..."}]`)
 
 ### 2.2 GViz API 前端無密鑰查詢規範
-前端採用 Google Visualization API (GViz) 直接查詢試算表，零 CORS 限制、無需任何前端 API Key：
-`https://docs.google.com/spreadsheets/d/1DvxPjzNRlTRSMSXr6eaktU2dBQZSS9oWadNfT3_ZUTM/gviz/tq?tqx=out:json&sheet={工作表名稱}`
+前端採用 Google Visualization API (GViz) 直接查詢試算表，零 CORS 限制、無需任何前端 API Key（**務必附帶 `&headers=1`**，強制宣告第 1 列為標題列，避免 GViz 啟發式演算法將多筆字串資料列誤判合併至標頭）：
+`https://docs.google.com/spreadsheets/d/1DvxPjzNRlTRSMSXr6eaktU2dBQZSS9oWadNfT3_ZUTM/gviz/tq?tqx=out:json&sheet={工作表名稱}&headers=1`
 
 ---
 
