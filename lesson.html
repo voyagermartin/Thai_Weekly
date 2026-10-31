@@ -1043,6 +1043,22 @@
   const SPREADSHEET_ID = "1DvxPjzNRlTRSMSXr6eaktU2dBQZSS9oWadNfT3_ZUTM";
   const GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxiY6t8K_BmB2oRWhbi7UZCHpN1Blmd1BEH8APe3PW6gXCKX2XcNYHcDZhZfMZtifi4/exec";
 
+  // 全域輔助函式：防範單引號與特殊字元跳脫、安全解析 JSON 陣列
+  const escapeQuote = (str) => String(str || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+
+  const safeParseJsonArray = (rawStr) => {
+    if (!rawStr || typeof rawStr !== 'string') return [];
+    const trimmed = rawStr.trim();
+    if (!trimmed || trimmed === '[]') return [];
+    try {
+      const parsed = JSON.parse(trimmed);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      console.warn('Vocab JSON 欄位解析略過:', rawStr, e);
+      return [];
+    }
+  };
+
   function parseGViz(text) {
     const raw = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1));
     if (!raw.table || !raw.table.cols) return [];
@@ -1131,21 +1147,7 @@
     document.getElementById('pill-time').innerHTML = `⏱️ <b>閱讀時間</b>：${issue.read_time}`;
     document.getElementById('pill-highlights').innerHTML = `🎯 <b>本期重點</b>：${issue.highlights}`;
 
-    // 安全解析 JSON 陣列輔助函式（防範髒資料中斷渲染）
-    const safeParseJsonArray = (rawStr) => {
-      if (!rawStr || typeof rawStr !== 'string') return [];
-      const trimmed = rawStr.trim();
-      if (!trimmed || trimmed === '[]') return [];
-      try {
-        const parsed = JSON.parse(trimmed);
-        return Array.isArray(parsed) ? parsed : [];
-      } catch (e) {
-        console.warn('Vocab JSON 欄位解析略過:', rawStr, e);
-        return [];
-      }
-    };
 
-    const escapeQuote = (str) => String(str || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 
     // 1. 渲染單字庫 (Core Vocab + 說文解字按鈕觸發展開)
     const issueVocab = vocabAll.filter(v => v.issue_code === code);
@@ -1545,11 +1547,18 @@
     `;
 
     try {
-      const resp = await fetch(GAS_WEBAPP_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action: 'analyze_word', word: word })
-      });
+      let resp;
+      try {
+        resp = await fetch(GAS_WEBAPP_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'analyze_word', word: word })
+        });
+      } catch (postErr) {
+        console.warn('POST 失敗，自動切換為 GET 備援請求:', postErr);
+        const getUrl = `${GAS_WEBAPP_URL}?action=analyze_word&word=${encodeURIComponent(word)}`;
+        resp = await fetch(getUrl);
+      }
 
       const data = await resp.json();
       if (!data || data.status !== 'success') {
