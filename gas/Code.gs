@@ -28,7 +28,8 @@ function onOpen() {
     .addItem("📧 立即補寄 26w43 給 Annie 與 昌哥", "resend26w43ToAnnieAndChang")
     .addSeparator()
     .addItem("⏰ 設定每週六 09:00 自動出刊排程", "setupWeeklyTrigger")
-    .addItem("🧹 一鍵清理現有備忘重複前綴", "cleanExistingMemos")
+    .addItem("🧹 一鍵清理現有備忘重複前綴", "cleanExistingMemos")
+    .addItem("🧩 初始化/補齊 Vocab 說文解字欄位與歷史拆解", "initVocabAnatomy")
     .addItem("🔑 寫入/更新 GEMINI_API_KEY 至指令碼屬性", "setScriptProperties")
     .addToUi();
 }
@@ -100,6 +101,9 @@ function doPost(e) {
 
     if (action === "clean_memos") {
       const res = cleanExistingMemos();
+      return ContentService.createTextOutput(JSON.stringify(res)).setMimeType(ContentService.MimeType.JSON);
+    } else if (action === "init_vocab_anatomy") {
+      const res = initVocabAnatomy();
       return ContentService.createTextOutput(JSON.stringify(res)).setMimeType(ContentService.MimeType.JSON);
     } else if (action === "publish_weekly") {
       const res = weeklyAutoPublish();
@@ -340,16 +344,37 @@ function weeklyAutoPublish() {
   sheetIssues.getRange(upcomingRowIndex, 15).setValue(generated.email.intro_text);
   sheetIssues.getRange(upcomingRowIndex, 16).setValue(generated.email.highlights.map(h => '<div class="highlight-item">' + h + '</div>').join("\n"));
 
-  // 2. 寫入 Vocab (Core + Culture)
+  // 2. 寫入 Vocab (Core + Culture，擴充欄位 F: breakdown_json 與 G: extensions_json)
   const sheetVocab = ss.getSheetByName("Vocab");
+  if (!sheetVocab.getRange(1, 6).getValue()) {
+    sheetVocab.getRange(1, 6, 1, 2).setValues([["breakdown_json", "extensions_json"]]);
+  }
   const vocabRows = [];
   generated.vocab.forEach(v => {
-    vocabRows.push([upcomingIssue.code, "core", v.thai, v.phonetic, v.pos + " " + v.meaning]);
+    const breakdownStr = (Array.isArray(v.breakdown) && v.breakdown.length > 0) ? JSON.stringify(v.breakdown) : "";
+    const extensionsStr = (Array.isArray(v.extensions) && v.extensions.length > 0) ? JSON.stringify(v.extensions) : "";
+    vocabRows.push([
+      upcomingIssue.code,
+      "core",
+      v.thai,
+      v.phonetic,
+      v.pos + " " + v.meaning,
+      breakdownStr,
+      extensionsStr
+    ]);
   });
   generated.culture.vocab_items.forEach(cv => {
-    vocabRows.push([upcomingIssue.code, "culture", cv.thai, cv.phonetic, cv.meaning]);
+    vocabRows.push([
+      upcomingIssue.code,
+      "culture",
+      cv.thai,
+      cv.phonetic,
+      cv.meaning,
+      "",
+      ""
+    ]);
   });
-  sheetVocab.getRange(sheetVocab.getLastRow() + 1, 1, vocabRows.length, 5).setValues(vocabRows);
+  sheetVocab.getRange(sheetVocab.getLastRow() + 1, 1, vocabRows.length, 7).setValues(vocabRows);
 
   // 3. 寫入 Sentences
   const sheetSentences = ss.getSheetByName("Sentences");
@@ -412,6 +437,10 @@ function callGeminiGenerate(upcomingIssue) {
 【主題簡介】：${upcomingIssue.desc}
 【目標受眾】：台灣商務人士、自由行旅客、觀光旅遊從業人員。
 【文字規範】：必須嚴格使用「台灣繁體中文」，絕對嚴禁出現任何簡體字！
+【說文解字・詞彙拆解規範】：請針對 vocab 陣列中挑選 1~2 組最具結構代表性的重點複合詞（例如由字根、字綴組合而成之詞彙），額外提供：
+  - breakdown：拆解字根/字綴結構，為包含 thai, phonetic, meaning 的物件陣列（例如 [{"thai": "ยา", "phonetic": "yaa", "meaning": "藥"}, {"thai": "แก้", "phonetic": "kâe", "meaning": "解/止"}, {"thai": "ปวด", "phonetic": "pùat", "meaning": "疼痛"}]）。
+  - extensions：2~4 個具代表性的同字根延伸派生詞，為包含 thai, phonetic, meaning 的物件陣列（例如 [{"thai": "ยาแก้ไอ", "phonetic": "yaa kâe ai", "meaning": "止咳藥"}, {"thai": "ยาแก้แพ้", "phonetic": "yaa kâe phae", "meaning": "抗過敏藥"}]）。
+  - 若該單字不需拆解，breakdown 與 extensions 請填入空陣列 []。
 
 請直接回傳合法的 JSON 格式，不要包含額外文字：
 {
@@ -423,7 +452,18 @@ function callGeminiGenerate(upcomingIssue) {
   "highlights_summary": "9個核心單字 ｜ 5組實用對話句型 ｜ 2大核心語法 ｜ 深度文化專題與單字發音",
   "read_time_minutes": "10",
   "vocab": [
-    {"thai": "泰文", "phonetic": "拼音", "pos": "[動詞]", "meaning": "繁中釋義"}
+    {
+      "thai": "泰文",
+      "phonetic": "拼音",
+      "pos": "[動詞]",
+      "meaning": "繁中釋義",
+      "breakdown": [
+        {"thai": "字根", "phonetic": "拼音", "meaning": "字義"}
+      ],
+      "extensions": [
+        {"thai": "延伸衍生詞", "phonetic": "拼音", "meaning": "繁中釋義"}
+      ]
+    }
   ],
   "sentences": [
     {"thai": "泰文句子", "phonetic": "拼音", "meaning": "繁中翻譯"}
@@ -518,4 +558,109 @@ function cleanExistingMemos() {
   }
   Logger.log("已清理備忘數量: " + updatedCount);
   return { status: "success", updatedCount: updatedCount };
-}
+}
+/**
+ * 初始化 Vocab 工作表之 breakdown_json (F欄) 與 extensions_json (G欄)，並為現有期數重點複合詞補齊說文解字資料
+ */
+function initVocabAnatomy() {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet = ss.getSheetByName("Vocab");
+  sheet.getRange(1, 6, 1, 2).setValues([["breakdown_json", "extensions_json"]]);
+
+  const anatomySeed = {
+    "26w41|อาหารทะเล": {
+      breakdown: [
+        { thai: "อาหาร", phonetic: "aa-hǎan", meaning: "食物/料理" },
+        { thai: "ทะเล", phonetic: "thá-lee", meaning: "海洋" }
+      ],
+      extensions: [
+        { thai: "อาหารไทย", phonetic: "aa-hǎan thai", meaning: "泰國料理" },
+        { thai: "อาหารเจ", phonetic: "aa-hǎan jee", meaning: "齋食/全素料理" },
+        { thai: "อาหารเช้า", phonetic: "aa-hǎan cháo", meaning: "早餐" }
+      ]
+    },
+    "26w41|ลูกค้า": {
+      breakdown: [
+        { thai: "ลูก", phonetic: "lûuk", meaning: "子/成員字首" },
+        { thai: "ค้า", phonetic: "kháa", meaning: "商業/買賣" }
+      ],
+      extensions: [
+        { thai: "ลูกทัวร์", phonetic: "lûuk thua", meaning: "團員/參團旅客" },
+        { thai: "ลูกเรือ", phonetic: "lûuk rʉa", meaning: "機組員/船員" },
+        { thai: "แม่ค้า", phonetic: "mâe kháa", meaning: "女攤販/老闆娘" }
+      ]
+    },
+    "26w42|สนามบิน": {
+      breakdown: [
+        { thai: "สนาม", phonetic: "sà-nǎam", meaning: "場地/廣場" },
+        { thai: "บิน", phonetic: "bin", meaning: "飛翔/飛行" }
+      ],
+      extensions: [
+        { thai: "เครื่องบิน", phonetic: "khrʉ̂ang-bin", meaning: "飛機" },
+        { thai: "สนามกีฬา", phonetic: "sà-nǎam gii-laa", meaning: "體育場" },
+        { thai: "สนามกอล์ฟ", phonetic: "sà-nǎam gɔ́f", meaning: "高爾夫球場" }
+      ]
+    },
+    "26w42|ใบเสร็จ": {
+      breakdown: [
+        { thai: "ใบ", phonetic: "bai", meaning: "葉/張/單據字首" },
+        { thai: "เสร็จ", phonetic: "sèt", meaning: "完成/完畢" }
+      ],
+      extensions: [
+        { thai: "ใบเมนู", phonetic: "bai mee-nuu", meaning: "菜單" },
+        { thai: "ใบขับขี่", phonetic: "bai khàp-khìi", meaning: "駕駛執照" },
+        { thai: "ใบตอง", phonetic: "bai dtɔɔng", meaning: "芭蕉葉" }
+      ]
+    },
+    "26w43|ค่ามัดจำ": {
+      breakdown: [
+        { thai: "ค่า", phonetic: "khâa", meaning: "費用/款項字首" },
+        { thai: "มัดจำ", phonetic: "mát-jam", meaning: "抵押/預付定金" }
+      ],
+      extensions: [
+        { thai: "ค่าห้อง", phonetic: "khâa hɔ̂ng", meaning: "房費" },
+        { thai: "ค่ารถ", phonetic: "khâa rót", meaning: "車資/交通費" },
+        { thai: "ค่าทิป", phonetic: "khâa thíp", meaning: "小費" }
+      ]
+    },
+    "26w43|ห้องเตียงคู่": {
+      breakdown: [
+        { thai: "ห้อง", phonetic: "hɔ̂ng", meaning: "房間" },
+        { thai: "เตียง", phonetic: "dtiang", meaning: "床鋪" },
+        { thai: "คู่", phonetic: "khûu", meaning: "雙/成對" }
+      ],
+      extensions: [
+        { thai: "ห้องพัก", phonetic: "hɔ̂ng phák", meaning: "客房" },
+        { thai: "ห้องน้ำ", phonetic: "hɔ̂ng náam", meaning: "洗手間/浴室" },
+        { thai: "ห้องอาหาร", phonetic: "hɔ̂ng aa-hǎan", meaning: "飯店餐廳" }
+      ]
+    },
+    "26w44|ยาแก้ปวด": {
+      breakdown: [
+        { thai: "ยา", phonetic: "yaa", meaning: "藥" },
+        { thai: "แก้", phonetic: "kâe", meaning: "解/止" },
+        { thai: "ปวด", phonetic: "pùat", meaning: "疼痛" }
+      ],
+      extensions: [
+        { thai: "ยาแก้ไอ", phonetic: "yaa kâe ai", meaning: "止咳藥" },
+        { thai: "ยาแก้แพ้", phonetic: "yaa kâe phae", meaning: "抗過敏藥" },
+        { thai: "ยาแก้เมารถ", phonetic: "yaa kâe mao rót", meaning: "暈車藥" }
+      ]
+    }
+  };
+
+  const data = sheet.getDataRange().getValues();
+  let updatedRows = 0;
+  for (let i = 1; i < data.length; i++) {
+    const key = String(data[i][0]).trim() + "|" + String(data[i][2]).trim();
+    if (anatomySeed[key]) {
+      const seed = anatomySeed[key];
+      sheet.getRange(i + 1, 6, 1, 2).setValues([[
+        JSON.stringify(seed.breakdown),
+        JSON.stringify(seed.extensions)
+      ]]);
+      updatedRows++;
+    }
+  }
+  return { status: "success", headers: ["breakdown_json", "extensions_json"], updatedRows: updatedRows };
+}

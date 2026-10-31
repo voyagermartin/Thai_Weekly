@@ -264,6 +264,7 @@
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
       gap: 20px;
+      align-items: start;
     }
     .vocab-card {
       background: var(--bg-card);
@@ -322,6 +323,144 @@
       color: #c084fc;
       font-size: 14px;
       display: block;
+    }
+
+    /* Word Anatomy Component (說文解字・詞彙拆解) */
+    .word-anatomy {
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px dashed rgba(245, 158, 11, 0.35);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .anatomy-block {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .anatomy-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent-gold);
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .breakdown-flow {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+    .breakdown-pill {
+      background: rgba(13, 8, 20, 0.65);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 6px 11px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      max-width: 100%;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .breakdown-pill:hover {
+      border-color: var(--accent-gold);
+      background: rgba(23, 15, 36, 0.9);
+    }
+    .breakdown-pill .bp-info {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.25;
+    }
+    .breakdown-pill .bp-thai {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-thai);
+    }
+    .breakdown-pill .bp-phonetic {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+    .breakdown-pill .bp-meaning {
+      font-size: 13.5px;
+      color: var(--text-main);
+      background: rgba(245, 158, 11, 0.14);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .breakdown-plus {
+      color: var(--accent-gold-light);
+      font-weight: 800;
+      font-size: 16px;
+      opacity: 0.85;
+      user-select: none;
+      padding: 0 2px;
+    }
+    .extensions-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .extension-item {
+      background: rgba(13, 8, 20, 0.55);
+      border: 1px solid rgba(168, 85, 247, 0.35);
+      border-radius: 10px;
+      padding: 6px 11px;
+      display: inline-flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 7px;
+      max-width: 100%;
+      font-size: 14px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .extension-item:hover {
+      border-color: var(--accent-gold);
+      background: rgba(23, 15, 36, 0.9);
+    }
+    .extension-item .ext-thai {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text-thai);
+    }
+    .extension-item .ext-phonetic {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+    .extension-item .ext-meaning {
+      font-size: 14px;
+      color: var(--text-main);
+      padding: 1px 6px;
+      border-radius: 5px;
+    }
+    .anatomy-meaning {
+      transition: all 0.2s;
+    }
+    .anatomy-meaning.masked {
+      background: #372352 !important;
+      border-color: rgba(192, 132, 252, 0.4) !important;
+      color: transparent !important;
+      user-select: none;
+      cursor: pointer;
+      position: relative;
+      min-width: 34px;
+      text-align: center;
+    }
+    .anatomy-meaning.masked::after {
+      content: "👁️";
+      color: #c084fc;
+      font-size: 12px;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
     }
 
     /* In-place Audio Play Button */
@@ -451,15 +590,24 @@
       color: var(--text-thai);
       font-size: 20px;
     }
-    .example-pill .btn-audio-mini {
+    .btn-audio-mini {
       background: none;
       border: none;
       cursor: pointer;
-      font-size: 18px;
+      font-size: 17px;
       color: #fde047;
       transition: transform 0.15s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2px;
+      flex-shrink: 0;
     }
-    .example-pill .btn-audio-mini:hover { transform: scale(1.2); }
+    .btn-audio-mini:hover { transform: scale(1.2); }
+    .btn-audio-mini.playing {
+      animation: audioPulse 0.9s infinite alternate;
+      border-radius: 50%;
+    }
 
     /* Culture Section */
     .culture-card {
@@ -537,6 +685,8 @@
       .sec-title { font-size: 21px; }
       .btn-audio { width: 44px; height: 44px; font-size: 18px; }
       .vocab-grid { grid-template-columns: 1fr; }
+      .breakdown-pill .bp-thai { font-size: 16px; }
+      .extension-item .ext-thai { font-size: 16px; }
     }
   </style>
 </head>
@@ -728,22 +878,88 @@
     document.getElementById('pill-time').innerHTML = `⏱️ <b>閱讀時間</b>：${issue.read_time}`;
     document.getElementById('pill-highlights').innerHTML = `🎯 <b>本期重點</b>：${issue.highlights}`;
 
-    // 1. 渲染單字庫 (Core Vocab)
+    // 安全解析 JSON 陣列輔助函式（防範髒資料中斷渲染）
+    const safeParseJsonArray = (rawStr) => {
+      if (!rawStr || typeof rawStr !== 'string') return [];
+      const trimmed = rawStr.trim();
+      if (!trimmed || trimmed === '[]') return [];
+      try {
+        const parsed = JSON.parse(trimmed);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (e) {
+        console.warn('Vocab JSON 欄位解析略過:', rawStr, e);
+        return [];
+      }
+    };
+
+    const escapeQuote = (str) => String(str || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+
+    // 1. 渲染單字庫 (Core Vocab + 說文解字 Word Anatomy)
     const issueVocab = vocabAll.filter(v => v.issue_code === code);
     const coreVocab = issueVocab.filter(v => v.type === 'core');
     const vocabGrid = document.getElementById('vocab-grid');
-    vocabGrid.innerHTML = coreVocab.map(v => `
-      <div class="vocab-card">
-        <div class="vocab-top">
-          <div>
-            <div class="thai-word">${v.thai}</div>
-            <div class="phonetic">${v.phonetic}</div>
+    vocabGrid.innerHTML = coreVocab.map(v => {
+      const breakdown = safeParseJsonArray(v.breakdown_json);
+      const extensions = safeParseJsonArray(v.extensions_json);
+      const hasAnatomy = breakdown.length > 0 || extensions.length > 0;
+
+      const breakdownHtml = breakdown.length > 0 ? `
+        <div class="anatomy-block">
+          <div class="anatomy-label"><span>🧩</span> 說文解字・詞彙拆解</div>
+          <div class="breakdown-flow">
+            ${breakdown.map(b => `
+              <div class="breakdown-pill">
+                <div class="bp-info">
+                  <span class="bp-thai">${b.thai || ''}</span>
+                  <span class="bp-phonetic">${b.phonetic || ''}</span>
+                </div>
+                <span class="bp-meaning anatomy-meaning">${b.meaning || ''}</span>
+                <button class="btn-audio-mini" onclick="playTTS('${escapeQuote(b.thai)}', this)" title="播放字根發音">🔊</button>
+              </div>
+            `).join('<span class="breakdown-plus">+</span>')}
           </div>
-          <button class="btn-audio" onclick="playTTS('${v.thai}', this)" title="播放泰語標準發音">🔊</button>
         </div>
-        <div class="meaning">${v.meaning}</div>
-      </div>
-    `).join('');
+      ` : '';
+
+      const extensionsHtml = extensions.length > 0 ? `
+        <div class="anatomy-block">
+          <div class="anatomy-label"><span>🌿</span> 延伸派生詞</div>
+          <div class="extensions-list">
+            ${extensions.map(ext => `
+              <div class="extension-item">
+                <span class="ext-thai">${ext.thai || ''}</span>
+                <span class="ext-phonetic">(${ext.phonetic || ''})</span>
+                <span class="ext-meaning anatomy-meaning">${ext.meaning || ''}</span>
+                <button class="btn-audio-mini" onclick="playTTS('${escapeQuote(ext.thai)}', this)" title="播放衍生詞發音">🔊</button>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : '';
+
+      const anatomySectionHtml = hasAnatomy ? `
+        <div class="word-anatomy">
+          ${breakdownHtml}
+          ${extensionsHtml}
+        </div>
+      ` : '';
+
+      return `
+        <div class="vocab-card">
+          <div>
+            <div class="vocab-top">
+              <div>
+                <div class="thai-word">${v.thai}</div>
+                <div class="phonetic">${v.phonetic}</div>
+              </div>
+              <button class="btn-audio" onclick="playTTS('${escapeQuote(v.thai)}', this)" title="播放泰語標準發音">🔊</button>
+            </div>
+            <div class="meaning">${v.meaning}</div>
+          </div>
+          ${anatomySectionHtml}
+        </div>
+      `;
+    }).join('');
 
     // 2. 渲染情境句型
     const issueSentences = sentencesAll.filter(s => s.issue_code === code).sort((a,b) => Number(a.order) - Number(b.order));
@@ -871,7 +1087,7 @@
       else el.onclick = () => el.classList.remove('masked');
     });
 
-    document.querySelectorAll('.sentence-meaning').forEach(el => {
+    document.querySelectorAll('.sentence-meaning, .anatomy-meaning').forEach(el => {
       el.classList.toggle('masked', isMasked);
       if (!isMasked) el.onclick = null;
       else el.onclick = () => el.classList.remove('masked');

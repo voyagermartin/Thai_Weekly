@@ -1,6 +1,6 @@
 # Thai_Weekly (泰語學習週報自動化發布系統) 專案協作手冊
 
-> **專案版本**：v3.1 (動態渲染標頭穩健化、音訊雙速鎖定與偏好記憶版)  
+> **專案版本**：v3.2 (說文解字・詞彙拆解 Word Anatomy 與全端動態升級版)  
 > **最後更新日期**：2026-10-31  
 > **維護者**：Martin × Antigravity (Anti) × Gemini API  
 > **線上站點**：[Thai_Weekly GitHub Pages](https://voyagermartin.github.io/Thai_Weekly/)
@@ -67,7 +67,7 @@ flowchart TD
 1. **`Issues`（期數主表）**
    - `issue_code` (如 26w43) ｜ `year` ｜ `week` ｜ `publish_date` ｜ `status` (published / upcoming) ｜ `title` ｜ `subtitle_1` ｜ `subtitle_2` ｜ `read_time` ｜ `highlights` ｜ `culture_title` ｜ `culture_body_html` ｜ `culture_memo_html` ｜ `email_subject` ｜ `email_intro_html` ｜ `email_highlights_html`
 2. **`Vocab`（單字庫）**
-   - `issue_code` ｜ `type` (`core` 核心字 / `culture` 文化專題單字) ｜ `thai` ｜ `phonetic` ｜ `meaning`
+   - `issue_code` ｜ `type` (`core` 核心字 / `culture` 文化專題單字) ｜ `thai` ｜ `phonetic` ｜ `meaning` ｜ `breakdown_json` (字根字綴拆解陣列 JSON) ｜ `extensions_json` (同字根延伸派生詞陣列 JSON)
 3. **`Sentences`（情境句型庫）**
    - `issue_code` ｜ `order` (1~5) ｜ `thai` ｜ `phonetic` ｜ `meaning`
 4. **`Grammar`（語法解析庫）**
@@ -177,6 +177,10 @@ Thai_Weekly/
   - [x] 提前實現 Roadmap「語音播放自訂記憶」：以 `localStorage` 持久化讀者速率偏好。
   - [x] 建立 `26w44.html` 跳轉頁，維持向下相容性。
   - [x] 確立「非必要勿開啟瀏覽器做測試」之核心除錯開發準則。
+- [x] **v3.2 (說文解字・詞彙拆解 Word Anatomy 擴充版 ｜ 2026-10-31)**：
+  - [x] 擴充 `Vocab` 工作表欄位 F (`breakdown_json`) 與欄位 G (`extensions_json`)，並補齊 26w41～26w44 重點複合詞拆解與延伸詞。
+  - [x] 升級 `gas/Code.gs` Gemini Prompt 與 7 欄寫入邏輯，自動生成重點複合詞字根拆解與衍生詞。
+  - [x] 升級 `lesson.html` 支援「說文解字・詞彙拆解」積木膠囊 (`+` 串接) 與延伸派生詞清單，完整整合 1.0x/0.75x 雙速語音與遮蔽自測。
 
 ---
 
