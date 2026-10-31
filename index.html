@@ -505,6 +505,419 @@
       .archive-grid { grid-template-columns: 1fr; gap: 16px; }
       .accordion-header { padding: 16px 18px; font-size: 16px; }
       .accordion-content { padding: 0 16px 18px; }
+      .live-search-container { padding: 18px 16px; }
+      .live-search-bar { flex-direction: column; align-items: stretch; }
+      .btn-live-submit { justify-content: center; width: 100%; }
+      .btn-audio { width: 44px; height: 44px; font-size: 18px; }
+      .ai-thai { font-size: 17px; }
+    }
+
+    /* 即時泰語說文解字查詢工具 (On-the-fly Word Anatomy Tool) */
+    .live-search-container {
+      background: linear-gradient(135deg, rgba(23, 15, 36, 0.95) 0%, rgba(35, 23, 56, 0.95) 100%);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 22px 24px;
+      margin-bottom: 28px;
+      box-shadow: 0 8px 24px -4px rgba(0,0,0,0.5);
+      transition: border-color 0.25s ease;
+    }
+    .live-search-container:focus-within {
+      border-color: var(--accent-gold);
+      box-shadow: 0 0 18px var(--gold-glow);
+    }
+    .live-search-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .live-search-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #fde68a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      letter-spacing: 0.5px;
+    }
+    .live-search-desc {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+    .live-search-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .live-search-input-wrap {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .live-search-input {
+      width: 100%;
+      background: rgba(13, 8, 20, 0.85);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text-thai);
+      font-size: 18px;
+      font-weight: 600;
+      padding: 12px 42px 12px 16px;
+      outline: none;
+      transition: all 0.2s ease;
+      letter-spacing: 0.5px;
+    }
+    .live-search-input:focus {
+      border-color: var(--accent-gold);
+      background: rgba(13, 8, 20, 1);
+    }
+    .live-search-input::placeholder {
+      color: #6b7280;
+      font-size: 15px;
+      font-weight: 400;
+    }
+    .btn-live-clear {
+      position: absolute;
+      right: 12px;
+      background: none;
+      border: none;
+      color: #9ca3af;
+      font-size: 16px;
+      cursor: pointer;
+      padding: 4px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.15s;
+    }
+    .btn-live-clear:hover { color: #f8fafc; }
+    .btn-live-submit {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #0d0814;
+      font-weight: 800;
+      font-size: 15.5px;
+      padding: 12px 24px;
+      border-radius: 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.28);
+    }
+    .btn-live-submit:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(245, 158, 11, 0.45);
+      filter: brightness(1.08);
+    }
+    .btn-live-submit:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    /* 即時結果卡片區 */
+    .live-anatomy-result {
+      display: none;
+      margin-top: 18px;
+      animation: drawerFadeIn 0.25s ease-out;
+    }
+    .live-result-card {
+      background: var(--bg-card);
+      border: 1px solid var(--accent-gold);
+      border-radius: 14px;
+      padding: 22px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5), 0 0 16px var(--gold-glow);
+    }
+    .live-non-compound-note {
+      background: rgba(168, 85, 247, 0.15);
+      border: 1px solid rgba(168, 85, 247, 0.35);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-top: 14px;
+      color: #e2e8f0;
+      font-size: 14.5px;
+      line-height: 1.6;
+    }
+
+    /* 說文解字卡片內部樣式 */
+    .thai-word {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--text-thai);
+      letter-spacing: 1px;
+      line-height: 1.35;
+      text-shadow: 0 0 12px rgba(253, 224, 71, 0.2);
+    }
+    .phonetic {
+      font-size: 16px;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+    .meaning {
+      font-size: 17px;
+      color: #f8fafc;
+      background: rgba(13, 8, 20, 0.6);
+      padding: 10px 14px;
+      border-radius: 10px;
+      border-left: 4px solid var(--accent-gold);
+      line-height: 1.5;
+    }
+    .word-anatomy {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .anatomy-block {
+      display: flex;
+      flex-direction: column;
+    }
+    .anatomy-label {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--accent-gold);
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 12px;
+    }
+
+    /* 拆解積木：上下層次結構卡片 */
+    .breakdown-flow {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .anatomy-item {
+      background: rgba(13, 8, 20, 0.65);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow: hidden;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .anatomy-item:hover {
+      border-color: var(--accent-gold);
+      background: rgba(23, 15, 36, 0.85);
+    }
+    .ai-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+    .ai-term {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      min-width: 0;
+    }
+    .ai-thai {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-thai);
+      white-space: nowrap;
+      word-break: keep-all;
+      line-height: 1.25;
+    }
+    .ai-phonetic {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      font-style: italic;
+      white-space: nowrap;
+    }
+    .ai-body {
+      font-size: 14.5px;
+      color: var(--text-main);
+      line-height: 1.55;
+      padding-left: 2px;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .breakdown-plus {
+      align-self: center;
+      color: var(--accent-gold-light);
+      font-weight: 800;
+      font-size: 16px;
+      line-height: 1;
+      padding: 7px 0;
+      opacity: 0.85;
+      user-select: none;
+    }
+
+    /* 延伸派生詞：精緻縱向階層清單 */
+    .extensions-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .extension-card {
+      background: rgba(13, 8, 20, 0.55);
+      border: 1px solid rgba(168, 85, 247, 0.32);
+      border-radius: 12px;
+      padding: 11px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      overflow: hidden;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .extension-card:hover {
+      border-color: var(--accent-gold);
+      background: rgba(23, 15, 36, 0.85);
+    }
+    .ext-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+    .ext-term {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      min-width: 0;
+    }
+    .ext-thai {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-thai);
+      white-space: nowrap;
+      word-break: keep-all;
+      line-height: 1.25;
+    }
+    .ext-phonetic {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-style: italic;
+      white-space: nowrap;
+    }
+    .ext-body {
+      font-size: 14px;
+      color: #cbd5e1;
+      line-height: 1.5;
+      padding-left: 4px;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .anatomy-meaning {
+      transition: all 0.2s;
+      border-radius: 6px;
+      padding: 1px 4px;
+    }
+
+    /* Word Anatomy Drawer (抽屜式說文解字容器) */
+    .anatomy-drawer {
+      display: none;
+      margin-top: 16px;
+      padding: 16px;
+      background: rgba(0, 0, 0, 0.32);
+      border-radius: 14px;
+      border-top: 1px solid rgba(245, 158, 11, 0.28);
+      border-bottom: 1px solid rgba(245, 158, 11, 0.15);
+      animation: drawerFadeIn 0.25s ease-out;
+    }
+    .anatomy-drawer.open {
+      display: block;
+    }
+    @keyframes drawerFadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 音訊播放按鈕與動畫 */
+    .btn-audio {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      color: #fde047;
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 20px;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .btn-audio:hover {
+      background: var(--accent-gold);
+      color: #0d0814;
+      transform: scale(1.08);
+      box-shadow: 0 0 18px var(--gold-glow);
+    }
+    .btn-audio.playing {
+      animation: audioPulse 0.9s infinite alternate;
+      background: var(--accent-gold);
+      color: #0d0814;
+    }
+    .btn-audio-mini {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 17px;
+      color: #fde047;
+      transition: transform 0.15s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2px;
+      flex-shrink: 0;
+    }
+    .btn-audio-mini:hover { transform: scale(1.2); }
+    .btn-audio-mini.playing {
+      animation: audioPulse 0.9s infinite alternate;
+      border-radius: 50%;
+    }
+    @keyframes audioPulse {
+      0% { transform: scale(1); box-shadow: 0 0 6px var(--gold-glow); }
+      100% { transform: scale(1.15); box-shadow: 0 0 20px rgba(245, 158, 11, 0.85); }
+    }
+
+    /* Loading Spinner */
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 4px solid rgba(245, 158, 11, 0.2);
+      border-top-color: var(--accent-gold);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 12px auto;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Toast Notification */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #231738;
+      border: 1px solid var(--border);
+      color: #ffffff;
+      padding: 14px 22px;
+      border-radius: 12px;
+      font-size: 15px;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+      z-index: 1000;
     }
   </style>
 </head>
@@ -546,7 +959,26 @@
     </div>
   </div>
 
-  <!-- 3. 方案 4 核心：即時關鍵字搜尋工具列 (Instant Search Toolbar) -->
+  <!-- 3. 即時泰語說文解字查詢工具 (On-the-fly Word Anatomy Tool) -->
+  <div class="live-search-container">
+    <div class="live-search-head">
+      <div class="live-search-title"><span>🧩</span> 泰語說文解字・即時構詞詞典 (Word Anatomy Tool)</div>
+      <span class="live-search-desc">輸入任何泰語複合詞，即刻拆解字根字綴與派生字網</span>
+    </div>
+    <div class="live-search-bar">
+      <div class="live-search-input-wrap">
+        <input type="text" id="live-search-input" class="live-search-input" placeholder="請輸入或貼上泰語單字/片語（例：ยาแก้ปวด、คืนภาษี、ห้องเตียงเดี่ยว、ร้านขายยา）" autocomplete="off" />
+        <button id="btn-live-clear" class="btn-live-clear" onclick="clearLiveSearch()" title="清除輸入">✕</button>
+      </div>
+      <button id="btn-live-submit" class="btn-live-submit" onclick="submitLiveAnatomy()">
+        <span>🧩</span> <span id="live-submit-text">拆解分析</span>
+      </button>
+    </div>
+    <!-- 即時查詢動態結果呈現容器 -->
+    <div id="live-anatomy-result" class="live-anatomy-result"></div>
+  </div>
+
+  <!-- 4. 方案 4 核心：即時關鍵字搜尋工具列 (Instant Search Toolbar) -->
   <div class="search-toolbar">
     <div class="search-box-wrapper">
       <span class="search-icon">🔍</span>
@@ -787,6 +1219,300 @@
 <!-- 即時搜尋與收納互動邏輯 Script -->
 <script>
   const SPREADSHEET_ID = "1DvxPjzNRlTRSMSXr6eaktU2dBQZSS9oWadNfT3_ZUTM";
+  const GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxiY6t8K_BmB2oRWhbi7UZCHpN1Blmd1BEH8APe3PW6gXCKX2XcNYHcDZhZfMZtifi4/exec";
+
+  // 全域輔助函式：防範單引號與特殊字元跳脫
+  const escapeQuote = (str) => String(str || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+
+  // 語音播放系統 (Google TTS + Web Speech API 雙引擎備援)
+  let currentAudio = null;
+  let playbackRate = 1.0;
+
+  // 讀取讀者偏好之播放速度
+  try {
+    const savedRate = parseFloat(localStorage.getItem('thai_weekly_audio_rate'));
+    if (savedRate === 0.75 || savedRate === 1.0) {
+      playbackRate = savedRate;
+    }
+  } catch (e) {}
+
+  function playTTS(text, btnElement) {
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio = null;
+    }
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    document.querySelectorAll('.btn-audio, .btn-audio-mini').forEach(b => b.classList.remove('playing'));
+
+    if (btnElement) {
+      btnElement.classList.add('playing');
+    }
+
+    showToast(`🔊 正在播放：${text} (${playbackRate}x)`);
+
+    const encoded = encodeURIComponent(text);
+    const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=th&q=${encoded}`;
+    
+    const audio = new Audio();
+    currentAudio = audio;
+
+    audio.defaultPlaybackRate = playbackRate;
+    audio.src = audioUrl;
+    audio.playbackRate = playbackRate;
+
+    const enforceRate = () => {
+      if (audio.playbackRate !== playbackRate) {
+        audio.playbackRate = playbackRate;
+      }
+    };
+
+    audio.addEventListener('loadedmetadata', enforceRate);
+    audio.addEventListener('canplay', enforceRate);
+    audio.addEventListener('play', enforceRate);
+
+    const cleanup = () => {
+      if (btnElement) btnElement.classList.remove('playing');
+      if (currentAudio === audio) currentAudio = null;
+    };
+
+    audio.onended = cleanup;
+
+    // 若 Google 語音因任何網路因素異常，自動切換至 Web Speech API 原生泰語發音
+    audio.onerror = () => {
+      console.warn('Google TTS 載入受阻，自動切換至 Web Speech API 原生語音播放');
+      playWebSpeech(text, btnElement);
+    };
+
+    audio.play().then(() => {
+      enforceRate();
+    }).catch(e => {
+      console.warn('Google TTS 播放異常，切換至 Web Speech API:', e);
+      playWebSpeech(text, btnElement);
+    });
+  }
+
+  function playWebSpeech(text, btnElement) {
+    if (!('speechSynthesis' in window)) {
+      showToast('⚠️ 瀏覽器不支援語音播放');
+      if (btnElement) btnElement.classList.remove('playing');
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'th-TH';
+    utterance.rate = playbackRate;
+
+    const voices = window.speechSynthesis.getVoices();
+    const thaiVoice = voices.find(v => v.lang === 'th-TH' || v.lang.toLowerCase().includes('th'));
+    if (thaiVoice) {
+      utterance.voice = thaiVoice;
+    }
+
+    utterance.onend = () => {
+      if (btnElement) btnElement.classList.remove('playing');
+    };
+
+    utterance.onerror = (e) => {
+      console.error('Web Speech 播放錯誤:', e);
+      if (btnElement) btnElement.classList.remove('playing');
+      showToast('⚠️ 語音播放受阻，請檢查音效設定');
+    };
+
+    window.speechSynthesis.speak(utterance);
+  }
+
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    if (!toast) return;
+    toast.innerText = msg;
+    toast.style.display = 'flex';
+    clearTimeout(toast.timer);
+    toast.timer = setTimeout(() => {
+      toast.style.display = 'none';
+    }, 2000);
+  }
+
+  // === 即時說文解字查詢工具 (On-the-fly Word Anatomy Tool) 邏輯 ===
+  function setupLiveSearchEvents() {
+    const input = document.getElementById('live-search-input');
+    const clearBtn = document.getElementById('btn-live-clear');
+    if (!input) return;
+
+    input.addEventListener('input', () => {
+      if (clearBtn) clearBtn.style.display = input.value.trim() ? 'flex' : 'none';
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        submitLiveAnatomy();
+      }
+    });
+  }
+
+  function clearLiveSearch() {
+    const input = document.getElementById('live-search-input');
+    const clearBtn = document.getElementById('btn-live-clear');
+    const resultDiv = document.getElementById('live-anatomy-result');
+    if (input) {
+      input.value = '';
+      input.focus();
+    }
+    if (clearBtn) clearBtn.style.display = 'none';
+    if (resultDiv) {
+      resultDiv.style.display = 'none';
+      resultDiv.innerHTML = '';
+    }
+  }
+
+  async function submitLiveAnatomy() {
+    const input = document.getElementById('live-search-input');
+    const submitBtn = document.getElementById('btn-live-submit');
+    const submitText = document.getElementById('live-submit-text');
+    const resultDiv = document.getElementById('live-anatomy-result');
+
+    if (!input || !submitBtn || !resultDiv) return;
+    const word = input.value.trim();
+    if (!word) {
+      showToast('⚠️ 請先輸入欲分析的泰文單字或片語！');
+      input.focus();
+      return;
+    }
+
+    submitBtn.disabled = true;
+    if (submitText) submitText.innerText = '分析中...';
+    resultDiv.style.display = 'block';
+    resultDiv.innerHTML = `
+      <div style="text-align:center; padding:28px 16px; background:rgba(0,0,0,0.3); border-radius:12px; border:1px solid rgba(245,158,11,0.25);">
+        <div class="spinner" style="width:36px; height:36px; margin:0 auto 12px auto;"></div>
+        <div style="color:var(--accent-gold); font-size:15px; font-weight:700;">Gemini 正在深入剖析構詞學結構...</div>
+        <div style="color:var(--text-muted); font-size:13px; margin-top:4px;">分析詞素字根、派生詞與實務發音</div>
+      </div>
+    `;
+
+    try {
+      let resp;
+      try {
+        resp = await fetch(GAS_WEBAPP_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'analyze_word', word: word })
+        });
+      } catch (postErr) {
+        console.warn('POST 失敗，自動切換為 GET 備援請求:', postErr);
+        const getUrl = `${GAS_WEBAPP_URL}?action=analyze_word&word=${encodeURIComponent(word)}`;
+        resp = await fetch(getUrl);
+      }
+
+      const data = await resp.json();
+      if (!data || data.status !== 'success') {
+        throw new Error(data && data.msg ? data.msg : '後端分析服務暫時無回應');
+      }
+
+      renderLiveAnatomyResult(data);
+      showToast(`✨「${word}」說文解字分析完成！`);
+    } catch (err) {
+      console.error('即時說文解字分析失敗:', err);
+      resultDiv.innerHTML = `
+        <div style="padding:18px 20px; background:rgba(244,63,94,0.12); border:1px solid rgba(244,63,94,0.35); border-radius:12px; color:#fca5a5; font-size:14.5px; line-height:1.6;">
+          <b>⚠️ 分析受阻：</b>${err.message || '連線逾時或網路異常，請稍後重試。'}<br>
+          <span style="font-size:13px; color:#cbd5e1; margin-top:4px; display:inline-block;">提示：請確認輸入為標準泰文字串。</span>
+        </div>
+      `;
+    } finally {
+      submitBtn.disabled = false;
+      if (submitText) submitText.innerText = '拆解分析';
+    }
+  }
+
+  function renderLiveAnatomyResult(res) {
+    const resultDiv = document.getElementById('live-anatomy-result');
+    if (!resultDiv) return;
+
+    const breakdown = Array.isArray(res.breakdown) ? res.breakdown : [];
+    const extensions = Array.isArray(res.extensions) ? res.extensions : [];
+    const hasBreakdown = breakdown.length > 0;
+
+    const breakdownHtml = hasBreakdown ? `
+      <div class="anatomy-block">
+        <div class="anatomy-label"><span>🧩</span> 說文解字・詞彙拆解</div>
+        <div class="breakdown-flow">
+          ${breakdown.map(b => `
+            <div class="anatomy-item">
+              <div class="ai-header">
+                <div class="ai-term">
+                  <span class="ai-thai">${b.thai || ''}</span>
+                  <span class="ai-phonetic">(${b.phonetic || ''})</span>
+                </div>
+                <button class="btn-audio-mini" onclick="playTTS('${escapeQuote(b.thai)}', this)" title="播放字根發音">🔊</button>
+              </div>
+              <div class="ai-body">
+                <span class="anatomy-meaning">${b.meaning || ''}</span>
+              </div>
+            </div>
+          `).join('<div class="breakdown-plus">+</div>')}
+        </div>
+      </div>
+    ` : '';
+
+    const extensionsHtml = extensions.length > 0 ? `
+      <div class="anatomy-block">
+        <div class="anatomy-label"><span>🌿</span> 延伸派生詞</div>
+        <div class="extensions-list">
+          ${extensions.map(ext => `
+            <div class="extension-card">
+              <div class="ext-header">
+                <div class="ext-term">
+                  <span class="ext-thai">${ext.thai || ''}</span>
+                  <span class="ext-phonetic">(${ext.phonetic || ''})</span>
+                </div>
+                <button class="btn-audio-mini" onclick="playTTS('${escapeQuote(ext.thai)}', this)" title="播放衍生詞發音">🔊</button>
+              </div>
+              <div class="ext-body">
+                <span class="anatomy-meaning">${ext.meaning || ''}</span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    ` : '';
+
+    const nonCompoundHtml = !hasBreakdown ? `
+      <div class="live-non-compound-note">
+        💡 <b>構詞學解析備忘：</b>${res.note || '此詞屬於單一字根詞或純音譯外來詞，在泰語中作為獨立語意單元，不宜向下分割詞素。'}
+      </div>
+    ` : (res.note ? `
+      <div class="live-non-compound-note" style="background:rgba(245,158,11,0.12); border-color:rgba(245,158,11,0.3); color:#fde68a;">
+        💡 <b>構詞結構提示：</b>${res.note}
+      </div>
+    ` : '');
+
+    resultDiv.innerHTML = `
+      <div class="live-result-card">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+          <div>
+            <div style="font-size:12.5px; font-weight:700; color:var(--accent-gold); letter-spacing:0.5px; margin-bottom:4px;">即時分析成果</div>
+            <div class="thai-word" style="font-size:32px;">${res.thai}</div>
+            <div class="phonetic" style="margin-bottom:8px;">${res.phonetic || ''}</div>
+          </div>
+          <button class="btn-audio" onclick="playTTS('${escapeQuote(res.thai)}', this)" title="播放泰語標準發音">🔊</button>
+        </div>
+        <div class="meaning" style="margin-bottom:14px;">${res.meaning || ''}</div>
+        ${nonCompoundHtml}
+        ${hasBreakdown || extensions.length > 0 ? `
+          <div class="anatomy-drawer open" style="margin-top:14px; display:block;">
+            <div class="word-anatomy">
+              ${breakdownHtml}
+              ${extensionsHtml}
+            </div>
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }
 
   function parseGViz(text) {
     const raw = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1));
@@ -1008,8 +1734,14 @@
     input.focus();
   }
 
-  window.addEventListener('DOMContentLoaded', loadIssuesFromSheet);
+  window.addEventListener('DOMContentLoaded', () => {
+    setupLiveSearchEvents();
+    loadIssuesFromSheet();
+  });
 </script>
+
+<!-- 全域浮動 Toast 提示元件 -->
+<div id="toast"></div>
 
 </body>
 </html>
