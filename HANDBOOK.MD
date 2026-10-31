@@ -1,7 +1,7 @@
 # Thai_Weekly (泰語學習週報自動化發布系統) 專案協作手冊
 
-> **專案版本**：v3.0 (Sheet-as-a-CMS 結構化資料庫與零洩漏安全架構完善版)  
-> **最後更新日期**：2026-10-26  
+> **專案版本**：v3.1 (動態渲染標頭穩健化、音訊雙速鎖定與偏好記憶版)  
+> **最後更新日期**：2026-10-31  
 > **維護者**：Martin × Antigravity (Anti) × Gemini API  
 > **線上站點**：[Thai_Weekly GitHub Pages](https://voyagermartin.github.io/Thai_Weekly/)
 
@@ -19,6 +19,9 @@
 - **根絕真人確認卡與流程攔截**：採用 Google Apps Script 原生 `MailApp.sendEmail`，享受 Google 帳戶每日原生發信額度，無真人確認卡阻擋。
 - **根除 404 找不到網頁時序爭執**：資料一入庫，前端 `lesson.html?issue=YYwWW` 隨即生效，信件中的閱讀按鈕點擊必有網頁！
 - **雲端安全零暴露防禦**：API 金鑰由 Google Apps Script 雲端原生指令碼屬性庫 (`ScriptProperties`) 加密持久化，Git 倉庫與本機原始碼達成 100% 零硬編碼洩漏風險。
+
+### 1.3 協作開發與除錯驗證準則 (Development & Testing Guidelines)
+* **非必要勿開啟瀏覽器做測試**：為確保開發效率、維持作業環境清爽與降低系統資源消耗，日常功能排查、邏輯驗證與修復應優先透過靜態代碼審查、輕量單元測試或本機終端指令進行，**非必要嚴禁主動啟動瀏覽器（Browser Agent / Headless Window）進行測試**。
 
 ```mermaid
 flowchart TD
@@ -80,15 +83,18 @@ flowchart TD
 
 ```text
 Thai_Weekly/
+├── .clasp.json                 # Google Apps Script 本地專案綁定配置檔
 ├── index.html                  # 站點首頁（即時讀取 Issues 分頁，動態渲染 Spotlight Hero、近期特輯與歷史手風琴）
 ├── lesson.html                 # 動態課程頁（依 ?issue=YYwWW 參數即時載入渲染四大專題，支援語音發音與遮蔽自測）
 ├── 26w41.html                  # 歷史相容跳轉頁（內嵌自動導向 lesson.html?issue=26w41）
 ├── 26w42.html                  # 歷史相容跳轉頁（內嵌自動導向 lesson.html?issue=26w42）
 ├── 26w43.html                  # 歷史相容跳轉頁（內嵌自動導向 lesson.html?issue=26w43）
+├── 26w44.html                  # 歷史相容跳轉頁（內嵌自動導向 lesson.html?issue=26w44）
 ├── favicon.svg                 # 專屬深邃曜石黑 × 科技藍漸層泰語學習 App 圖標
 ├── templates/
 │   └── lesson_template.html    # 紫金版面設計基準模板（供動態骨架參考）
 ├── gas/
+│   ├── appsscript.json         # Apps Script 專案資訊清單
 │   └── Code.gs                 # 綁定 Google Apps Script 原生自動化腳本（零硬編碼安全版）
 ├── scripts/
 │   ├── Thai_Weekly_DB.xlsx     # 結構化資料庫本地工作簿快照
@@ -112,9 +118,11 @@ Thai_Weekly/
 * **雙引擎語音播放系統**：
   * 第一引擎：Google TTS 原地串流 (`audio/mpeg`)。
   * 第二引擎：自動備援 Web Speech API 原生合成語音 (`th-TH`)。
+  * **雙速切換與生命週期鎖定機制 (1.0x / 0.75x)**：針對瀏覽器在給定 `audio.src` 時會自動將 `playbackRate` 洗白重置為 `defaultPlaybackRate (1.0)` 的底層機制，系統全面設定 `audio.defaultPlaybackRate = playbackRate`，並在 `loadedmetadata`、`canplay`、`play` 等多重事件中強制鎖定 `enforceRate()`，確保 0.75x 減速自然清晰。
+  * **語音偏好本地持久化**：以 `localStorage` 保存 `thai_weekly_audio_rate`，讀者選定 0.75x 或 1.0x 後，跨期數閱讀或重整網頁皆自動記憶偏好。
   * 文化專題精選單字發音：文末必備 8 組文化單字發音按鈕 (`culture-vocab-sec`) 🔊。
 * **相容性保證**：
-  * 舊信件點擊 `26w41.html`、`26w42.html`、`26w43.html` 均自動無縫跳轉至 `lesson.html?issue=26wXX`，舊連結 100% 正常開啟。
+  * 舊信件點擊 `26w41.html`、`26w42.html`、`26w43.html`、`26w44.html` 均自動無縫跳轉至 `lesson.html?issue=26wXX`，舊連結 100% 正常開啟。
 
 ---
 
@@ -162,12 +170,19 @@ Thai_Weekly/
   - [x] 建立 API 金鑰雲端指令碼屬性 (`ScriptProperties`) 持久化與試算表彈窗輸入機制。
   - [x] 徹底清除原始碼硬編碼金鑰，重構淨化 Git 歷史紀錄（Purge Git History），達成零外洩資安防禦。
   - [x] 升級 `deploy_gas.py` 支援原地覆蓋部署，保持 Web App URL 恆定。
+- [x] **v3.1 (全端動態渲染穩定化與語音體驗升級 ｜ 2026-10-31)**：
+  - [x] 發布 VOL. 26w44 特輯（泰式按摩SPA・藥局問診與身體部位實務），並自動生成 26w45 預告。
+  - [x] 排查並修復 GViz 查詢缺少 `&headers=1` 導致多筆字串列被啟發式演算法併入欄位標頭、首頁與課程頁無法動態抓取新刊之重大缺陷。
+  - [x] 排查並修復 HTML5 Audio 在指派 `src` 時自動重置 `playbackRate` 的底層機制，落實多事件鎖定與 `defaultPlaybackRate` 雙重防護，確保 0.75x 與 1.0x 顯著區別。
+  - [x] 提前實現 Roadmap「語音播放自訂記憶」：以 `localStorage` 持久化讀者速率偏好。
+  - [x] 建立 `26w44.html` 跳轉頁，維持向下相容性。
+  - [x] 確立「非必要勿開啟瀏覽器做測試」之核心除錯開發準則。
 
 ---
 
 ## 6. 下階段開發演進展望 (Next Phase Roadmap)
 
-本節作為 v3.0 穩定運行後，後續迭代與學習體驗擴充的起點基準：
+本節作為後續迭代與學習體驗擴充的起點基準：
 
 1. **學習歷程本地持久化 (Local Progress Tracking)**：
    * 利用瀏覽器 `localStorage` 記錄讀者的「已讀期數徽章」、「核心單字收藏本 (Saved Vocab)」。
@@ -176,7 +191,7 @@ Thai_Weekly/
    * 提供更精細的「遮蔽模式」：獨立切換遮蔽「泰文單字」、「音標」或「中文釋義」。
    * 單元快速自測：於 `lesson.html` 底部整合隨機 3 題快速選擇測驗，即時檢視學習成效。
 3. **語音播放自訂記憶 (Audio Preferences)**：
-   * 記憶讀者自選之語音速率（1.0x 或 0.75x），換頁時自動保持偏好。
+   * [x] 記憶讀者自選之語音速率（1.0x 或 0.75x），換頁時自動保持偏好（已於 v3.1 實現）。
    * 新增發音波形動畫或跟讀計時器。
 4. **多媒體內容延伸 (Rich Media Support)**：
    * 評估在 Google Sheet 中增加欄位支援短影片嵌入（YouTube Shorts）或情境音檔直連，豐富每週文化專題深度。
