@@ -660,11 +660,31 @@
   let playbackRate = 1.0;
   let isMasked = false;
 
+  // 讀取讀者偏好之播放速度
+  try {
+    const savedRate = parseFloat(localStorage.getItem('thai_weekly_audio_rate'));
+    if (savedRate === 0.75 || savedRate === 1.0) {
+      playbackRate = savedRate;
+    }
+  } catch (e) {}
+
+  function updateRateUI() {
+    const btn1 = document.getElementById('btn-rate-1');
+    const btn075 = document.getElementById('btn-rate-075');
+    if (btn1) btn1.classList.toggle('active', playbackRate === 1.0);
+    if (btn075) btn075.classList.toggle('active', playbackRate === 0.75);
+  }
+
   function toggleRate(rate) {
     playbackRate = rate;
-    document.getElementById('btn-rate-1').classList.toggle('active', rate === 1.0);
-    document.getElementById('btn-rate-075').classList.toggle('active', rate === 0.75);
-    if (currentAudio) currentAudio.playbackRate = rate;
+    updateRateUI();
+    if (currentAudio) {
+      currentAudio.defaultPlaybackRate = rate;
+      currentAudio.playbackRate = rate;
+    }
+    try {
+      localStorage.setItem('thai_weekly_audio_rate', String(rate));
+    } catch (e) {}
     showToast(`語音速度切換為 ${rate}x`);
   }
 
@@ -703,14 +723,28 @@
       btnElement.classList.add('playing');
     }
 
-    showToast(`🔊 正在播放：${text}`);
+    showToast(`🔊 正在播放：${text} (${playbackRate}x)`);
 
     const encoded = encodeURIComponent(text);
     const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=th&q=${encoded}`;
     
     const audio = new Audio();
     currentAudio = audio;
+
+    // 關鍵修復：設置 defaultPlaybackRate 並在各事件生命週期鎖定 playbackRate
+    audio.defaultPlaybackRate = playbackRate;
+    audio.src = audioUrl;
     audio.playbackRate = playbackRate;
+
+    const enforceRate = () => {
+      if (audio.playbackRate !== playbackRate) {
+        audio.playbackRate = playbackRate;
+      }
+    };
+
+    audio.addEventListener('loadedmetadata', enforceRate);
+    audio.addEventListener('canplay', enforceRate);
+    audio.addEventListener('play', enforceRate);
 
     const cleanup = () => {
       if (btnElement) btnElement.classList.remove('playing');
@@ -725,8 +759,9 @@
       playWebSpeech(text, btnElement);
     };
 
-    audio.src = audioUrl;
-    audio.play().catch(e => {
+    audio.play().then(() => {
+      enforceRate();
+    }).catch(e => {
       console.warn('Google TTS 播放異常，切換至 Web Speech API:', e);
       playWebSpeech(text, btnElement);
     });
