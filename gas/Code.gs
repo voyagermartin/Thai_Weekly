@@ -81,9 +81,15 @@ function getApiKey() {
 }
 
 function doGet(e) {
-  if (e && e.parameter && e.parameter.clean === "1") {
-    const res = cleanExistingMemos();
-    return ContentService.createTextOutput(JSON.stringify(res)).setMimeType(ContentService.MimeType.JSON);
+  if (e && e.parameter) {
+    if (e.parameter.action === "analyze_word" && e.parameter.word) {
+      const res = analyzeSingleWord(e.parameter.word);
+      return ContentService.createTextOutput(JSON.stringify(res)).setMimeType(ContentService.MimeType.JSON);
+    }
+    if (e.parameter.clean === "1") {
+      const res = cleanExistingMemos();
+      return ContentService.createTextOutput(JSON.stringify(res)).setMimeType(ContentService.MimeType.JSON);
+    }
   }
   const prop = PropertiesService.getScriptProperties().getProperty("GEMINI_API_KEY");
   return ContentService.createTextOutput(JSON.stringify({
@@ -99,7 +105,10 @@ function doPost(e) {
     const postData = JSON.parse(e.postData.contents);
     const action = postData.action;
 
-    if (action === "clean_memos") {
+    if (action === "analyze_word") {
+      const res = analyzeSingleWord(postData.word);
+      return ContentService.createTextOutput(JSON.stringify(res)).setMimeType(ContentService.MimeType.JSON);
+    } else if (action === "clean_memos") {
       const res = cleanExistingMemos();
       return ContentService.createTextOutput(JSON.stringify(res)).setMimeType(ContentService.MimeType.JSON);
 
@@ -744,4 +753,85 @@ ${JSON.stringify(vocabItems.map(v => ({ thai: v.thai, phonetic: v.phonetic, mean
   }
 
   throw new Error("Gemini 批次說文解字分析失敗: " + lastErr);
+}
+/**
+ * 即時線上分析單一泰語詞彙/片語之說文解字拆解結構 (On-the-fly Word Anatomy)
+ * @param {string} word 欲分析之泰文單字或片語
+ */
+function analyzeSingleWord(word) {
+  const cleanWord = String(word || "").trim();
+  if (!cleanWord) {
+    return { status: "error", msg: "請提供欲分析之泰文單字或片語！" };
+  }
+
+  const apiKey = getApiKey();
+  const models = ["gemini-3.5-flash-lite", "gemini-3.8-flash"];
+  let lastErr = "";
+
+  const prompt = `
+你是一位深諳泰語構詞學與實用教學的資深語言學專家。請對以下泰語單字/片語進行【即時說文解字・詞彙拆解構詞分析】。
+
+【待分析詞彙】：${cleanWord}
+
+【嚴格規則】：
+1. 【判斷構詞類型】：
+   - 凡由兩個以上具獨立意義之詞素組合而成的複合詞、動賓片語、偏正詞組（如：ยาแก้ปวด, คืนภาษี, ห้องเตียงเดี่ยว, แอร์ไม่เย็น 等），請拆解各詞素並列出延伸派生詞。
+   - 若為純外來語音譯詞（如 คีย์การ์ด Key card, มิเตอร์ Meter）或單一字根詞（如 แพ้, นวด, เบา, แรง），breakdown 與 extensions 請回傳空陣列 []，並在 note 或 meaning 中簡短說明其構詞特點（例如：純外來語音譯詞，或單一獨立字根不可分割）。
+2. 【文字規範】：必須嚴格使用「台灣繁體中文」，嚴禁使用簡體字！
+
+請直接回傳合法的 JSON 物件，格式如下：
+{
+  "thai": "${cleanWord}",
+  "phonetic": "羅馬拼音",
+  "meaning": "台灣繁體中文釋義（可包含詞性，如 [名詞] 止痛藥）",
+  "is_compound": true或false,
+  "note": "簡短構詞特色說明（如：由 藥 + 止/解 + 痛 組合而成的實用複合詞）",
+  "breakdown": [
+    {"thai": "詞素泰文", "phonetic": "拼音", "meaning": "字素中文字義"}
+  ],
+  "extensions": [
+    {"thai": "衍生詞泰文", "phonetic": "拼音", "meaning": "衍生詞繁體中文釋義"}
+  ]
+}
+`;
+
+  for (let i = 0; i < models.length; i++) {
+    const model = models[i];
+    const url = "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + apiKey;
+    const payload = {
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: {
+        responseMimeType: "application/json",
+        temperature: 0.2
+      }
+    };
+
+    try {
+      const resp = UrlFetchApp.fetch(url, {
+        method: "post",
+        contentType: "application/json",
+        payload: JSON.stringify(payload),
+        muteHttpExceptions: true
+      });
+
+      if (resp.getResponseCode() === 200) {
+        const json = JSON.parse(resp.getContentText());
+        let t = json.candidates[0].content.parts[0].text.trim();
+        if (t.startsWith("```")) {
+          t = t.replace(/^```[a-zA-Z]*\n/, "").replace(/\n```$/, "");
+        }
+        const parsed = JSON.parse(t);
+        parsed.status = "success";
+        return parsed;
+      } else {
+        lastErr = "HTTP " + resp.getResponseCode() + ": " + resp.getContentText();
+        Logger.log("Analyze Single Word Model " + model + " 異常: " + lastErr);
+      }
+    } catch (e) {
+      lastErr = String(e);
+      Logger.log("Analyze Single Word Model " + model + " 失敗: " + e);
+    }
+  }
+
+  return { status: "error", msg: "分析失敗: " + lastErr };
 }
