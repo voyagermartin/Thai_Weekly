@@ -91,7 +91,7 @@ def deploy_code_gs():
         "exceptionLogging": "STACKDRIVER",
         "runtimeVersion": "V8",
         "webapp": {
-            "access": "ANYONE",
+            "access": "ANYONE_ANONYMOUS",
             "executeAs": "USER_DEPLOYING"
         }
     }
