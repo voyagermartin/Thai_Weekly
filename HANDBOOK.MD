@@ -1,6 +1,6 @@
 # Thai_Weekly (泰語學習週報自動化系統) 專案協作手冊
 
-> **專案版本**：v3.3 (Web-First 雙軌驅動・即時 AI 詞典與個人化演進版) ｜ **更新日期**：2026-10-31  
+> **專案版本**：v3.3 (Web-First 雙軌驅動・即時 AI 詞典與個人化演進版) ｜ **更新日期**：2026-11-08  
 > **線上站點**：[Thai_Weekly GitHub Pages](https://voyagermartin.github.io/Thai_Weekly/) ｜ **維護者**：Martin × Antigravity × Gemini API  
 
 ---
@@ -81,6 +81,7 @@ Thai_Weekly/
   - 鎖定 `enforceRate()` 與 `audio.defaultPlaybackRate`，確保 0.75x 與 1.0x 顯著區別，並以 `localStorage` 持久化記憶讀者速率偏好。
 * **歷史手風琴歸檔抽屜 (Yearly Archive List)**：
   - 抽屜內改採精緻條列式清單（`.archive-list` 與 `.archive-row`），包含期數標籤、出刊日期、專題標題與摘要導讀，大幅精簡縱向空間並兼顧即時搜尋過濾效能。
+  - **排序規範**：歷史歸檔清單全面採「由舊到新（編年正序：26w41 ➔ 26w44）」呈現；上方「近期特輯」則維持由新到舊倒序排列，滿足不同情境之瀏覽體驗。
 
 ---
 
@@ -106,7 +107,7 @@ Thai_Weekly/
 - [x] **v3.0**：重大架構升級 Sheet-as-a-CMS，建立 `Thai_Weekly_DB` 與動態 `lesson.html` / `index.html`，Git 歷史金鑰淨化。
 - [x] **v3.1**：發布 26w44；修復 GViz `&headers=1` 標頭缺陷；解決 HTML5 Audio 降速重置問題；實現語音速率本地記憶。
 - [x] **v3.2**：擴充 `Vocab` 7 欄架構，建立複合詞字根拆解與延伸詞機制；實作折疊抽屜與解決泰文折行斷字。
-- [x] **v3.3**：全站雙端（首頁與課程頁）上線「即時說文解字 AI 詞典」；首頁歷史年度歸檔改採條列式清單；廢棄舊版 GitHub Actions 出刊排程；確立 Web-First 演進架構。
+- [x] **v3.3**：全站雙端（首頁與課程頁）上線「即時說文解字 AI 詞典」；首頁歷史歸檔改為精緻條列式清單並切換為「由舊到新」正序排列；廢棄舊版 GitHub Actions 出刊排程；確立 Web-First 演進架構。
 
 ---
 
