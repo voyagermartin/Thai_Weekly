@@ -1529,8 +1529,17 @@
 
     if (!input || !submitBtn || !resultDiv) return;
     const word = input.value.trim();
-    if (!word) {
-      showToast('⚠️ 請先輸入欲分析的泰文單字或片語！');
+    if (!word || !/[\u0E00-\u0E7F]/.test(word)) {
+      const warnMsg = !word
+        ? '請先輸入欲分析的泰文單字或片語，並確認輸入為標準泰文字串。'
+        : '請確認輸入為標準泰文字串。';
+      showToast(`⚠️ ${warnMsg}`);
+      resultDiv.style.display = 'block';
+      resultDiv.innerHTML = `
+        <div style="padding:18px 20px; background:rgba(244,63,94,0.12); border:1px solid rgba(244,63,94,0.35); border-radius:12px; color:#fca5a5; font-size:14.5px; line-height:1.6;">
+          <b>⚠️ 輸入格式提示：</b>${warnMsg}
+        </div>
+      `;
       input.focus();
       return;
     }
@@ -1562,17 +1571,21 @@
 
       const data = await resp.json();
       if (!data || data.status !== 'success') {
-        throw new Error(data && data.msg ? data.msg : '後端分析服務暫時無回應');
+        const backendMsg = (data && (data.message || data.msg)) || '後端分析服務暫時無回應，請稍後再試。';
+        throw new Error(backendMsg);
       }
 
       renderLiveAnatomyResult(data);
       showToast(`✨「${word}」說文解字分析完成！`);
     } catch (err) {
       console.error('即時說文解字分析失敗:', err);
+      const safeErrText = String(err && err.message ? err.message : '連線逾時或網路異常，請稍後重試。')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
       resultDiv.innerHTML = `
         <div style="padding:18px 20px; background:rgba(244,63,94,0.12); border:1px solid rgba(244,63,94,0.35); border-radius:12px; color:#fca5a5; font-size:14.5px; line-height:1.6;">
-          <b>⚠️ 分析受阻：</b>${err.message || '連線逾時或網路異常，請稍後重試。'}<br>
-          <span style="font-size:13px; color:#cbd5e1; margin-top:4px; display:inline-block;">提示：請確認輸入為標準泰文字串。</span>
+          <b>⚠️ 分析受阻：</b>${safeErrText}
         </div>
       `;
     } finally {

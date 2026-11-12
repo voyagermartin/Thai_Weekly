@@ -761,12 +761,17 @@ ${JSON.stringify(vocabItems.map(v => ({ thai: v.thai, phonetic: v.phonetic, mean
 function analyzeSingleWord(word) {
   const cleanWord = String(word || "").trim();
   if (!cleanWord) {
-    return { status: "error", msg: "請提供欲分析之泰文單字或片語！" };
+    return {
+      status: "error",
+      error_type: "INVALID_INPUT",
+      message: "請提供欲分析之泰文單字或片語！"
+    };
   }
 
   const apiKey = getApiKey();
   const models = ["gemini-3.5-flash-lite", "gemini-3.8-flash"];
   let lastErr = "";
+  let busyCount = 0;
 
   const prompt = `
 你是一位深諳泰語構詞學與實用教學的資深語言學專家。請對以下泰語單字/片語進行【即時說文解字・詞彙拆解構詞分析】。
@@ -814,8 +819,11 @@ function analyzeSingleWord(word) {
         muteHttpExceptions: true
       });
 
-      if (resp.getResponseCode() === 200) {
-        const json = JSON.parse(resp.getContentText());
+      const responseCode = resp.getResponseCode();
+      const respText = resp.getContentText();
+
+      if (responseCode === 200) {
+        const json = JSON.parse(respText);
         let t = json.candidates[0].content.parts[0].text.trim();
         if (t.startsWith("```")) {
           t = t.replace(/^```[a-zA-Z]*\n/, "").replace(/\n```$/, "");
@@ -823,15 +831,55 @@ function analyzeSingleWord(word) {
         const parsed = JSON.parse(t);
         parsed.status = "success";
         return parsed;
+      } else if (responseCode === 503 || responseCode === 429) {
+        busyCount++;
+        lastErr = "HTTP " + responseCode + " (" + model + ")";
+        Logger.log("WARN: Analyze Single Word Model " + model + " 遭遇限流或滿載 (" + responseCode + "): " + respText);
+        if (i < models.length - 1) {
+          Utilities.sleep(800);
+        }
+        continue;
+      } else if (responseCode === 404 && i < models.length - 1) {
+        lastErr = "HTTP 404 (" + model + ")";
+        Logger.log("WARN: Analyze Single Word Model " + model + " 不可用 (404)，自動切換下一備用模型: " + respText);
+        continue;
       } else {
-        lastErr = "HTTP " + resp.getResponseCode() + ": " + resp.getContentText();
-        Logger.log("Analyze Single Word Model " + model + " 異常: " + lastErr);
+        let errDetail = "HTTP " + responseCode;
+        try {
+          const errJson = JSON.parse(respText);
+          if (errJson && errJson.error && errJson.error.message) {
+            errDetail += " - " + errJson.error.message;
+          }
+        } catch (parseErr) {}
+        Logger.log("ERROR: Analyze Single Word Model " + model + " 非預期錯誤 (" + responseCode + "): " + respText);
+        return {
+          status: "error",
+          error_type: responseCode === 403 || responseCode === 401 ? "AUTH_ERROR" : "API_ERROR",
+          message: responseCode === 403 || responseCode === 401
+            ? "API 金鑰無效或權限不足，請檢查後端設定。"
+            : "AI 服務請求失敗（" + errDetail + "），請稍後再試。"
+        };
       }
     } catch (e) {
       lastErr = String(e);
       Logger.log("Analyze Single Word Model " + model + " 失敗: " + e);
+      if (i < models.length - 1) {
+        Utilities.sleep(800);
+      }
     }
   }
 
-  return { status: "error", msg: "分析失敗: " + lastErr };
+  if (busyCount > 0) {
+    return {
+      status: "error",
+      error_type: "SERVER_BUSY",
+      message: "AI 伺服器目前處於尖峰滿載狀態，請稍候 5～10 秒後再點擊查詢一次。"
+    };
+  }
+
+  return {
+    status: "error",
+    error_type: "UNKNOWN_ERROR",
+    message: "分析服務暫時無法完成請求，請稍後再試。"
+  };
 }
