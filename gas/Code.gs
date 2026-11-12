@@ -759,7 +759,9 @@ ${JSON.stringify(vocabItems.map(v => ({ thai: v.thai, phonetic: v.phonetic, mean
  * @param {string} word 欲分析之泰文單字或片語
  */
 function analyzeSingleWord(word) {
-  const cleanWord = String(word || "").trim();
+  const cleanWord = String(word || "")
+    .replace(/[\u200B-\u200D\uFEFF\u00A0]/g, "")
+    .trim();
   if (!cleanWord) {
     return {
       status: "error",

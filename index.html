@@ -1505,11 +1505,14 @@
     const resultDiv = document.getElementById('live-anatomy-result');
 
     if (!input || !submitBtn || !resultDiv) return;
-    const word = input.value.trim();
-    if (!word || !/[\u0E00-\u0E7F]/.test(word)) {
-      const warnMsg = !word
-        ? '請先輸入欲分析的泰文單字或片語，並確認輸入為標準泰文字串。'
-        : '請確認輸入為標準泰文字串。';
+    const cleanWord = input.value
+      .replace(/[\u200B-\u200D\uFEFF\u00A0]/g, '')
+      .trim()
+      .normalize('NFC');
+    input.value = cleanWord;
+
+    if (!cleanWord || !/[\u0E00-\u0E7F]/.test(cleanWord)) {
+      const warnMsg = '請輸入包含泰文的單字或片語';
       showToast(`⚠️ ${warnMsg}`);
       resultDiv.style.display = 'block';
       resultDiv.innerHTML = `
@@ -1520,6 +1523,7 @@
       input.focus();
       return;
     }
+    const word = cleanWord;
 
     submitBtn.disabled = true;
     if (submitText) submitText.innerText = '分析中...';
