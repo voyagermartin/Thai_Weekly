@@ -1,6 +1,6 @@
 # Thai_Weekly (泰語學習週報自動化系統) 專案協作手冊
 
-> **專案版本**：v3.3 (Web-First 雙軌驅動・即時 AI 詞典與個人化演進版) ｜ **更新日期**：2026-11-08  
+> **專案版本**：v3.4 (Web-First 雙軌驅動・高可用容錯備援與隱形字元淨化版) ｜ **更新日期**：2026-11-12  
 > **線上站點**：[Thai_Weekly GitHub Pages](https://voyagermartin.github.io/Thai_Weekly/) ｜ **維護者**：Martin × Antigravity × Gemini API  
 
 ---
@@ -75,6 +75,7 @@ Thai_Weekly/
   - **泰文折行防護**：套用 `white-space: nowrap; word-break: keep-all;`，徹底根絕泰文母音符號拆裂至下一行。
 * **即時說文解字詞典 (On-the-fly Anatomy Tool)**：
   - 首頁與課程頁同步掛載，雙重傳輸容錯（預設 `POST`，異常自動切換為 `GET` 備援）。
+  - **輸入淨化與友善錯誤提示**：送出前自動清除零寬度隱形字元（`U+200B~U+200D`、`U+FEFF`、`U+00A0`）並以 `NFC` 正規化（防範 LINE OCR 複製髒字元），同步回填輸入框；僅於空值或完全不含泰文字元（`U+0E00~U+0E7F`）時於前端阻擋提示，後端異常則直接顯示白話 `message`。
   - 全域輔助提升：`escapeQuote` 與 `safeParseJsonArray` 位於腳本最頂層，確保防護跳脫字元。
 * **雙引擎語音播放 (TTS)**：
   - 第一引擎 Google TTS 串流，備援 Web Speech API 原生語音 (`th-TH`)。
@@ -88,11 +89,11 @@ Thai_Weekly/
 ## 4. Google Apps Script 後端中樞與安全防禦
 
 * **Script ID**：[`1fJ_JIB0aET_pLwDOJasv47YzSBn3xk7NhW3h96919NRd2opJpq-VOOmA`](https://script.google.com/home/projects/1fJ_JIB0aET_pLwDOJasv47YzSBn3xk7NhW3h96919NRd2opJpq-VOOmA/edit)
-* **Web App 端點**：`https://script.google.com/macros/s/AKfycbxiY6t8K_BmB2oRWhbi7UZCHpN1Blmd1BEH8APe3PW6gXCKX2XcNYHcDZhZfMZtifi4/exec`（部署權限：`ANYONE_ANONYMOUS`，免登入匿名跨域連線）
+* **Web App 端點**：`https://script.google.com/macros/s/AKfycbxiY6t8K_BmB2oRWhbi7UZCHpN1Blmd1BEH8APe3PW6gXCKX2XcNYHcDZhZfMZtifi4/exec`（部署權限：`ANYONE_ANONYMOUS`，免登入匿名跨域連線；目前版本：`@23`）
 * **零暴露 API 金鑰防禦**：全專案 0 硬編碼金鑰。金鑰保存在雲端 `ScriptProperties`，透過試算表上方「🚀 週報自動化控制台」選單互動式寫入。
 * **核心後端函式**：
   - `weeklyAutoPublish()`：每週六 09:00 時間驅動排程觸發，呼叫 Gemini 出刊寫入四大分頁並寄信。
-  - `analyzeSingleWord(word)`：支援 `action: "analyze_word"`，呼叫 Gemini 3.5 剖析構詞，支援複合詞拆解與外來語/單字根防呆排除。
+  - `analyzeSingleWord(word)`：支援 `action: "analyze_word"`，具隱形字元淨化與多模型自動備援迴圈（`gemini-3.5-flash-lite` ➔ `gemini-3.8-flash`）。遇 `503`/`429` 延遲 800ms 自動降級切換（遇 `404` 亦自動切換），`400`/`401`/`403` 立即回傳具體原因，全數滿載則包裝為結構化 `SERVER_BUSY` 友善訊息，支援複合詞拆解與外來語/單字根防呆排除。
   - `backfillAnatomyForIssue(issueCode)`：零手動批次自動回填歷史期數之單字拆解與派生詞至 F、G 欄。
 * **一對一寄信清單 (MailApp.sendEmail)**：
   - `voyager.martin@gmail.com` ➔ `早安 Martin！`
@@ -108,6 +109,7 @@ Thai_Weekly/
 - [x] **v3.1**：發布 26w44；修復 GViz `&headers=1` 標頭缺陷；解決 HTML5 Audio 降速重置問題；實現語音速率本地記憶。
 - [x] **v3.2**：擴充 `Vocab` 7 欄架構，建立複合詞字根拆解與延伸詞機制；實作折疊抽屜與解決泰文折行斷字。
 - [x] **v3.3**：全站雙端（首頁與課程頁）上線「即時說文解字 AI 詞典」；首頁歷史歸檔改為精緻條列式清單並切換為「由舊到新」正序排列；廢棄舊版 GitHub Actions 出刊排程；確立 Web-First 演進架構。
+- [x] **v3.4**：強化即時說文解字高可用性與輸入防呆（GAS Web App 更新至 `@23`）：後端實作 `503`/`429` 多模型自動備援切換（`gemini-3.5-flash-lite` ➔ `gemini-3.8-flash`）與 `SERVER_BUSY` 友善錯誤包裝；前後端同步實作零寬度隱形字元淨化（NFC 正規化）與泰文字元前置驗證。
 
 ---
 
