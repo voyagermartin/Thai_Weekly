@@ -23,13 +23,16 @@ flowchart TD
         Sheet --> Mail["MailApp 一對一寄送極簡提醒信"]
     end
 
-    subgraph 前端即時互動 (GitHub Pages)
+    subgraph 前端即時互動與 PWA 獨立 App (GitHub Pages)
         Reader["讀者造訪 index.html / lesson.html"]
-        GViz["GViz API (&headers=1) 讀取試算表"] --> Reader
+        PWA["PWA Service Worker (sw.js)"] --> Shell["App Shell 靜態資源預快取"]
+        PWA --> Standalone["📲 手機桌面安裝獨立 App (Standalone)"]
+        GViz["GViz API (&headers=1) 讀取試算表"] --> PWA
+        PWA --> Reader
         Reader --> Anatomy["即時說文解字查詢 (action: analyze_word)"]
-        Anatomy --> WebApp["GAS Web App (ANYONE_ANONYMOUS)"]
-        WebApp --> GeminiLive["Gemini 即時構詞剖析"]
-        GeminiLive --> AnatomyUI["動態展開紫金卡片與 TTS 發音"]
+        Anatomy --> WebApp["GAS Web App (@23, ANYONE_ANONYMOUS)"]
+        WebApp --> GeminiLive["Gemini 雙模型備援構詞剖析"]
+        GeminiLive --> AnatomyUI["動態展開紫金卡片與雙引擎 TTS 發音"]
     end
     Mail -.-> Reader
 ```
@@ -66,6 +69,8 @@ Thai_Weekly/
 ├── sw.js                       # Service Worker（App Shell 預載、靜態快取、GViz 離線回退與離線防護）
 ├── pwa.js                      # PWA 控制模組（跨平台安裝提示、iOS Safari 導引、Appinstalled 監聽）
 ├── icons/                      # PWA 應用程式圖標（192x192, 512x512, Maskable, Apple Touch Icon）
+├── scripts/
+│   └── generate_icons.ps1      # 跨平台標準圖標自動化生成腳本（基於 Leelawadee UI 與紫金色彩系統）
 ├── gas/
 │   ├── appsscript.json         # Apps Script 清單（宣告 ANYONE_ANONYMOUS 存取權限）
 │   └── Code.gs                 # 後端中樞腳本（出刊、寄信、即時單字分析、歷史回填）
@@ -137,8 +142,8 @@ Thai_Weekly/
 
 ## 6. 下階段開發演進展望 (Next Phase Roadmap)
 
-1. **學習歷程本地持久化**：`localStorage` 記錄已讀期數徽章與「核心單字收藏本 (Saved Vocab)」。
-2. **單元測驗模式增強**：獨立切換遮蔽「泰文字/音標/釋義」；課程底部整合 3 題快速自測。
+1. **學習歷程本地持久化**：結合 PWA 離線能力，以 `localStorage` 記錄已讀期數徽章與「核心單字收藏本 (Saved Vocab)」，支援完全離線複習。
+2. **單元測驗模式增強**：獨立切換遮蔽「泰文字/音標/釋義」；課程底部整合 3 題快速自測，答題紀錄本機快照保存。
 3. **多媒體內容延伸**：評估 Sheet 支援短影片（YouTube Shorts）或情境音檔直連。
 4. **Web-First 個人化學習與訂閱演進架構 (Personalized Learning Hub)**：
    * **第一階段：前端本機偏好抽屜 (Local Preferences Drawer)**
