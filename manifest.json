@@ -1,0 +1,64 @@
+{
+  "id": "./",
+  "name": "泰語學習週報｜Thai Weekly",
+  "short_name": "泰語週報",
+  "description": "泰皇暗夜紫金風雙軌學習雜誌，支援即時說文解字、雙引擎語音發音與遮蔽自測",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "background_color": "#0d0814",
+  "theme_color": "#0d0814",
+  "lang": "zh-TW",
+  "dir": "ltr",
+  "categories": ["education", "books", "magazines"],
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "即時說文解字",
+      "short_name": "說文解字",
+      "description": "即時泰語構詞拆解與衍生詞查詢",
+      "url": "./index.html#live-search-container",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "最新特輯課程",
+      "short_name": "本週課程",
+      "description": "前往最新一期泰語週報特輯",
+      "url": "./lesson.html",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

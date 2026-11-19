@@ -6,8 +6,16 @@
   <!-- 必須保留：防止傳送 Referer，確保外部串流與資源安全 -->
   <meta name="referrer" content="no-referrer">
   <title>泰語學習週報｜全期索引與自學小站</title>
+  <!-- PWA & Mobile Web Meta -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0d0814">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="泰語週報">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="apple-touch-icon" href="favicon.svg">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <style>
     :root {
       /* 背景層次：由深邃暗夜紫向宮廷夜色延伸 */
@@ -109,6 +117,39 @@
       background: var(--bg-card-hover);
       color: #ffffff;
       border-color: var(--accent-gold);
+    }
+    .btn-pwa-install {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(168, 85, 247, 0.2));
+      border: 1px solid var(--accent-gold);
+      color: var(--accent-gold-light);
+      cursor: pointer;
+    }
+    .btn-pwa-install:hover {
+      background: var(--accent-gold);
+      color: #0d0814;
+      box-shadow: 0 0 12px var(--gold-glow);
+    }
+    .pwa-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(6px);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .pwa-modal-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-accent);
+      border-radius: 18px;
+      max-width: 440px;
+      width: 100%;
+      padding: 26px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), 0 0 20px var(--gold-glow);
+      color: var(--text-main);
+      animation: fadeIn 0.25s ease-out;
     }
 
     /* 方案 1 核心：本週最新刊置頂大封面 (Spotlight Hero) */
@@ -1060,7 +1101,8 @@
       <div class="brand-icon">🇹🇭</div>
       <span>泰語學習週報</span>
     </a>
-    <div style="display:flex; gap:10px;">
+    <div style="display:flex; gap:10px; align-items:center;">
+      <button class="nav-btn btn-pwa-install" style="display:none;" title="安裝至手機或桌面作為獨立 App">📲 安裝 App</button>
       <a href="lesson.html" id="nav-latest-btn" class="nav-btn">📖 最新刊 26w44</a>
     </div>
   </nav>
@@ -1894,6 +1936,9 @@
 
 <!-- 全域浮動 Toast 提示元件 -->
 <div id="toast"></div>
+
+<!-- PWA 支援腳本 (Service Worker 註冊與安裝提示) -->
+<script src="pwa.js" defer></script>
 
 </body>
 </html>

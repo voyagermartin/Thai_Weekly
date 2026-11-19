@@ -1,6 +1,6 @@
 # Thai_Weekly (泰語學習週報自動化系統) 專案協作手冊
 
-> **專案版本**：v3.4 (Web-First 雙軌驅動・高可用容錯備援與隱形字元淨化版) ｜ **更新日期**：2026-11-12  
+> **專案版本**：v3.5 (Web-First 雙軌驅動・PWA 獨立 App 原生支援與離線快取版) ｜ **更新日期**：2026-11-19  
 > **線上站點**：[Thai_Weekly GitHub Pages](https://voyagermartin.github.io/Thai_Weekly/) ｜ **維護者**：Martin × Antigravity × Gemini API  
 
 ---
@@ -58,9 +58,14 @@ flowchart TD
 ### 3.1 專案目錄結構
 ```text
 Thai_Weekly/
-├── index.html                  # 站點首頁（Spotlight Hero、即時構詞詞典、期數搜尋、歷史手風琴）
-├── lesson.html                 # 動態課程頁（?issue=YYwWW，含說文解字抽屜、即時查詢、TTS、遮蔽自測）
+├── index.html                  # 站點首頁（Spotlight Hero、即時構詞詞典、期數搜尋、歷史手風琴、PWA 安裝入口）
+├── lesson.html                 # 動態課程頁（?issue=YYwWW，含說文解字抽屜、即時查詢、TTS、遮蔽自測、PWA 安裝）
+├── lesson_template.html        # 課程範本頁（整合 PWA 與紫金風規範）
 ├── 26w41.html ~ 26w44.html     # 歷史相容自動跳轉頁（導向 lesson.html?issue=26wXX）
+├── manifest.json               # Web App Manifest（宣告 PWA 獨立 App 名稱、暗夜紫金主題色、圖標與快捷捷徑）
+├── sw.js                       # Service Worker（App Shell 預載、靜態快取、GViz 離線回退與離線防護）
+├── pwa.js                      # PWA 控制模組（跨平台安裝提示、iOS Safari 導引、Appinstalled 監聽）
+├── icons/                      # PWA 應用程式圖標（192x192, 512x512, Maskable, Apple Touch Icon）
 ├── gas/
 │   ├── appsscript.json         # Apps Script 清單（宣告 ANYONE_ANONYMOUS 存取權限）
 │   └── Code.gs                 # 後端中樞腳本（出刊、寄信、即時單字分析、歷史回填）
@@ -83,6 +88,22 @@ Thai_Weekly/
 * **歷史手風琴歸檔抽屜 (Yearly Archive List)**：
   - 抽屜內改採精緻條列式清單（`.archive-list` 與 `.archive-row`），包含期數標籤、出刊日期、專題標題與摘要導讀，大幅精簡縱向空間並兼顧即時搜尋過濾效能。
   - **排序規範**：歷史歸檔清單全面採「由舊到新（編年正序：26w41 ➔ 26w44）」呈現；上方「近期特輯」則維持由新到舊倒序排列，滿足不同情境之瀏覽體驗。
+
+### 3.3 PWA 獨立 App 與離線快取規格 (Progressive Web App)
+* **Web App Manifest (`manifest.json`)**：
+  - 宣告 `standalone` 沉浸式獨立視窗模式，深紫背景色 `--bg-base: #0d0814` 與沉浸式狀態列。
+  - 具備完整 192x192、512x512 標準與 Maskable 遮罩自適應圖標，以及 iOS `apple-touch-icon.png`。
+  - 配置主畫面捷徑清單（Shortcuts）：直達「即時說文解字」與「最新特輯課程」。
+* **Service Worker 離線快取架構 (`sw.js`)**：
+  - **App Shell 預快取**：首頁、課程頁、Manifest、SVG/PNG 圖標一次預載。
+  - **分流快取策略**：
+    - HTML 導航：`Network-First`（連線優先更新，離線自動退回快取頁面）。
+    - 試算表 GViz API：`Network-First`（更新後同步寫入快取，離線仍能載入最近讀取之課程教材）。
+    - 靜態資產：`Stale-While-Revalidate`（即時回應並在背景更新最新版）。
+    - Gemini AI 即時查詢：`Network-Only`（連線執行；離線攔截並回傳友善離線通知 JSON）。
+* **跨平台安裝提示模組 (`pwa.js`)**：
+  - Android / Chrome / Edge：攔截 `beforeinstallprompt`，於導航列顯示紫金風「📲 安裝 App」按鈕，安裝完成觸發 Toast 並自動隱藏。
+  - iOS Safari：精準偵測設備環境與獨立模式，若於瀏覽器開啟則提供「📲 加到主畫面」引導彈窗，清楚示範「分享 ⎋ ➔ 加入主畫面 ⊞」步驟。
 
 ---
 
@@ -110,6 +131,7 @@ Thai_Weekly/
 - [x] **v3.2**：擴充 `Vocab` 7 欄架構，建立複合詞字根拆解與延伸詞機制；實作折疊抽屜與解決泰文折行斷字。
 - [x] **v3.3**：全站雙端（首頁與課程頁）上線「即時說文解字 AI 詞典」；首頁歷史歸檔改為精緻條列式清單並切換為「由舊到新」正序排列；廢棄舊版 GitHub Actions 出刊排程；確立 Web-First 演進架構。
 - [x] **v3.4**：強化即時說文解字高可用性與輸入防呆（GAS Web App 更新至 `@23`）：後端實作 `503`/`429` 多模型自動備援切換（`gemini-3.5-flash-lite` ➔ `gemini-3.8-flash`）與 `SERVER_BUSY` 友善錯誤包裝；前後端同步實作零寬度隱形字元淨化（NFC 正規化）與泰文字元前置驗證。
+- [x] **v3.5**：全專案實裝完整 PWA（Progressive Web App）獨立 App 支援：配置 Web App Manifest、5 種尺寸/遮罩規格圖標、Service Worker 分流快取與離線防護、Android 原生安裝提示與 iOS Safari「加到主畫面」引導互動。
 
 ---
 
