@@ -28,8 +28,9 @@ function onOpen() {
     .addItem("📧 立即補寄 26w43 給 Annie 與 昌哥", "resend26w43ToAnnieAndChang")
     .addSeparator()
     .addItem("⏰ 設定每週六 09:00 自動出刊排程", "setupWeeklyTrigger")
-    .addItem("🧹 一鍵清理現有備忘重複前綴", "cleanExistingMemos")
+    .addItem("🧹 一鍵清理現有備忘重複前綴", "cleanExistingMemos")
     .addItem("🧩 自動補齊歷史單字說文解字 (Auto-Backfill)", "menuBackfillAnatomy")
+    .addItem("🔧 修正預告期數週數與日期 (26w47)", "fixUpcomingAndWeekIssue")
     .addItem("🔑 寫入/更新 GEMINI_API_KEY 至指令碼屬性", "setScriptProperties")
     .addToUi();
 }
@@ -88,6 +89,10 @@ function doGet(e) {
     }
     if (e.parameter.clean === "1") {
       const res = cleanExistingMemos();
+      return ContentService.createTextOutput(JSON.stringify(res)).setMimeType(ContentService.MimeType.JSON);
+    }
+    if (e.parameter.action === "fix_upcoming") {
+      const res = fixUpcomingAndWeekIssue();
       return ContentService.createTextOutput(JSON.stringify(res)).setMimeType(ContentService.MimeType.JSON);
     }
   }
@@ -321,6 +326,7 @@ function weeklyAutoPublish() {
       upcomingRowIndex = i + 1;
       upcomingIssue = {
         code: data[i][0],
+        date: data[i][3],
         title: data[i][5],
         desc: data[i][6] + " " + data[i][7]
       };
@@ -404,10 +410,17 @@ function weeklyAutoPublish() {
 
   // 5. 新增下下一期 upcoming 列
   if (generated.next_issue) {
+    const currentWeekNum = parseInt(String(upcomingIssue.code).replace(/^[0-9]+w/i, ""), 10) || 46;
+    const fallbackNextCode = "26w" + (currentWeekNum + 1);
+    const nextCode = (generated.next_issue.code && generated.next_issue.code !== upcomingIssue.code)
+      ? generated.next_issue.code
+      : fallbackNextCode;
+    const nextWeek = String(nextCode).replace(/^[0-9]+w/i, "") || String(currentWeekNum + 1);
+
     sheetIssues.appendRow([
-      generated.next_issue.code,
+      nextCode,
       "2026",
-      generated.next_issue.code.split("w")[1] || "45",
+      nextWeek,
       generated.next_issue.date,
       "upcoming",
       generated.next_issue.title,
@@ -441,10 +454,25 @@ function callGeminiGenerate(upcomingIssue) {
   const apiKey = getApiKey();
   const models = ["gemini-3.5-flash-lite", "gemini-3.8-flash"];
   
+  // 動態推算下週預告之期數與出刊日期 (自動遞增 1 週，出刊日 +7 天)
+  const currentWeekNum = parseInt(String(upcomingIssue.code).replace(/^[0-9]+w/i, ""), 10) || 46;
+  const nextWeekNum = currentWeekNum + 1;
+  const nextCode = "26w" + nextWeekNum;
+  
+  let nextDate = "2026-11-21";
+  if (upcomingIssue.date) {
+    try {
+      const d = new Date(upcomingIssue.date);
+      d.setDate(d.getDate() + 7);
+      nextDate = Utilities.formatDate(d, "Asia/Taipei", "yyyy-MM-dd");
+    } catch(e) {}
+  }
+  
   const prompt = `
 你是一位深諳泰語教學法與觀光文化底蘊的頂級泰語教育專家，請為「Thai_Weekly（泰語學習週報）」編纂本期（VOL. ${upcomingIssue.code}）的完整教材內容。
 【本期主題】：${upcomingIssue.title}
 【主題簡介】：${upcomingIssue.desc}
+【下期預告目標】：預告期數必須為 "${nextCode}"（2026 第 ${nextWeekNum} 週），出刊日期為 "${nextDate}"。
 【目標受眾】：台灣商務人士、自由行旅客、觀光旅遊從業人員。
 【文字規範】：必須嚴格使用「台灣繁體中文」，絕對嚴禁出現任何簡體字！
 【說文解字・詞彙拆解全自動辨識規範】：請針對 vocab 陣列中每個單字進行構詞結構判斷：
@@ -506,10 +534,10 @@ function callGeminiGenerate(upcomingIssue) {
     ]
   },
   "next_issue": {
-    "code": "26w45",
-    "date": "2026-11-07",
-    "title": "下週預告標題",
-    "desc": "下週預告簡介"
+    "code": "${nextCode}",
+    "date": "${nextDate}",
+    "title": "下週預告標題（繁體中文，切合商務/生活主題）",
+    "desc": "下週預告簡介（吸引讀者期待）"
   }
 }
 `;
@@ -569,7 +597,7 @@ function cleanExistingMemos() {
   }
   Logger.log("已清理備忘數量: " + updatedCount);
   return { status: "success", updatedCount: updatedCount };
-}
+}
 /**
  * 試算表選單觸發的自動補齊歷史單字說文解字入口
  */
@@ -884,4 +912,48 @@ function analyzeSingleWord(word) {
     error_type: "UNKNOWN_ERROR",
     message: "分析服務暫時無法完成請求，請稍後再試。"
   };
+}
+
+/**
+ * 修正試算表中錯誤之期數週數與出刊日期：
+ * 1. 26w46 的發布日期修正為 2026-11-14
+ * 2. upcoming 列更正為 26w47 (week: 47, date: 2026-11-21)
+ */
+function fixUpcomingAndWeekIssue() {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheetIssues = ss.getSheetByName("Issues");
+  const data = sheetIssues.getDataRange().getValues();
+  
+  let updated46 = false;
+  let updatedUpcoming = false;
+
+  for (let i = 1; i < data.length; i++) {
+    const code = String(data[i][0]).trim();
+    const status = String(data[i][4]).trim();
+    
+    // 修正 26w46 之出刊日期 (第 46 週應為 2026-11-14)
+    if (code === "26w46" && status === "published") {
+      sheetIssues.getRange(i + 1, 4).setValue("2026-11-14");
+      updated46 = true;
+    }
+
+    // 修正 upcoming 列 (應為 26w47，第 47 週，2026-11-21)
+    if (status === "upcoming") {
+      sheetIssues.getRange(i + 1, 1).setValue("26w47");
+      sheetIssues.getRange(i + 1, 2).setValue("2026");
+      sheetIssues.getRange(i + 1, 3).setValue("47");
+      sheetIssues.getRange(i + 1, 4).setValue("2026-11-21");
+      updatedUpcoming = true;
+    }
+  }
+
+  SpreadsheetApp.flush();
+  const msg = "修正完成！26w46日期更新: " + updated46 + ", upcoming 26w47更新: " + updatedUpcoming;
+  Logger.log(msg);
+  if (SpreadsheetApp.getUi) {
+    try {
+      SpreadsheetApp.getUi().alert("修正完成", msg, SpreadsheetApp.getUi().ButtonSet.OK);
+    } catch(e) {}
+  }
+  return { status: "success", msg: msg, updated46: updated46, updatedUpcoming: updatedUpcoming };
 }

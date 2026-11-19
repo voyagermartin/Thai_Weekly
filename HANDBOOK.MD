@@ -64,7 +64,7 @@ Thai_Weekly/
 ├── index.html                  # 站點首頁（Spotlight Hero、即時構詞詞典、期數搜尋、歷史手風琴、PWA 安裝入口）
 ├── lesson.html                 # 動態課程頁（?issue=YYwWW，含說文解字抽屜、即時查詢、TTS、遮蔽自測、PWA 安裝）
 ├── lesson_template.html        # 課程範本頁（整合 PWA 與紫金風規範）
-├── 26w41.html ~ 26w44.html     # 歷史相容自動跳轉頁（導向 lesson.html?issue=26wXX）
+├── 26w41.html ~ 26w46.html     # 歷史相容自動跳轉頁（導向 lesson.html?issue=26wXX）
 ├── manifest.json               # Web App Manifest（宣告 PWA 獨立 App 名稱、暗夜紫金主題色、圖標與快捷捷徑）
 ├── sw.js                       # Service Worker（App Shell 預載、靜態快取、GViz 離線回退與離線防護）
 ├── pwa.js                      # PWA 控制模組（跨平台安裝提示、iOS Safari 導引、Appinstalled 監聽）
@@ -92,7 +92,7 @@ Thai_Weekly/
   - 鎖定 `enforceRate()` 與 `audio.defaultPlaybackRate`，確保 0.75x 與 1.0x 顯著區別，並以 `localStorage` 持久化記憶讀者速率偏好。
 * **歷史手風琴歸檔抽屜 (Yearly Archive List)**：
   - 抽屜內改採精緻條列式清單（`.archive-list` 與 `.archive-row`），包含期數標籤、出刊日期、專題標題與摘要導讀，大幅精簡縱向空間並兼顧即時搜尋過濾效能。
-  - **排序規範**：歷史歸檔清單全面採「由舊到新（編年正序：26w41 ➔ 26w44）」呈現；上方「近期特輯」則維持由新到舊倒序排列，滿足不同情境之瀏覽體驗。
+  - **排序規範**：歷史歸檔清單全面採「由舊到新（編年正序：26w41 ➔ 26w46）」呈現；上方「近期特輯」則維持由新到舊倒序排列，滿足不同情境之瀏覽體驗。
 
 ### 3.3 PWA 獨立 App 與離線快取規格 (Progressive Web App)
 * **Web App Manifest (`manifest.json`)**：
@@ -136,7 +136,7 @@ Thai_Weekly/
 - [x] **v3.2**：擴充 `Vocab` 7 欄架構，建立複合詞字根拆解與延伸詞機制；實作折疊抽屜與解決泰文折行斷字。
 - [x] **v3.3**：全站雙端（首頁與課程頁）上線「即時說文解字 AI 詞典」；首頁歷史歸檔改為精緻條列式清單並切換為「由舊到新」正序排列；廢棄舊版 GitHub Actions 出刊排程；確立 Web-First 演進架構。
 - [x] **v3.4**：強化即時說文解字高可用性與輸入防呆（GAS Web App 更新至 `@23`）：後端實作 `503`/`429` 多模型自動備援切換（`gemini-3.5-flash-lite` ➔ `gemini-3.8-flash`）與 `SERVER_BUSY` 友善錯誤包裝；前後端同步實作零寬度隱形字元淨化（NFC 正規化）與泰文字元前置驗證。
-- [x] **v3.5**：全專案實裝完整 PWA（Progressive Web App）獨立 App 支援：配置 Web App Manifest、5 種尺寸/遮罩規格圖標、Service Worker 分流快取與離線防護、Android 原生安裝提示與 iOS Safari「加到主畫面」引導互動。
+- [x] **v3.5**：全專案實裝完整 PWA 獨立 App 支援與離線快取架構；徹底修復預告篇章週數倒退缺陷（更正 Google Sheet 26w46 出刊日為 2026-11-14、預告篇章為 26w47 2026-11-21，並於 GAS 後端實作動態週數與日期自動遞增演算法，根絕範例硬編碼污染）。
 
 ---
 
