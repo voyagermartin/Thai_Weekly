@@ -1,6 +1,6 @@
 # Thai_Weekly (泰語學習週報自動化系統) 專案協作手冊
 
-> **專案版本**：v3.5 (Web-First 雙軌驅動・PWA 獨立 App 原生支援與離線快取版) ｜ **更新日期**：2026-11-19  
+> **專案版本**：v3.6 (主題防撞護欄與生詞去重黑名單版・動態情境輪調) ｜ **更新日期**：2026-11-22  
 > **線上站點**：[Thai_Weekly GitHub Pages](https://voyagermartin.github.io/Thai_Weekly/) ｜ **維護者**：Martin × Antigravity × Gemini API  
 
 ---
@@ -64,7 +64,7 @@ Thai_Weekly/
 ├── index.html                  # 站點首頁（Spotlight Hero、即時構詞詞典、期數搜尋、歷史手風琴、PWA 安裝入口）
 ├── lesson.html                 # 動態課程頁（?issue=YYwWW，含說文解字抽屜、即時查詢、TTS、遮蔽自測、PWA 安裝）
 ├── lesson_template.html        # 課程範本頁（整合 PWA 與紫金風規範）
-├── 26w41.html ~ 26w46.html     # 歷史相容自動跳轉頁（導向 lesson.html?issue=26wXX）
+├── 26w41.html ~ 26w47.html     # 歷史相容自動跳轉頁（導向 lesson.html?issue=26wXX）
 ├── manifest.json               # Web App Manifest（宣告 PWA 獨立 App 名稱、暗夜紫金主題色、圖標與快捷捷徑）
 ├── sw.js                       # Service Worker（App Shell 預載、靜態快取、GViz 離線回退與離線防護）
 ├── pwa.js                      # PWA 控制模組（跨平台安裝提示、iOS Safari 導引、Appinstalled 監聽）
@@ -115,10 +115,11 @@ Thai_Weekly/
 ## 4. Google Apps Script 後端中樞與安全防禦
 
 * **Script ID**：[`1fJ_JIB0aET_pLwDOJasv47YzSBn3xk7NhW3h96919NRd2opJpq-VOOmA`](https://script.google.com/home/projects/1fJ_JIB0aET_pLwDOJasv47YzSBn3xk7NhW3h96919NRd2opJpq-VOOmA/edit)
-* **Web App 端點**：`https://script.google.com/macros/s/AKfycbxiY6t8K_BmB2oRWhbi7UZCHpN1Blmd1BEH8APe3PW6gXCKX2XcNYHcDZhZfMZtifi4/exec`（部署權限：`ANYONE_ANONYMOUS`，免登入匿名跨域連線；目前版本：`@23`）
+* **Web App 端點**：`https://script.google.com/macros/s/AKfycbxiY6t8K_BmB2oRWhbi7UZCHpN1Blmd1BEH8APe3PW6gXCKX2XcNYHcDZhZfMZtifi4/exec`（部署權限：`ANYONE_ANONYMOUS`，免登入匿名跨域連線；目前版本：`@25`）
 * **零暴露 API 金鑰防禦**：全專案 0 硬編碼金鑰。金鑰保存在雲端 `ScriptProperties`，透過試算表上方「🚀 週報自動化控制台」選單互動式寫入。
 * **核心後端函式**：
-  - `weeklyAutoPublish()`：每週六 09:00 時間驅動排程觸發，呼叫 Gemini 出刊寫入四大分頁並寄信。
+  - `weeklyAutoPublish()`：每週六 09:00 時間驅動排程觸發。具備**歷史主題防撞護欄與核心單字去重機制**：出刊前自動讀取 `Issues` 歷史已發布標題與 `Vocab` 已出單字黑名單注入 Prompt，並要求 `next_issue` 嚴禁在觀光四寶（基礎點餐、基礎交通、飯店、SPA）原地循環，強制從「文創市集、醫療急難、商務拜會、租車自駕、生活物業、數位遊牧、節慶民俗」等 7 大情境輪調發想；產出當期教材寫入四大分頁、更新下期預告並寄發導讀信。
+  - `updateUpcomingIssue26w48()`：支援試算表選單與 Web App 端點（`action: "update_26w48"`），將預告期數替換為全新文創市集主題。
   - `analyzeSingleWord(word)`：支援 `action: "analyze_word"`，具隱形字元淨化與多模型自動備援迴圈（`gemini-3.5-flash-lite` ➔ `gemini-3.8-flash`）。遇 `503`/`429` 延遲 800ms 自動降級切換（遇 `404` 亦自動切換），`400`/`401`/`403` 立即回傳具體原因，全數滿載則包裝為結構化 `SERVER_BUSY` 友善訊息，支援複合詞拆解與外來語/單字根防呆排除。
   - `backfillAnatomyForIssue(issueCode)`：零手動批次自動回填歷史期數之單字拆解與派生詞至 F、G 欄。
 * **一對一寄信清單 (MailApp.sendEmail)**：
@@ -137,6 +138,7 @@ Thai_Weekly/
 - [x] **v3.3**：全站雙端（首頁與課程頁）上線「即時說文解字 AI 詞典」；首頁歷史歸檔改為精緻條列式清單並切換為「由舊到新」正序排列；廢棄舊版 GitHub Actions 出刊排程；確立 Web-First 演進架構。
 - [x] **v3.4**：強化即時說文解字高可用性與輸入防呆（GAS Web App 更新至 `@23`）：後端實作 `503`/`429` 多模型自動備援切換（`gemini-3.5-flash-lite` ➔ `gemini-3.8-flash`）與 `SERVER_BUSY` 友善錯誤包裝；前後端同步實作零寬度隱形字元淨化（NFC 正規化）與泰文字元前置驗證。
 - [x] **v3.5**：全專案實裝完整 PWA 獨立 App 支援與離線快取架構；徹底修復預告篇章週數倒退缺陷（更正 Google Sheet 26w46 出刊日為 2026-11-14、預告篇章為 26w47 2026-11-21，並於 GAS 後端實作動態週數與日期自動遞增演算法，根絕範例硬編碼污染）。
+- [x] **v3.6**：實作「歷史主題防重護欄」與「核心單字去重黑名單機制」；建立 7 大生活與商務情境輪調矩陣，徹底終結觀光四寶（點餐/交通/住宿/SPA）無限循環；重置 26w48 預告主題為「曼谷文創市集與生活選物挖寶」，GAS Web App 部署至版本 `@25`；首頁 Spotlight、Recent Grid 與歸檔手風琴全數同步至 26w47（共 7 期）。
 
 ---
 

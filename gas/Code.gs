@@ -30,6 +30,7 @@ function onOpen() {
     .addItem("⏰ 設定每週六 09:00 自動出刊排程", "setupWeeklyTrigger")
     .addItem("🧹 一鍵清理現有備忘重複前綴", "cleanExistingMemos")
     .addItem("🧩 自動補齊歷史單字說文解字 (Auto-Backfill)", "menuBackfillAnatomy")
+    .addItem("🎨 更新 26w48 預告主題為文創市集（防重版）", "updateUpcomingIssue26w48")
     .addItem("🔧 修正預告期數週數與日期 (26w47)", "fixUpcomingAndWeekIssue")
     .addItem("🔑 寫入/更新 GEMINI_API_KEY 至指令碼屬性", "setScriptProperties")
     .addToUi();
@@ -89,6 +90,10 @@ function doGet(e) {
     }
     if (e.parameter.clean === "1") {
       const res = cleanExistingMemos();
+      return ContentService.createTextOutput(JSON.stringify(res)).setMimeType(ContentService.MimeType.JSON);
+    }
+    if (e.parameter.action === "update_26w48" || e.parameter.action === "update_upcoming") {
+      const res = updateUpcomingIssue26w48();
       return ContentService.createTextOutput(JSON.stringify(res)).setMimeType(ContentService.MimeType.JSON);
     }
     if (e.parameter.action === "fix_upcoming") {
@@ -341,8 +346,30 @@ function weeklyAutoPublish() {
 
   Logger.log("開始編纂當週教材: " + upcomingIssue.code + " " + upcomingIssue.title);
 
-  // 呼叫 Gemini API
-  const generated = callGeminiGenerate(upcomingIssue);
+  // 蒐集歷史已發行期數標題，供 Gemini 下期預告避重
+  const pastTitles = [];
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][5]) {
+      pastTitles.push("VOL. " + data[i][0] + ": " + data[i][5]);
+    }
+  }
+
+  // 蒐集歷史已發布核心單字，避免產生重複詞彙
+  const pastVocabsSet = new Set();
+  const sheetVocab = ss.getSheetByName("Vocab");
+  if (sheetVocab) {
+    const vocabData = sheetVocab.getDataRange().getValues();
+    for (let i = 1; i < vocabData.length; i++) {
+      const thaiWord = String(vocabData[i][2] || "").trim();
+      if (thaiWord) {
+        pastVocabsSet.add(thaiWord);
+      }
+    }
+  }
+  const pastVocabs = Array.from(pastVocabsSet);
+
+  // 呼叫 Gemini API 產出教材 JSON（注入歷史主題與單字防重清單）
+  const generated = callGeminiGenerate(upcomingIssue, pastTitles, pastVocabs);
 
   // 1. 更新 Issues 表該列為 published
   sheetIssues.getRange(upcomingRowIndex, 5).setValue("published");
@@ -361,8 +388,7 @@ function weeklyAutoPublish() {
   sheetIssues.getRange(upcomingRowIndex, 16).setValue(generated.email.highlights.map(h => '<div class="highlight-item">' + h + '</div>').join("\n"));
 
   // 2. 寫入 Vocab (Core + Culture，擴充欄位 F: breakdown_json 與 G: extensions_json)
-  const sheetVocab = ss.getSheetByName("Vocab");
-  if (!sheetVocab.getRange(1, 6).getValue()) {
+  if (sheetVocab && !sheetVocab.getRange(1, 6).getValue()) {
     sheetVocab.getRange(1, 6, 1, 2).setValues([["breakdown_json", "extensions_json"]]);
   }
   const vocabRows = [];
@@ -450,7 +476,7 @@ function weeklyAutoPublish() {
 /**
  * 呼叫 Gemini API 產出教材 JSON
  */
-function callGeminiGenerate(upcomingIssue) {
+function callGeminiGenerate(upcomingIssue, pastTitles, pastVocabs) {
   const apiKey = getApiKey();
   const models = ["gemini-3.5-flash-lite", "gemini-3.8-flash"];
   
@@ -468,6 +494,14 @@ function callGeminiGenerate(upcomingIssue) {
     } catch(e) {}
   }
   
+  const pastTitlesText = (Array.isArray(pastTitles) && pastTitles.length > 0)
+    ? pastTitles.slice(-10).join("\n")
+    : "無歷史資料";
+  
+  const pastVocabsText = (Array.isArray(pastVocabs) && pastVocabs.length > 0)
+    ? pastVocabs.join(", ")
+    : "無歷史資料";
+
   const prompt = `
 你是一位深諳泰語教學法與觀光文化底蘊的頂級泰語教育專家，請為「Thai_Weekly（泰語學習週報）」編纂本期（VOL. ${upcomingIssue.code}）的完整教材內容。
 【本期主題】：${upcomingIssue.title}
@@ -475,6 +509,25 @@ function callGeminiGenerate(upcomingIssue) {
 【下期預告目標】：預告期數必須為 "${nextCode}"（2026 第 ${nextWeekNum} 週），出刊日期為 "${nextDate}"。
 【目標受眾】：台灣商務人士、自由行旅客、觀光旅遊從業人員。
 【文字規範】：必須嚴格使用「台灣繁體中文」，絕對嚴禁出現任何簡體字！
+
+【歷史已發布主題清單（下期預告 next_issue 絕對嚴禁選用以下或題材高度重疊的主題）】：
+${pastTitlesText}
+
+【歷史核心單字黑名單（本期教學單字與衍生詞嚴禁重複出現）】：
+${pastVocabsText}
+※ 重要防重要求：請發揮專業教學設計能力，選取符合本期主題且未出現在上方黑名單的全新實用詞彙！
+
+【下期預告 next_issue 主題發想輪調限制】：
+絕對嚴禁在觀光四寶（基礎美食點餐/米其林、基礎交通/叫車/捷運、星級飯店住宿、按摩SPA）中原地循環！
+下期預告題材請務必從以下未飽和的多元生活與商務情境中輪調挑選全新領域：
+  1. 文創設計與工藝市集挖寶（如洽圖洽市集議價、手工藝材質詢問、瑕疵退換、國際快遞寄送回台）
+  2. 泰國醫療急難與國際醫院就診（如掛號、突發病痛症狀精確描述、藥局配藥、保險診斷證明）
+  3. 泰國商務拜會與社交參展禮儀（如拜訪客戶、名片交換、商務餐敘祝酒客套、合作洽談）
+  4. 租車自駕與道路交通突發應變（如租車驗車、加油站油品溝通、高速公路過路費、擦撞事故救援）
+  5. 泰國生活物業與租屋水電溝通（如公寓簽約、退押金、水電瓦斯網路報修、管委會溝通）
+  6. 咖啡館遠端辦公與數位遊牧生態（如安靜座位、Wi-Fi/插座詢問、行動支付、共享空間）
+  7. 泰國傳統民俗、宗教參拜與節慶文化（如大皇宮/寺廟參拜禁忌、水燈節/宋干潑水節深度民俗用語）
+
 【說文解字・詞彙拆解全自動辨識規範】：請針對 vocab 陣列中每個單字進行構詞結構判斷：
   1. 【複合詞與實用片語必須拆解】：凡是由兩個以上具獨立意義之詞素組成的複合詞、動賓短語、偏正詞組（如：ห้องเตียงเดี่ยว、แอร์ไม่เย็น、น้ำไม่ร้อน、เปลี่ยนห้อง、ยาแก้ปวด、คืนภาษี、อาหารทะเล、ลูกค้า、สนามบิน、ใบเสร็จ 等），必須輸出：
      - breakdown：拆解各詞素結構，為包含 thai, phonetic, meaning 的物件陣列（例如 ยาแก้ปวด 拆解為 ยา[藥] + แก้[解/止] + ปวด[疼痛]）。
@@ -956,4 +1009,39 @@ function fixUpcomingAndWeekIssue() {
     } catch(e) {}
   }
   return { status: "success", msg: msg, updated46: updated46, updatedUpcoming: updatedUpcoming };
+}
+
+/**
+ * 更新 26w48 預告主題，避開與 26w44 按摩主題重複，換上文創市集主題
+ */
+function updateUpcomingIssue26w48() {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheetIssues = ss.getSheetByName("Issues");
+  const data = sheetIssues.getDataRange().getValues();
+  
+  let found = false;
+  for (let i = 1; i < data.length; i++) {
+    const code = String(data[i][0]).trim();
+    const status = String(data[i][4]).trim();
+    if (code === "26w48" || status === "upcoming") {
+      sheetIssues.getRange(i + 1, 1).setValue("26w48");
+      sheetIssues.getRange(i + 1, 2).setValue("2026");
+      sheetIssues.getRange(i + 1, 3).setValue("48");
+      sheetIssues.getRange(i + 1, 4).setValue("2026-11-28");
+      sheetIssues.getRange(i + 1, 5).setValue("upcoming");
+      sheetIssues.getRange(i + 1, 6).setValue("曼谷文創市集與生活選物挖寶：恰圖恰討價還價、材質詢問與包裝快遞實務");
+      sheetIssues.getRange(i + 1, 7).setValue("下週將帶領讀者深入走訪曼谷著名市集與文創工藝選物店，學習詢問手工藝材質、批發與量大議價技巧、瑕疵品更換，以及退稅、快遞寄送回台的必備泰語！");
+      found = true;
+      break;
+    }
+  }
+  SpreadsheetApp.flush();
+  const msg = "26w48 預告主題更新成功（文創市集選物挖寶防重版）";
+  Logger.log(msg);
+  if (SpreadsheetApp.getUi) {
+    try {
+      SpreadsheetApp.getUi().alert("更新完成", msg, SpreadsheetApp.getUi().ButtonSet.OK);
+    } catch(e) {}
+  }
+  return { status: "success", msg: msg, updated: found };
 }
