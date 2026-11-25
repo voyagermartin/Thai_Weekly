@@ -1,6 +1,6 @@
 # Thai_Weekly (泰語學習週報自動化系統) 專案協作手冊
 
-> **專案版本**：v3.6 (主題防撞護欄與生詞去重黑名單版・動態情境輪調) ｜ **更新日期**：2026-11-22  
+> **專案版本**：v3.7 (主題防疲乏冷卻期 ✕ 真實地標品牌搭配 ✕ 生詞 100% 絕對去重版) ｜ **更新日期**：2026-11-25  
 > **線上站點**：[Thai_Weekly GitHub Pages](https://voyagermartin.github.io/Thai_Weekly/) ｜ **維護者**：Martin × Antigravity × Gemini API  
 
 ---
@@ -9,6 +9,11 @@
 
 ### 1.1 願景與戰略（Web-First, Mail-Light）
 * **全功能網站化**：教學互動、說文解字、語音發音、自測遮蔽與即時 AI 構詞剖析，100% 收斂於網站端完成。全站採**泰皇暗夜紫金風（Dark Editorial Magazine UI）**。
+* **螺旋式主題深耕與真實場域搭配（Domain Spiraling & Real-world Grounding）**：
+  - **大方向深耕與防疲乏冷卻機制**：購物逛街、飲食饗宴、交通移動、飯店住宿、身心放鬆等大領域允許螺旋重訪，但**嚴禁連續 2~3 週出現相同大領域**，避免讀者疲乏。
+  - **真實品牌與跨城市地標搭配**：主題與對話必須深植於泰國指標品牌（如 BOOTS 藥妝、7-Eleven 熟食代辦）、知名地標（如 IconSiam、Terminal 21）或不同城市特色地理風情（如清邁夜市咖哩麵、真心市集手作、清邁雙條車、昭披耶河水上渡輪）。
+  - **垂直子情境切片（Sub-scenarios Slicing）**：同一大領域回訪時，切入角度與場域必須截然不同（例如逛街：服飾試穿 ➔ 鞋靴皮革批發 ➔ BOOTS日常藥妝 ➔ 獨立書店文具）。
+  - **核心單字 100% 絕對去重**：核心單字（Vocab）與衍生詞必須 **100% 避開歷史黑名單**，確保讀者在熟悉且具體的生活情境中持續學得更寬、更深、更道地。
 * **郵件輕量化**：每週六 09:00 由 GAS 原生發送極簡提醒信（專屬問候＋一句導讀＋直達按鈕），免除排版負擔與擋信風險。
 * **🚨 開發除錯鐵律**：**非必要嚴禁主動開啟瀏覽器測試**。日常功能排查、邏輯驗證與修復一律透過代碼審查、單元測試或終端指令（curl/CLI）完成，杜絕資源耗損。
 
@@ -30,7 +35,7 @@ flowchart TD
         GViz["GViz API (&headers=1) 讀取試算表"] --> PWA
         PWA --> Reader
         Reader --> Anatomy["即時說文解字查詢 (action: analyze_word)"]
-        Anatomy --> WebApp["GAS Web App (@23, ANYONE_ANONYMOUS)"]
+        Anatomy --> WebApp["GAS Web App (@27, ANYONE_ANONYMOUS)"]
         WebApp --> GeminiLive["Gemini 雙模型備援構詞剖析"]
         GeminiLive --> AnatomyUI["動態展開紫金卡片與雙引擎 TTS 發音"]
     end
@@ -92,7 +97,7 @@ Thai_Weekly/
   - 鎖定 `enforceRate()` 與 `audio.defaultPlaybackRate`，確保 0.75x 與 1.0x 顯著區別，並以 `localStorage` 持久化記憶讀者速率偏好。
 * **歷史手風琴歸檔抽屜 (Yearly Archive List)**：
   - 抽屜內改採精緻條列式清單（`.archive-list` 與 `.archive-row`），包含期數標籤、出刊日期、專題標題與摘要導讀，大幅精簡縱向空間並兼顧即時搜尋過濾效能。
-  - **排序規範**：歷史歸檔清單全面採「由舊到新（編年正序：26w41 ➔ 26w46）」呈現；上方「近期特輯」則維持由新到舊倒序排列，滿足不同情境之瀏覽體驗。
+  - **排序規範**：歷史歸檔清單全面採「由舊到新（編年正序：26w41 ➔ 26w47）」呈現；上方「近期特輯」則維持由新到舊倒序排列，滿足不同情境之瀏覽體驗。
 
 ### 3.3 PWA 獨立 App 與離線快取規格 (Progressive Web App)
 * **Web App Manifest (`manifest.json`)**：
@@ -115,10 +120,10 @@ Thai_Weekly/
 ## 4. Google Apps Script 後端中樞與安全防禦
 
 * **Script ID**：[`1fJ_JIB0aET_pLwDOJasv47YzSBn3xk7NhW3h96919NRd2opJpq-VOOmA`](https://script.google.com/home/projects/1fJ_JIB0aET_pLwDOJasv47YzSBn3xk7NhW3h96919NRd2opJpq-VOOmA/edit)
-* **Web App 端點**：`https://script.google.com/macros/s/AKfycbxiY6t8K_BmB2oRWhbi7UZCHpN1Blmd1BEH8APe3PW6gXCKX2XcNYHcDZhZfMZtifi4/exec`（部署權限：`ANYONE_ANONYMOUS`，免登入匿名跨域連線；目前版本：`@25`）
+* **Web App 端點**：`https://script.google.com/macros/s/AKfycbxiY6t8K_BmB2oRWhbi7UZCHpN1Blmd1BEH8APe3PW6gXCKX2XcNYHcDZhZfMZtifi4/exec`（部署權限：`ANYONE_ANONYMOUS`，免登入匿名跨域連線；目前版本：`@27`）
 * **零暴露 API 金鑰防禦**：全專案 0 硬編碼金鑰。金鑰保存在雲端 `ScriptProperties`，透過試算表上方「🚀 週報自動化控制台」選單互動式寫入。
 * **核心後端函式**：
-  - `weeklyAutoPublish()`：每週六 09:00 時間驅動排程觸發。具備**歷史主題防撞護欄與核心單字去重機制**：出刊前自動讀取 `Issues` 歷史已發布標題與 `Vocab` 已出單字黑名單注入 Prompt，並要求 `next_issue` 嚴禁在觀光四寶（基礎點餐、基礎交通、飯店、SPA）原地循環，強制從「文創市集、醫療急難、商務拜會、租車自駕、生活物業、數位遊牧、節慶民俗」等 7 大情境輪調發想；產出當期教材寫入四大分頁、更新下期預告並寄發導讀信。
+  - `weeklyAutoPublish()`：每週六 09:00 時間驅動排程觸發。具備**防主題疲乏冷卻期（大領域嚴禁連續2~3週重複）**、**真實品牌/地標搭配（如 BOOTS日常藥妝、清邁夜市小吃、小七熟食代辦、水上渡輪）**與**核心單字 100% 絕對去重**機制：出刊前自動讀取 `Issues` 歷史標題供切換全新垂直子情境與地點，並讀取 `Vocab` 已出單字集合注入 Prompt 作為嚴格黑名單，強制生詞零重複；產出當期教材寫入四大分頁、更新下期預告並寄發導讀信。
   - `updateUpcomingIssue26w48()`：支援試算表選單與 Web App 端點（`action: "update_26w48"`），將預告期數替換為全新文創市集主題。
   - `analyzeSingleWord(word)`：支援 `action: "analyze_word"`，具隱形字元淨化與多模型自動備援迴圈（`gemini-3.5-flash-lite` ➔ `gemini-3.8-flash`）。遇 `503`/`429` 延遲 800ms 自動降級切換（遇 `404` 亦自動切換），`400`/`401`/`403` 立即回傳具體原因，全數滿載則包裝為結構化 `SERVER_BUSY` 友善訊息，支援複合詞拆解與外來語/單字根防呆排除。
   - `backfillAnatomyForIssue(issueCode)`：零手動批次自動回填歷史期數之單字拆解與派生詞至 F、G 欄。
@@ -139,6 +144,7 @@ Thai_Weekly/
 - [x] **v3.4**：強化即時說文解字高可用性與輸入防呆（GAS Web App 更新至 `@23`）：後端實作 `503`/`429` 多模型自動備援切換（`gemini-3.5-flash-lite` ➔ `gemini-3.8-flash`）與 `SERVER_BUSY` 友善錯誤包裝；前後端同步實作零寬度隱形字元淨化（NFC 正規化）與泰文字元前置驗證。
 - [x] **v3.5**：全專案實裝完整 PWA 獨立 App 支援與離線快取架構；徹底修復預告篇章週數倒退缺陷（更正 Google Sheet 26w46 出刊日為 2026-11-14、預告篇章為 26w47 2026-11-21，並於 GAS 後端實作動態週數與日期自動遞增演算法，根絕範例硬編碼污染）。
 - [x] **v3.6**：實作「歷史主題防重護欄」與「核心單字去重黑名單機制」；建立 7 大生活與商務情境輪調矩陣，徹底終結觀光四寶（點餐/交通/住宿/SPA）無限循環；重置 26w48 預告主題為「曼谷文創市集與生活選物挖寶」，GAS Web App 部署至版本 `@25`；首頁 Spotlight、Recent Grid 與歸檔手風琴全數同步至 26w47（共 7 期）。
+- [x] **v3.7**：重構出刊 Prompt 之「螺旋式主題深耕準則」：確立「防主題疲乏冷卻期（大領域嚴禁連續 2~3 週重複）」、「真實品牌地標搭配（如 BOOTS日常藥妝、清邁夜市小吃、小七熟食代辦、水上渡輪）」與「核心單字 100% 嚴格去重黑名單」三重機制；GAS Web App 部署至版本 `@27`。
 
 ---
 
